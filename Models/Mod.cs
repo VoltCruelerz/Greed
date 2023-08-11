@@ -16,6 +16,8 @@ namespace Greed.Models
 
         public bool IsActive { get; set; } = false;
 
+        public string Id { get; set; } = string.Empty;
+
         public List<Entity> Entities { get; set; } = new List<Entity>();
 
         public List<LocalizedText> LocalizedTexts { get; set; } = new List<LocalizedText>();
@@ -23,7 +25,7 @@ namespace Greed.Models
         public bool IsGreedy => Metadata != null;
         public Metadata Meta => Metadata!;
 
-        public Mod(string path)
+        public Mod(List<string> enabledModIds, string path)
         {
             Debug.WriteLine("Loading " + path);
             var contents = Directory.GetFiles(path);
@@ -35,6 +37,13 @@ namespace Greed.Models
             if (greedyFile == null)
             {
                 return;
+            }
+
+            var pathTerms = path.Split("\\");
+            Id = pathTerms[pathTerms.Length - 1];
+            if (enabledModIds.Contains(Id))
+            {
+                IsActive = true;
             }
 
             Metadata = JsonConvert.DeserializeObject<Metadata>(File.ReadAllText(greedyFile));

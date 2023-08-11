@@ -23,7 +23,8 @@ namespace Greed
     /// </summary>
     public partial class MainWindow : Window
     {
-        List<Mod> Mods = new();
+        private List<Mod> Mods = new();
+        private Mod? Selected;
 
         public MainWindow()
         {
@@ -46,7 +47,8 @@ namespace Greed
         private void RefreshModList()
         {
             viewModList.Items.Clear();
-            Mods.ForEach(m => viewModList.Items.Add(new { Active = m.IsActive ? "✓" : " ", Name = m.Meta.Name, Version = m.Meta.Version, SinsVersion = m.Meta.SinsVersion }));
+            // new { Active = m.IsActive ? "✓" : " ", Name = m.Meta.Name, Version = m.Meta.Version, SinsVersion = m.Meta.SinsVersion }
+            Mods.ForEach(m => viewModList.Items.Add(new ModListItem(m)));
         }
 
         private void Activate_Click(object sender, RoutedEventArgs e)
@@ -61,7 +63,23 @@ namespace Greed
 
         private void viewModList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            var item = (ModListItem)e.AddedItems[0]!;
+            var selected = Mods.First(p => p.Id == item.Id);
 
+            var doc = new FlowDocument(new Paragraph(new Run($"{selected.Meta.Name} v{selected.Meta.Version} (Sins {selected.Meta.SinsVersion})")
+            {
+                FontWeight = FontWeights.Bold
+            }));
+            doc.Blocks.Add(new Paragraph(new Run($"by {selected.Meta.Author}")
+            {
+                FontStyle = FontStyles.Italic
+            }));
+            doc.Blocks.Add(new Paragraph(new Run(selected.Meta.Url)
+            {
+                TextDecorations = TextDecorations.Underline
+            }));
+            doc.Blocks.Add(new Paragraph(new Run(selected.Meta.Description)));
+            txtInfo.Document = doc;
         }
     }
 }

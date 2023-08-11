@@ -5,9 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Greed"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Greed Mod Loader" Height="450" Width="800" Icon="/credits_asset_icon200.png">
     <Grid>
-        <ListView x:Name="viewModList" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="10,33,410,41" SelectionChanged="viewModList_SelectionChanged">
+        <ListView x:Name="viewModList" HorizontalAlignment="Left" d:ItemsSource="{d:SampleData ItemCount=5}" Width="380" Margin="10,33,0,26" SelectionChanged="viewModList_SelectionChanged">
             <ListView.View>
                 <GridView x:Name="grdView">
                     <GridViewColumn Header="X" Width="20" DisplayMemberBinding="{Binding Active}" />
@@ -17,11 +17,19 @@
                 </GridView>
             </ListView.View>
         </ListView>
-        <GroupBox x:Name="gbxSummary" HorizontalAlignment="Left" Height="214" Header="Selected Mod Info" Margin="400,33,0,0" VerticalAlignment="Top" Width="390"/>
-        <Button x:Name="cmdActivate" Content="Activate" HorizontalAlignment="Left" Margin="400,252,0,0" VerticalAlignment="Top" Width="390" Click="Activate_Click"/>
-        <Button x:Name="cmdDeactivate" Content="Deactivate" HorizontalAlignment="Left" Margin="400,277,0,0" VerticalAlignment="Top" Width="390" Click="Deactivate_Click"/>
+        <GroupBox x:Name="gbxSummary" HorizontalAlignment="Right" Height="310" Header="Selected Mod Info" Margin="400,33,0,0" VerticalAlignment="Top" Width="390">
+            <RichTextBox x:Name="txtInfo" AutomationProperties.HelpText="Select a mod to see its details." IsReadOnly="True">
+                <FlowDocument>
+                    <Paragraph>
+                        <Run Text="RichTextBox"/>
+                    </Paragraph>
+                </FlowDocument>
+            </RichTextBox>
+        </GroupBox>
+        <Button x:Name="cmdActivate" Content="Activate" HorizontalAlignment="Right" Margin="400,348,0,0" VerticalAlignment="Top" Width="390" Click="Activate_Click"/>
+        <Button x:Name="cmdDeactivate" Content="Deactivate" HorizontalAlignment="Right" Margin="400,373,0,0" VerticalAlignment="Top" Width="390" Click="Deactivate_Click"/>
         <Label Content="Loads First" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
-        <Label Content="Loads Last" HorizontalAlignment="Left" Margin="10,398,0,0" VerticalAlignment="Top"/>
+        <Label Content="Loads Last" HorizontalAlignment="Left" Margin="10,398,0,0" VerticalAlignment="Bottom"/>
 
     </Grid>
 </Window>
