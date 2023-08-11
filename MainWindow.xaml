@@ -28,8 +28,7 @@
         </GroupBox>
         <Button x:Name="cmdActivate" Content="Activate" HorizontalAlignment="Right" Margin="400,348,0,0" VerticalAlignment="Top" Width="390" Click="Activate_Click"/>
         <Button x:Name="cmdDeactivate" Content="Deactivate" HorizontalAlignment="Right" Margin="400,373,0,0" VerticalAlignment="Top" Width="390" Click="Deactivate_Click"/>
-        <Label Content="Loads First" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
-        <Label Content="Loads Last" HorizontalAlignment="Left" Margin="10,398,0,0" VerticalAlignment="Bottom"/>
+        <Label Content="Top mods inserted first. Bottom mods overwrite." HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
 
     </Grid>
 </Window>
