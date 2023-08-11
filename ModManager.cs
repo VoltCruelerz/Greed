@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -14,8 +15,9 @@ namespace Greed
 {
     static class ModManager
     {
-        public static List<Mod> LoadGreedyMods(string modDir)
+        public static List<Mod> LoadGreedyMods()
         {
+            string modDir = ConfigurationManager.AppSettings["modDir"]!;
             var modDirs = Directory.GetDirectories(modDir);
 
             // If enabled path doesn't exist yet, make it.
@@ -33,11 +35,24 @@ namespace Greed
             return modDirs.Select(d => new Mod(enabledModFolders, d)).Where(m => m.IsGreedy).ToList();
         }
 
-        public static void SetGreedyMods(string modDir, List<Mod> active)
+        public static void SetGreedyMods(List<Mod> active)
         {
+            string modDir = ConfigurationManager.AppSettings["modDir"]!;
             var arr = JArray.FromObject(active.Select(p => p.Id));
             var enabledPath = modDir + "\\enabled_greed.json";
             File.WriteAllText(enabledPath, arr.ToString());
+        }
+
+        public static void ExportGreedyMods(List<Mod> active)
+        {
+            // Burn down the old Greed mod directory (if exists)
+
+            // Set Greed to be active mod #0
+
+            // Copy gold JSON from Sins to the Greed mod dir.
+
+            // For each greedy mod, overwrite as needed.
+            active.Sort((a, b) => a.Meta.Priority -  b.Meta.Priority);
         }
     }
 }

@@ -47,7 +47,7 @@ namespace Greed
             Debug.WriteLine($"Sins II Dir: {sinsDir}");
 
             Debug.WriteLine("Loading mods...");
-            Mods = ModManager.LoadGreedyMods(modDir);
+            Mods = ModManager.LoadGreedyMods();
 
             viewModList.Items.Clear();
             Mods.ForEach(m => viewModList.Items.Add(new ModListItem(m)));
@@ -90,25 +90,31 @@ namespace Greed
             Debug.WriteLine("Activate_Click()");
             Selected!.IsActive = !Selected.IsActive;
             string modDir = ConfigurationManager.AppSettings["modDir"]!;
-            ModManager.SetGreedyMods(modDir, Mods.Where(m => m.IsActive).ToList());
+            ModManager.SetGreedyMods(Mods.Where(m => m.IsActive).ToList());
             RefreshModList();
+
+            // Reselect the selection for the user.
+            Selected = Mods.Find(m => m.Id == Selected.Id);
+            var index = Mods.IndexOf(Selected!);
+            viewModList.SelectedItem = Selected;
+            viewModList.SelectedIndex = index;
         }
 
-        private void ExportModList()
-        {
-            // If enabled path doesn't exist yet, make it.
-            var enabledPath = ConfigurationManager.AppSettings["modDir"]! + "\\enabled_mods.json";
-            List<string> enabledModFolders;
-            if (File.Exists(enabledPath))
-            {
-                var enabled = JsonConvert.DeserializeObject<EnabledMods>(File.ReadAllText(enabledPath))!;
-                enabledModFolders = enabled.ModKeys.Select(p => p.Name).ToList();
-            }
-            else
-            {
-                enabledModFolders = new List<string>();
-                File.WriteAllText(enabledPath, "{ \"mod_keys\": [] }");
-            }
-        }
+        //private void ExportModList()
+        //{
+        //    // If enabled path doesn't exist yet, make it.
+        //    var enabledPath = ConfigurationManager.AppSettings["modDir"]! + "\\enabled_mods.json";
+        //    List<string> enabledModFolders;
+        //    if (File.Exists(enabledPath))
+        //    {
+        //        var enabled = JsonConvert.DeserializeObject<EnabledMods>(File.ReadAllText(enabledPath))!;
+        //        enabledModFolders = enabled.ModKeys.Select(p => p.Name).ToList();
+        //    }
+        //    else
+        //    {
+        //        enabledModFolders = new List<string>();
+        //        File.WriteAllText(enabledPath, "{ \"mod_keys\": [] }");
+        //    }
+        //}
     }
 }

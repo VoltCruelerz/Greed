@@ -18,7 +18,7 @@ namespace Greed.Models
 
         public string Id { get; set; } = string.Empty;
 
-        public List<Entity> Entities { get; set; } = new List<Entity>();
+        public List<JsonSource> Entities { get; set; } = new List<JsonSource>();
 
         public List<LocalizedText> LocalizedTexts { get; set; } = new List<LocalizedText>();
 
