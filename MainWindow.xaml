@@ -10,8 +10,8 @@
         <ListView x:Name="viewModList" HorizontalAlignment="Left" d:ItemsSource="{d:SampleData ItemCount=5}" Width="380" Margin="10,33,0,26" SelectionChanged="viewModList_SelectionChanged">
             <ListView.View>
                 <GridView x:Name="grdView">
-                    <GridViewColumn Header="X" Width="20" DisplayMemberBinding="{Binding Active}" />
-                    <GridViewColumn Header="Mod" Width="190" DisplayMemberBinding="{Binding Name}" />
+                    <GridViewColumn Header="" Width="20" DisplayMemberBinding="{Binding Active}" />
+                    <GridViewColumn Header="Mod Name" Width="190" DisplayMemberBinding="{Binding Name}" />
                     <GridViewColumn Header="Version" Width="80" DisplayMemberBinding="{Binding Version}" />
                     <GridViewColumn Header="Sins" Width="80" DisplayMemberBinding="{Binding SinsVersion}" />
                 </GridView>
@@ -26,8 +26,7 @@
                 </FlowDocument>
             </RichTextBox>
         </GroupBox>
-        <Button x:Name="cmdActivate" Content="Activate" HorizontalAlignment="Right" Margin="400,348,0,0" VerticalAlignment="Top" Width="390" Click="Activate_Click"/>
-        <Button x:Name="cmdDeactivate" Content="Deactivate" HorizontalAlignment="Right" Margin="400,373,0,0" VerticalAlignment="Top" Width="390" Click="Deactivate_Click"/>
+        <Button x:Name="cmdToggle" Content="Toggle" HorizontalAlignment="Right" Margin="0,348,10,0" VerticalAlignment="Top" Width="62" Click="cmdToggle_Click" IsEnabled="False"/>
         <Label Content="Top mods inserted first. Bottom mods overwrite." HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
 
     </Grid>

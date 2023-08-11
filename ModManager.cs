@@ -1,6 +1,7 @@
 ﻿using Greed.Models;
 using Greed.Models.EnabledMods;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,26 +12,32 @@ using System.Threading.Tasks;
 
 namespace Greed
 {
-    static class ModLoader
+    static class ModManager
     {
         public static List<Mod> LoadGreedyMods(string modDir)
         {
             var modDirs = Directory.GetDirectories(modDir);
 
             // If enabled path doesn't exist yet, make it.
-            var enabledPath = modDir + "\\enabled_mods.json";
+            var enabledPath = modDir + "\\enabled_greed.json";
             List<string> enabledModFolders;
             if (File.Exists(enabledPath))
             {
-                var enabled = JsonConvert.DeserializeObject<EnabledMods>(File.ReadAllText(enabledPath))!;
-                enabledModFolders = enabled.ModKeys.Select(p => p.Name).ToList();
+                enabledModFolders = JArray.Parse(File.ReadAllText(enabledPath)).Select(p => p.ToString()).ToList();
             } else
             {
                 enabledModFolders = new List<string>();
-                File.WriteAllText(enabledPath, "{ \"mod_keys\": [] }");
+                File.WriteAllText(enabledPath, "[]");
             }
 
             return modDirs.Select(d => new Mod(enabledModFolders, d)).Where(m => m.IsGreedy).ToList();
+        }
+
+        public static void SetGreedyMods(string modDir, List<Mod> active)
+        {
+            var arr = JArray.FromObject(active.Select(p => p.Id));
+            var enabledPath = modDir + "\\enabled_greed.json";
+            File.WriteAllText(enabledPath, arr.ToString());
         }
     }
 }
