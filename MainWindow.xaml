@@ -7,10 +7,13 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        <ListView d:ItemsSource="{d:SampleData ItemCount=5}" Margin="10,33,410,41">
+        <ListView x:Name="viewModList" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="10,33,410,41" SelectionChanged="viewModList_SelectionChanged">
             <ListView.View>
-                <GridView>
-                    <GridViewColumn/>
+                <GridView x:Name="grdView">
+                    <GridViewColumn Header="X" Width="20" DisplayMemberBinding="{Binding Active}" />
+                    <GridViewColumn Header="Mod" Width="190" DisplayMemberBinding="{Binding Name}" />
+                    <GridViewColumn Header="Version" Width="80" DisplayMemberBinding="{Binding Version}" />
+                    <GridViewColumn Header="Sins" Width="80" DisplayMemberBinding="{Binding SinsVersion}" />
                 </GridView>
             </ListView.View>
         </ListView>
