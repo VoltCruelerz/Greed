@@ -90,7 +90,7 @@ namespace Greed.Models
             });
         }
 
-        private void ExportFolder(List<Source> sources, Func<Source, Source> handleFileExport)
+        private static void ExportFolder(List<Source> sources, Func<Source, Source> handleFileExport)
         {
             /*
              * For each source
