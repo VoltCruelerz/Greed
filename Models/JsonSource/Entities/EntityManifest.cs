@@ -9,6 +9,7 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace Greed.Models.JsonSource.Entities
 {
+    [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
     public class EntityManifest : Source
     {
         [JsonProperty(PropertyName = "ids")]
@@ -16,7 +17,7 @@ namespace Greed.Models.JsonSource.Entities
 
         public EntityManifest(string path) : base(path)
         {
-            NeedsGold = true;
+            NeedsMerge = true;
             var manifest = JObject.Parse(Json);
             var arr = (JArray)manifest["ids"];
             Ids = arr.Select(i => i.ToString()).ToList();

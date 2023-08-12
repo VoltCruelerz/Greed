@@ -61,6 +61,7 @@ namespace Greed
                 Directory.Delete(greedPath, true);
             }
             Directory.CreateDirectory(greedPath);
+            File.WriteAllText(greedPath + "\\mod_manifest.json", "{ \"is_cosmetic_only\": false }");
 
             // For each greedy mod, overwrite as needed.
             active.ForEach(m => m.Export());

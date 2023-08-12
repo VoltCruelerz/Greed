@@ -35,6 +35,20 @@ namespace Greed
             InitializeComponent();
             Debug.WriteLine("Load Done");
 
+
+            string? modDir = ConfigurationManager.AppSettings["modDir"];
+            if (modDir == null || !Directory.Exists(modDir))
+            {
+                CriticalAlertPopup("Configuration Error", "You need to set the modDir element of the Greed App.config file to the mod directory.");
+                return;
+            }
+            string? sinsDir = ConfigurationManager.AppSettings["sinsDir"];
+            if (sinsDir == null || !Directory.Exists(sinsDir))
+            {
+                CriticalAlertPopup("Configuration Error", "You need to set the sinsDir element of the Greed App.config file to where sins2.exe lives.");
+                return;
+            }
+
             RefreshModList();
         }
 
@@ -45,15 +59,30 @@ namespace Greed
             string sinsDir = ConfigurationManager.AppSettings["sinsDir"]!;
             Debug.WriteLine($"Mod Dir: {modDir}");
             Debug.WriteLine($"Sins II Dir: {sinsDir}");
+            try
+            {
+                this.Title = $"Greed Mod Loader (Detected Sins II v{FileVersionInfo.GetVersionInfo(sinsDir + "\\sins2.exe").FileVersion})";
+            } catch (Exception)
+            {
+                CriticalAlertPopup("No SinsII", "sins2.exe could not be found at the specified location. Please double check that it is within the place indicated by the App.config.");
+                return;
+            }
 
             Debug.WriteLine("Loading mods...");
-            Mods = ModManager.LoadGreedyMods();
+            try
+            {
+                Mods = ModManager.LoadGreedyMods();
+            } catch (Exception e)
+            {
+                CriticalAlertPopup("Mod Load Error", "Unable to locate all files.\n" + e.Message + "\n" + e.StackTrace);
+                return;
+            }
 
             viewModList.Items.Clear();
             Mods.ForEach(m => viewModList.Items.Add(new ModListItem(m)));
         }
 
-        private void viewModList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ModList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             // This gets hit when refreshing the display.
             if (e.AddedItems.Count == 0)
@@ -85,12 +114,20 @@ namespace Greed
             cmdToggle.Content = Selected.IsActive ? "Deactivate" : "Activate";
         }
 
-        private void cmdToggle_Click(object sender, RoutedEventArgs e)
+        private void Toggle_Click(object sender, RoutedEventArgs e)
         {
             Debug.WriteLine("Activate_Click()");
             Selected!.IsActive = !Selected.IsActive;
             string modDir = ConfigurationManager.AppSettings["modDir"]!;
-            ModManager.SetGreedyMods(Mods.Where(m => m.IsActive).ToList());
+            try
+            {
+                ModManager.SetGreedyMods(Mods.Where(m => m.IsActive).ToList());
+            }
+            catch (Exception ex)
+            {
+                CriticalAlertPopup("Mod Load Error", "Unable to locate all files.\n" + ex.Message + "\n" + ex.StackTrace);
+                return;
+            }
             RefreshModList();
 
             // Reselect the selection for the user.
@@ -100,13 +137,27 @@ namespace Greed
             viewModList.SelectedIndex = index;
         }
 
-        private void cmdExport_Click(object sender, RoutedEventArgs e)
+        private void Export_Click(object sender, RoutedEventArgs e)
         {
             cmdExport.IsEnabled = false;
 
-            ModManager.ExportGreedyMods(Mods.Where(m => m.IsGreedy && m.IsActive).ToList());
+            try
+            {
+                ModManager.ExportGreedyMods(Mods.Where(m => m.IsGreedy && m.IsActive).ToList());
+            }
+            catch (Exception ex)
+            {
+                CriticalAlertPopup("Mod Load Error", "Unable to locate all files.\n" + ex.Message + "\n" + ex.StackTrace);
+                return;
+            }
 
             cmdExport.IsEnabled = true;
+        }
+
+        private void CriticalAlertPopup(string title, string message)
+        {
+            MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Error);
+            this.Close();
         }
     }
 }

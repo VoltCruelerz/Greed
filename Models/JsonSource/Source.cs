@@ -14,9 +14,11 @@ namespace Greed.Models.JsonSource
         public string Filename { get; set; }
         public string Json { get; set; }
         public bool NeedsGold { get; set; }
+        public bool NeedsMerge { get; set; }
 
         public Source(string sourcePath)
         {
+            NeedsGold = false;
             NeedsGold = false;
 
             SourcePath = sourcePath;

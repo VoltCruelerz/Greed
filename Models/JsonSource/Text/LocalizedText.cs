@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace Greed.Models.JsonSource.Text
 {
+    [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
     public class LocalizedText : Source
     {
         [JsonProperty(PropertyName = "text")]
@@ -20,6 +21,7 @@ namespace Greed.Models.JsonSource.Text
         public LocalizedText(string path) : base(path)
         {
             NeedsGold = true;
+            NeedsMerge = true;
             var manifest = JObject.Parse(Json);
             var arr = (JArray)manifest["text"];
             Text = new List<List<string>>();

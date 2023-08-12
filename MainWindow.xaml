@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="Greed Mod Loader" Height="450" Width="800" Icon="/credits_asset_icon200.png">
     <Grid>
-        <ListView x:Name="viewModList" HorizontalAlignment="Left" d:ItemsSource="{d:SampleData ItemCount=5}" Width="380" Margin="10,33,0,26" SelectionChanged="viewModList_SelectionChanged">
+        <ListView x:Name="viewModList" HorizontalAlignment="Left" d:ItemsSource="{d:SampleData ItemCount=5}" Width="380" Margin="10,33,0,26" SelectionChanged="ModList_SelectionChanged">
             <ListView.View>
                 <GridView x:Name="grdView">
                     <GridViewColumn Header="" Width="20" DisplayMemberBinding="{Binding Active}" />
@@ -26,9 +26,9 @@
                 </FlowDocument>
             </RichTextBox>
         </GroupBox>
-        <Button x:Name="cmdToggle" Content="Toggle" HorizontalAlignment="Right" Margin="0,348,10,0" VerticalAlignment="Top" Width="62" Click="cmdToggle_Click" IsEnabled="False"/>
+        <Button x:Name="cmdToggle" Content="Toggle" HorizontalAlignment="Right" Margin="0,348,10,0" VerticalAlignment="Top" Width="62" Click="Toggle_Click" IsEnabled="False"/>
         <Label Content="Top mods inserted first. Bottom mods overwrite." HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
-        <Button x:Name="cmdExport" Content="Export Greedy Selections" HorizontalAlignment="Left" Margin="410,388,0,0" VerticalAlignment="Top" Width="380" Click="cmdExport_Click"/>
+        <Button x:Name="cmdExport" Content="Export Greedy Selections" HorizontalAlignment="Left" Margin="410,388,0,0" VerticalAlignment="Top" Width="380" Click="Export_Click"/>
 
     </Grid>
 </Window>

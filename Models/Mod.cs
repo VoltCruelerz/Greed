@@ -55,24 +55,46 @@ namespace Greed.Models
             var subpaths = Directory.GetDirectories(path);
             var subdirs = subpaths.Select(p => p[(path.Length + 1)..]);
 
-            // Handle Entities
-            if (subdirs.Contains("entities"))
-            {
-                var entityPath = path + "\\entities";
-                var entityPaths = Directory.GetFiles(entityPath);
-                Entities = entityPaths.Select(p => Entity.BuildEntity(p)).ToList();
-            }
+            Entities = ImportFolder(subdirs, path, "entities", (string filePath) => Entity.BuildEntity(filePath))
+                ?? LocalizedTexts;
+            LocalizedTexts = ImportFolder(subdirs, path, "localized_text", (string filePath) => new LocalizedText(filePath))
+                ?? LocalizedTexts;
+        }
 
-            // Handle Text Localization
-            if (subdirs.Contains("localized_text"))
+        private static List<Source>? ImportFolder(IEnumerable<string> subdirs, string path, string folder, Func<string, Source> handleFileImport)
+        {
+            if (subdirs.Contains(folder))
             {
-                // TODO
+                return Directory.GetFiles(path + "\\" + folder)
+                    .Select(p => handleFileImport(p))
+                    .ToList();
             }
+            return null;
         }
 
         public void Export()
         {
             Debug.WriteLine("- Exporting " + Id);
+
+            ExportFolder(Entities, (Source source) =>
+            {
+                var manifest = (EntityManifest)source;
+                var greedSource = new EntityManifest(source.GreedPath);
+                manifest.Ids.ForEach(id => greedSource.Upsert(id));
+                return greedSource;
+            });
+
+            ExportFolder(LocalizedTexts, (Source source) =>
+            {
+                var local = (LocalizedText)source;
+                var greedSource = new LocalizedText(source.GreedPath);
+                local.Text.ForEach(kv => greedSource.Upsert(kv));
+                return greedSource;
+            });
+        }
+
+        private void ExportFolder(List<Source> sources, Func<Source, Source> handleFileExport)
+        {
             /*
              * For each source
              *     If gold is required
@@ -82,33 +104,47 @@ namespace Greed.Models
              *     If gold is not required
              *         Copy src -> greed
              */
-
-            foreach (var entity in Entities)
+            foreach (var source in sources)
             {
-                Debug.WriteLine("- - " + entity.Filename);
-                CreateGreedDirIfNotExists(entity.GreedPath);
-                if (entity.NeedsGold)
+                Debug.WriteLine("- - " + source.Filename);
+                CreateGreedDirIfNotExists(source.GreedPath);
+                if (source.NeedsMerge)
                 {
-                    if (!File.Exists(entity.GreedPath))
+                    var greedExists = File.Exists(source.GreedPath);
+                    var output = source;
+
+                    // If we need to initialize with a gold copy.
+                    if (source.NeedsGold)
                     {
-                        File.Copy(entity.GoldPath, entity.GreedPath);
+                        // If greed doesn't exist yet, initialize it from gold.
+                        if (!greedExists)
+                        {
+                            File.Copy(source.GoldPath, source.GreedPath);
+                        }
+                        // We need to merge the source with what's out there.
+                        output = handleFileExport(source);
                     }
-                    File.ReadAllText(entity.GreedPath);
+                    else if (greedExists)
+                    {
+                        // If we don't need to initialize with gold and greed already exists
+                        output = handleFileExport(source);
+                    }
+                    else
+                    {
+                        // If we don't need to initialize with gold and greed doesn't exist yet, start from scratch.
+                    }
 
-                    var manifest = (EntityManifest)entity;
-                    var greedSource = new EntityManifest(entity.GreedPath);
-                    greedSource.Ids.ForEach(id => manifest.Ids.Add(id));
 
-                    File.WriteAllText(entity.GreedPath, JsonConvert.SerializeObject(greedSource));
+                    File.WriteAllText(source.GreedPath, JsonConvert.SerializeObject(output));
                 }
                 else
                 {
-                    File.Copy(entity.SourcePath, entity.GreedPath, false);
+                    File.Copy(source.SourcePath, source.GreedPath, false);
                 }
             }
         }
 
-        private void CreateGreedDirIfNotExists(string greedPath)
+        private static void CreateGreedDirIfNotExists(string greedPath)
         {
             var info = new FileInfo(greedPath);
             if (!info.Exists)
