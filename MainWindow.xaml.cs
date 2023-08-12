@@ -136,6 +136,7 @@ namespace Greed
             try
             {
                 ModManager.ExportGreedyMods(Mods.Where(m => m.IsGreedy && m.IsActive).ToList());
+                MessageBox.Show("Greedy mods are now active. Have fun Sinning!", "Export Success", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
