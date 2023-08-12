@@ -1,21 +1,38 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Greed.Models
+namespace Greed.Models.JsonSource.Text
 {
-    public class LocalizedText
+    public class LocalizedText : Source
     {
-        [JsonRequired]
         [JsonProperty(PropertyName = "text")]
         public List<List<string>> Text { get; set; } = new();
 
         public List<string> GetKeys => Text.Select(p => p[0]).ToList();
 
         public List<string> GetValues => Text.Select(p => p[1]).ToList();
+
+        public LocalizedText(string path) : base(path)
+        {
+            NeedsGold = true;
+            var manifest = JObject.Parse(Json);
+            var arr = (JArray)manifest["text"];
+            Text = new List<List<string>>();
+            foreach (var item in arr)
+            {
+                var kv = ((JArray)item).ToList();
+                Text.Add(new List<string>()
+                {
+                    kv[0].ToString(),
+                    kv[1].ToString()
+                });
+            }
+        }
 
         public bool HasKey(string key) => Text.Any(p => p[0] == key);
 
@@ -34,7 +51,7 @@ namespace Greed.Models
                 }
             }
 
-            Text.Add(new List<string>(){ key, value });
+            Text.Add(new List<string>() { key, value });
         }
     }
 }

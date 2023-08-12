@@ -26,13 +26,18 @@ namespace Greed
             if (File.Exists(enabledPath))
             {
                 enabledModFolders = JArray.Parse(File.ReadAllText(enabledPath)).Select(p => p.ToString()).ToList();
-            } else
+            }
+            else
             {
                 enabledModFolders = new List<string>();
                 File.WriteAllText(enabledPath, "[]");
             }
 
-            return modDirs.Select(d => new Mod(enabledModFolders, d)).Where(m => m.IsGreedy).ToList();
+            return modDirs
+                .Select(d => new Mod(enabledModFolders, d))
+                .Where(m => m.IsGreedy)
+                .OrderBy(m => m.Meta.Priority)
+                .ToList();
         }
 
         public static void SetGreedyMods(List<Mod> active)
@@ -45,14 +50,57 @@ namespace Greed
 
         public static void ExportGreedyMods(List<Mod> active)
         {
-            // Burn down the old Greed mod directory (if exists)
+            Debug.WriteLine("Exporting Active Mods");
+            string modDir = ConfigurationManager.AppSettings["modDir"]!;
+            string sinsDir = ConfigurationManager.AppSettings["sinsDir"]!;
+            var greedPath = modDir + "\\greed";
 
-            // Set Greed to be active mod #0
-
-            // Copy gold JSON from Sins to the Greed mod dir.
+            // Burn down the old Greed mod directory (if exists) and make it anew.
+            if (Directory.Exists(greedPath))
+            {
+                Directory.Delete(greedPath, true);
+            }
+            Directory.CreateDirectory(greedPath);
 
             // For each greedy mod, overwrite as needed.
-            active.Sort((a, b) => a.Meta.Priority -  b.Meta.Priority);
+            active.ForEach(m => m.Export());
+
+            // Set Greed as active mod #0.
+            ActivateGreed();
+        }
+
+        private static void ActivateGreed()
+        {
+            // If enabled path doesn't exist yet, make it.
+            var enabledPath = ConfigurationManager.AppSettings["modDir"]! + "\\enabled_mods.json";
+            EnabledMods enabled;
+            var greedKey = new ModKey()
+            {
+                Name = "greed",
+                Version = int.Parse(ConfigurationManager.AppSettings["greedVersion"]!)
+            };
+
+            if (File.Exists(enabledPath))
+            {
+                enabled = JsonConvert.DeserializeObject<EnabledMods>(File.ReadAllText(enabledPath))!;
+                if (enabled.ModKeys.Any(mk => mk.Name == "greed"))
+                {
+                    // No update required.
+                    return;
+                }
+                enabled.ModKeys.Add(greedKey);
+            }
+            else
+            {
+                enabled = new EnabledMods
+                {
+                    ModKeys = new List<ModKey>()
+                    {
+                        greedKey
+                    }
+                };
+            }
+            File.WriteAllText(enabledPath, JsonConvert.SerializeObject(enabled));
         }
     }
 }

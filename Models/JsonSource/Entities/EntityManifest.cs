@@ -7,14 +7,16 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Net.Mime.MediaTypeNames;
 
-namespace Greed.Models.Entities
+namespace Greed.Models.JsonSource.Entities
 {
-    public class EntityManifest : JsonSource
+    public class EntityManifest : Source
     {
+        [JsonProperty(PropertyName = "ids")]
         public readonly List<string> Ids;
 
         public EntityManifest(string path) : base(path)
         {
+            NeedsGold = true;
             var manifest = JObject.Parse(Json);
             var arr = (JArray)manifest["ids"];
             Ids = arr.Select(i => i.ToString()).ToList();

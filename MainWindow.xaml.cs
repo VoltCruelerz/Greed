@@ -100,21 +100,13 @@ namespace Greed
             viewModList.SelectedIndex = index;
         }
 
-        //private void ExportModList()
-        //{
-        //    // If enabled path doesn't exist yet, make it.
-        //    var enabledPath = ConfigurationManager.AppSettings["modDir"]! + "\\enabled_mods.json";
-        //    List<string> enabledModFolders;
-        //    if (File.Exists(enabledPath))
-        //    {
-        //        var enabled = JsonConvert.DeserializeObject<EnabledMods>(File.ReadAllText(enabledPath))!;
-        //        enabledModFolders = enabled.ModKeys.Select(p => p.Name).ToList();
-        //    }
-        //    else
-        //    {
-        //        enabledModFolders = new List<string>();
-        //        File.WriteAllText(enabledPath, "{ \"mod_keys\": [] }");
-        //    }
-        //}
+        private void cmdExport_Click(object sender, RoutedEventArgs e)
+        {
+            cmdExport.IsEnabled = false;
+
+            ModManager.ExportGreedyMods(Mods.Where(m => m.IsGreedy && m.IsActive).ToList());
+
+            cmdExport.IsEnabled = true;
+        }
     }
 }

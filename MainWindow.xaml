@@ -28,6 +28,7 @@
         </GroupBox>
         <Button x:Name="cmdToggle" Content="Toggle" HorizontalAlignment="Right" Margin="0,348,10,0" VerticalAlignment="Top" Width="62" Click="cmdToggle_Click" IsEnabled="False"/>
         <Label Content="Top mods inserted first. Bottom mods overwrite." HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
+        <Button x:Name="cmdExport" Content="Export Greedy Selections" HorizontalAlignment="Left" Margin="410,388,0,0" VerticalAlignment="Top" Width="380" Click="cmdExport_Click"/>
 
     </Grid>
 </Window>

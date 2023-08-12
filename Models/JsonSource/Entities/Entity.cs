@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Greed.Models.Entities
+namespace Greed.Models.JsonSource.Entities
 {
-    public class Entity : JsonSource
+    public class Entity : Source
     {
         public Entity(string path) : base(path)
         {
