@@ -4,7 +4,7 @@ _A mod deconfliction tool for [Sins of a Solar Empire II](https://www.sinsofasol
 
 [Github](https://github.com/VoltCruelerz/Greed)
 
-> _**WARNING**: At present, Greed only supports modifications in the `entities` and `localized_text` folders, though future updates will add further support._
+> _**WARNING**: At present, Greed only supports deconfliction in the `entities` and `localized_text` folders, though future updates will add further support._
 
 ![screenshot](assets/Screenshot.png)
 
