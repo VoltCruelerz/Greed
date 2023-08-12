@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Greed.Models
+﻿namespace Greed.Models
 {
     public class ModListItem
     {
@@ -18,7 +12,8 @@ namespace Greed.Models
 
         public string SinsVersion { get; set; }
 
-        public ModListItem(Mod m) {
+        public ModListItem(Mod m)
+        {
             Id = m.Id;
             Active = m.IsActive ? "✓" : " ";
             Name = m.Meta.Name;

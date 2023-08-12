@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Greed.Models.JsonSource.Entities
+﻿namespace Greed.Models.JsonSource.Entities
 {
     public class Entity : Source
     {

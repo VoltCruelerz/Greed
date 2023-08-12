@@ -1,23 +1,13 @@
-﻿using System;
+﻿using Greed.Models;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.IO;
-using Greed.Models;
-using Greed.Models.EnabledMods;
-using Newtonsoft.Json;
 
 namespace Greed
 {
@@ -39,13 +29,13 @@ namespace Greed
             string? modDir = ConfigurationManager.AppSettings["modDir"];
             if (modDir == null || !Directory.Exists(modDir))
             {
-                CriticalAlertPopup("Configuration Error", "You need to set the modDir element of the Greed App.config file to the mod directory.");
+                CriticalAlertPopup("Configuration Error", "You need to set the modDir element in Greed.dll.config file to your mod directory.");
                 return;
             }
             string? sinsDir = ConfigurationManager.AppSettings["sinsDir"];
             if (sinsDir == null || !Directory.Exists(sinsDir))
             {
-                CriticalAlertPopup("Configuration Error", "You need to set the sinsDir element of the Greed App.config file to where sins2.exe lives.");
+                CriticalAlertPopup("Configuration Error", "You need to set the sinsDir element in Greed.dll.config file to where sins2.exe lives.");
                 return;
             }
 
@@ -62,7 +52,8 @@ namespace Greed
             try
             {
                 this.Title = $"Greed Mod Loader (Detected Sins II v{FileVersionInfo.GetVersionInfo(sinsDir + "\\sins2.exe").FileVersion})";
-            } catch (Exception)
+            }
+            catch (Exception)
             {
                 CriticalAlertPopup("No SinsII", "sins2.exe could not be found at the specified location. Please double check that it is within the place indicated by the App.config.");
                 return;
@@ -72,7 +63,8 @@ namespace Greed
             try
             {
                 Mods = ModManager.LoadGreedyMods();
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
                 CriticalAlertPopup("Mod Load Error", "Unable to locate all files.\n" + e.Message + "\n" + e.StackTrace);
                 return;
