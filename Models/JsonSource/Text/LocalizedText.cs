@@ -20,7 +20,7 @@ namespace Greed.Models.JsonSource.Text
             NeedsGold = true;
             NeedsMerge = true;
             var manifest = JObject.Parse(Json);
-            var arr = (JArray)manifest["text"];
+            var arr = (JArray)manifest["text"]!;
             Text = new List<List<string>>();
             foreach (var item in arr)
             {

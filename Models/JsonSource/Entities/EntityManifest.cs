@@ -15,7 +15,7 @@ namespace Greed.Models.JsonSource.Entities
         {
             NeedsMerge = true;
             var manifest = JObject.Parse(Json);
-            var arr = (JArray)manifest["ids"];
+            var arr = (JArray)manifest["ids"]!;
             Ids = arr.Select(i => i.ToString()).ToList();
         }
 

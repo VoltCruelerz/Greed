@@ -5,7 +5,7 @@
     <TargetFramework>net7.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <Title>Greed Mod Manager</Title>
     <Authors>Volt Cruelerz</Authors>
     <Description>A mod loader for Sins of a Solar Empire II.</Description>
@@ -16,7 +16,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
   <ItemGroup>
