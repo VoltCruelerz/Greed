@@ -1,5 +1,9 @@
 ﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Reflection;
+using System.Windows;
 
 namespace Greed.Models
 {
@@ -19,15 +23,19 @@ namespace Greed.Models
 
         [JsonRequired]
         [JsonProperty(PropertyName = "version")]
-        public string Version { get; set; } = string.Empty;
+        public Version Version { get; set; } = new System.Version("0.0.0");
 
         [JsonRequired]
         [JsonProperty(PropertyName = "url")]
         public string Url { get; set; } = string.Empty;
 
         [JsonRequired]
+        [JsonProperty(PropertyName = "greedVersion")]
+        public Version GreedVersion { get; set; } = new System.Version("0.0.0");
+
+        [JsonRequired]
         [JsonProperty(PropertyName = "sinsVersion")]
-        public string SinsVersion { get; set; } = string.Empty;
+        public Version SinsVersion { get; set; } = new System.Version("0.0.0.0");
 
         [JsonRequired]
         [JsonProperty(PropertyName = "priority")]
@@ -39,5 +47,21 @@ namespace Greed.Models
 
         [JsonProperty(PropertyName = "conflicts")]
         public List<string> Conflicts { get; set; } = new List<string>();
+
+        public bool IsLegalVersion(Version liveSinsVersion)
+        {
+            var liveVersion = Assembly.GetExecutingAssembly().GetName().Version!;
+            if (liveVersion.CompareTo(GreedVersion) < 0)
+            {
+                Debug.WriteLine("Deprecated greed version.");
+                return false;
+            }
+            if (liveSinsVersion.CompareTo(SinsVersion) < 0)
+            {
+                Debug.WriteLine("Deprecated sins version.");
+                return false;
+            }
+            return true;
+        }
     }
 }

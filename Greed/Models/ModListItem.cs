@@ -17,8 +17,8 @@
             Id = m.Id;
             Active = m.IsActive ? "✓" : " ";
             Name = m.Meta.Name;
-            Version = m.Meta.Version;
-            SinsVersion = m.Meta.SinsVersion;
+            Version = m.Meta.Version.ToString();
+            SinsVersion = m.Meta.SinsVersion.ToString();
         }
     }
 }

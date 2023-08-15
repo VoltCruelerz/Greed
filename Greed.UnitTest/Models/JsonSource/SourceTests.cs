@@ -50,7 +50,6 @@ namespace Greed.UnitTest.Models.JsonSource
 
             // Assert
             var aObj = JObject.Parse(a.ToString());
-            var bObj = JObject.Parse(b.ToString());
             var cObj = JObject.Parse(c.ToString());
             Assert.AreEqual(aObj["intA"]!.ToString(), cObj["intA"]!.ToString());
             Assert.IsNull(cObj["strB"]);
