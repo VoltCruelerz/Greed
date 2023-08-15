@@ -9,13 +9,23 @@ namespace Greed.Models.JsonSource
     public enum SourceType
     {
         /// <summary>
-        /// Overwrite what's there
+        /// Replace elements. Null removes.
         /// </summary>
-        Replace,
+        MergeReplace,
 
         /// <summary>
-        /// Add new bits at the end
+        /// Merge and concatenate new elements. Null removes.
         /// </summary>
-        Concat
+        MergeConcat,
+
+        /// <summary>
+        /// Merge and union new elements (skip old ones). Null removes.
+        /// </summary>
+        MergeUnion,
+
+        /// <summary>
+        /// Fully overwrite what came before.
+        /// </summary>
+        Overwrite
     }
 }

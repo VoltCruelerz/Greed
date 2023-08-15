@@ -118,21 +118,18 @@ namespace Greed
             }
             catch (Exception ex)
             {
-                CriticalAlertPopup("Mod Load Error", "Unable to locate all files.\n" + ex.Message + "\n" + ex.StackTrace);
+                CriticalAlertPopup("Mod Set Error", "Unable to locate all files.\n" + ex.Message + "\n" + ex.StackTrace);
                 return;
             }
             RefreshModList();
-
-            // Reselect the selection for the user.
-            Selected = Mods.Find(m => m.Id == Selected.Id);
-            var index = Mods.IndexOf(Selected!);
-            viewModList.SelectedItem = Selected;
-            viewModList.SelectedIndex = index;
+            ReselectSelection();
         }
 
         private void Export_Click(object sender, RoutedEventArgs e)
         {
             cmdExport.IsEnabled = false;
+            RefreshModList();
+            ReselectSelection();
 
             try
             {
@@ -141,11 +138,22 @@ namespace Greed
             }
             catch (Exception ex)
             {
-                CriticalAlertPopup("Mod Load Error", "Unable to locate all files.\n" + ex.Message + "\n" + ex.StackTrace);
+                CriticalAlertPopup("Mod Export Error", "Unable to locate all files.\n" + ex.Message + "\n" + ex.StackTrace);
                 return;
             }
 
             cmdExport.IsEnabled = true;
+        }
+
+        private void ReselectSelection()
+        {
+            Selected = Mods.Find(m => m.Id == Selected?.Id);
+            if (Selected != null)
+            {
+                var index = Mods.IndexOf(Selected!);
+                viewModList.SelectedItem = Selected;
+                viewModList.SelectedIndex = index;
+            }
         }
 
         private void CriticalAlertPopup(string title, string message)

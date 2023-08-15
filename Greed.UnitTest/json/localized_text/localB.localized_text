@@ -1,6 +1,10 @@
 {
   "text": [
     [
+      "keyA",
+      "foo"
+    ],
+    [
       "keyC",
       "valC"
     ]

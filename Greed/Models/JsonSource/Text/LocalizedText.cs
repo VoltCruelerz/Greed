@@ -17,8 +17,6 @@ namespace Greed.Models.JsonSource.Text
 
         public LocalizedText(string path) : base(path)
         {
-            NeedsGold = true;
-            NeedsMerge = true;
             var manifest = JObject.Parse(Json);
             var arr = (JArray)manifest["text"]!;
             Text = new List<List<string>>();
@@ -33,24 +31,41 @@ namespace Greed.Models.JsonSource.Text
             }
         }
 
+        public override Source Merge(Source other)
+        {
+            var otherText = (LocalizedText)other;
+            otherText.Text.ForEach(okv => Upsert(okv));
+            Json = JsonConvert.SerializeObject(this, Formatting.None);
+            return this;
+        }
+
+        public override string Minify()
+        {
+            Json = JsonConvert.SerializeObject(this, Formatting.None);
+            return Json;
+        }
+
+        public override Source Clone()
+        {
+            return new LocalizedText(SourcePath);
+        }
+
         public bool HasKey(string key) => Text.Any(p => p[0] == key);
 
         public string? GetValue(string key) => Text.FirstOrDefault(p => p[0] == key)?[1];
 
-        public void Upsert(List<string> kv) => Upsert(kv[0], kv[1]);
+        private void Upsert(List<string> kv) => Upsert(kv[0], kv[1]);
 
-        public void Upsert(string key, string value)
+        private void Upsert(string key, string value)
         {
-            for (int i = 0; i < Text.Count; i++)
+            var index = Text.FindIndex(kv => kv[0] == key);
+            if (index != -1)
             {
-                if (Text[i][0] == key)
-                {
-                    Text[i][1] = value;
-                    return;
-                }
+                Text[index][1] = value;
+            } else
+            {
+                Text.Add(new List<string>() { key, value });
             }
-
-            Text.Add(new List<string>() { key, value });
         }
     }
 }

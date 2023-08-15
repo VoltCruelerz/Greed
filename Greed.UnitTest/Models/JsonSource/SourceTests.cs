@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using System.Diagnostics;
 using System.Text.Json;
 using Greed.Models.JsonSource;
+using Greed.Models.JsonSource.Text;
 
 namespace Greed.UnitTest.Models.JsonSource
 {
@@ -10,13 +11,37 @@ namespace Greed.UnitTest.Models.JsonSource
     public class SourceTests
     {
         [TestMethod]
-        public void Merge_Replace_Simple()
+        public void Merge_Overwrite_Simple()
         {
             // Arrange
             //var a = JObject.Parse(File.ReadAllText());
             var a = new Source("..\\..\\..\\json\\dummy\\objA.json");
             Console.WriteLine("\nA ===============\n" + a.ToString());
             var b = new Source("..\\..\\..\\json\\dummy\\objB.json");
+            Console.WriteLine("\nB ===============\n" + b.ToString());
+
+            // Act
+            var c = a.Clone();
+            c.Merge(b);
+            Console.WriteLine("\nRESULT C ===============\n" + c.ToString());
+
+            // Assert
+            var aObj = JObject.Parse(a.ToString());
+            var bObj = JObject.Parse(b.ToString());
+            var cObj = JObject.Parse(c.ToString());
+            Assert.AreEqual(aObj["intA"]!.ToString(), cObj["intA"]!.ToString());
+            Assert.AreEqual(bObj["strB"]!.ToString(), cObj["strB"]!.ToString());
+            Assert.IsNull(cObj["objC"]);
+        }
+
+        [TestMethod]
+        public void Merge_Replace_Simple()
+        {
+            // Arrange
+            //var a = JObject.Parse(File.ReadAllText());
+            var a = new Source("..\\..\\..\\json\\dummy\\objA.json");
+            Console.WriteLine("\nA ===============\n" + a.ToString());
+            var b = new Source("..\\..\\..\\json\\dummy\\objB.json.gmr");
             Console.WriteLine("\nB ===============\n" + b.ToString());
 
             // Act
@@ -40,7 +65,7 @@ namespace Greed.UnitTest.Models.JsonSource
             //var a = JObject.Parse(File.ReadAllText());
             var a = new Source("..\\..\\..\\json\\dummy\\objA.json");
             Console.WriteLine("\nA ===============\n" + a.ToString());
-            var b = new Source("..\\..\\..\\json\\dummy\\objB_null.json");
+            var b = new Source("..\\..\\..\\json\\dummy\\objB_null.json.gmr");
             Console.WriteLine("\nB ===============\n" + b.ToString());
 
             // Act
@@ -63,7 +88,7 @@ namespace Greed.UnitTest.Models.JsonSource
             //var a = JObject.Parse(File.ReadAllText());
             var a = new Source("..\\..\\..\\json\\dummy\\arrA.json");
             Console.WriteLine("\nA ===============\n" + a.ToString());
-            var b = new Source("..\\..\\..\\json\\dummy\\arrB.json");
+            var b = new Source("..\\..\\..\\json\\dummy\\arrB.json.gmr");
             Console.WriteLine("\nB ===============\n" + b.ToString());
 
             // Act
@@ -80,13 +105,34 @@ namespace Greed.UnitTest.Models.JsonSource
         }
 
         [TestMethod]
+        public void Merge_Union_Array()
+        {
+            // Arrange
+            //var a = JObject.Parse(File.ReadAllText());
+            var a = new Source("..\\..\\..\\json\\dummy\\arrA.json");
+            Console.WriteLine("\nA ===============\n" + a.ToString());
+            var b = new Source("..\\..\\..\\json\\dummy\\arrB.json.gmu");
+            Console.WriteLine("\nB ===============\n" + b.ToString());
+
+            // Act
+            var c = a.Clone();
+            c.Merge(b);
+            Console.WriteLine("\nRESULT C ===============\n" + c.ToString());
+
+            // Assert
+            var arrC = (JArray)JObject.Parse(c.ToString())["arr"]!;
+            var result = string.Join("", arrC.ToList());
+            Assert.AreEqual("abcd", result);
+        }
+
+        [TestMethod]
         public void Merge_Concat_Array()
         {
             // Arrange
             //var a = JObject.Parse(File.ReadAllText());
             var a = new Source("..\\..\\..\\json\\dummy\\arrA.json");
             Console.WriteLine("\nA ===============\n" + a.ToString());
-            var b = new Source("..\\..\\..\\json\\dummy\\arrB.json.concat");
+            var b = new Source("..\\..\\..\\json\\dummy\\arrB.json.gmc");
             Console.WriteLine("\nB ===============\n" + b.ToString());
 
             // Act
@@ -107,11 +153,11 @@ namespace Greed.UnitTest.Models.JsonSource
         {
             // Arrange
             //var a = JObject.Parse(File.ReadAllText());
-            var a = new Source("..\\..\\..\\json\\localized_text\\localA.json");
+            var a = new LocalizedText("..\\..\\..\\json\\localized_text\\localA.localized_text");
             Console.WriteLine("\nA ===============\n" + a.ToString());
-            var b = new Source("..\\..\\..\\json\\localized_text\\localB.json.concat");
+            var b = new LocalizedText("..\\..\\..\\json\\localized_text\\localB.localized_text");
             Console.WriteLine("\nB ===============\n" + b.ToString());
-            var expected = new Source("..\\..\\..\\json\\localized_text\\localMerged.json");
+            var expected = new LocalizedText("..\\..\\..\\json\\localized_text\\localMerged.localized_text");
 
             // Act
             var c = a.Clone();
@@ -119,7 +165,7 @@ namespace Greed.UnitTest.Models.JsonSource
             Console.WriteLine("\nRESULT C ===============\n" + c.ToString());
 
             // Assert
-            Assert.AreEqual(expected.ToString(), c.ToString(), "Expected:\n" + expected.ToString());
+            Assert.AreEqual(expected.Minify(), c.Minify());
         }
 
         [TestMethod]
@@ -129,7 +175,7 @@ namespace Greed.UnitTest.Models.JsonSource
             //var a = JObject.Parse(File.ReadAllText());
             var a = new Source("..\\..\\..\\json\\entities\\playerA.json");
             Console.WriteLine("\nA ===============\n" + a.ToString());
-            var b = new Source("..\\..\\..\\json\\entities\\playerB.json.concat");
+            var b = new Source("..\\..\\..\\json\\entities\\playerB.json.gmc");
             Console.WriteLine("\nB ===============\n" + b.ToString());
             var expected = new Source("..\\..\\..\\json\\entities\\playerMerged.json");
 
