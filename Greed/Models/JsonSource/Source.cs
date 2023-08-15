@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using Greed.Extensions;
 using Greed.Models.JsonSource.Text;
 using Greed.Models.JsonSource.Entities;
+using JsonDiffer;
 
 namespace Greed.Models.JsonSource
 {
@@ -108,6 +109,15 @@ namespace Greed.Models.JsonSource
         public virtual Source Clone()
         {
             return new Source(SourcePath);
+        }
+
+        public virtual string Diff(Source other)
+        {
+            var j1 = JToken.Parse(Json);
+            var j2 = JToken.Parse(other.Json);
+
+            var diff = JsonConvert.SerializeObject(JsonDifferentiator.Differentiate(j1, j2), Formatting.Indented);
+            return diff;
         }
 
         /// <summary>
