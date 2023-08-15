@@ -1,0 +1,12 @@
+{
+  "intA": null,
+  "arrC": [
+    {
+      "arrE": [
+        "bar",
+        null
+      ]
+    }
+  ],
+  "strF": "sdf"
+}

@@ -23,8 +23,9 @@ namespace Greed
         {
             Debug.WriteLine("Main Window");
             InitializeComponent();
+            txtInfo.Document.Blocks.Clear();
+            txtInfo.AppendText("Select a mod to view details about it.");
             Debug.WriteLine("Load Done");
-
 
             string? modDir = ConfigurationManager.AppSettings["modDir"];
             if (modDir == null || !Directory.Exists(modDir))
