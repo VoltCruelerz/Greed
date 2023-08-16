@@ -120,6 +120,11 @@ namespace Greed.Models.JsonSource
             return diff;
         }
 
+        public string DiffFromGold()
+        {
+            return Filename + "\n" + Diff(new Source(GoldPath));
+        }
+
         /// <summary>
         /// These two functions exist because .NET 7's null handling doesn't play nice with Newtonsoft yet. They rip out nulls.
         /// </summary>

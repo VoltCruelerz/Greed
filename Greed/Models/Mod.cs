@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-
+using System.Text;
 
 namespace Greed.Models
 {
@@ -172,6 +172,16 @@ namespace Greed.Models
             {
                 Directory.CreateDirectory(info.Directory!.FullName);
             }
+        }
+
+        public string DiffFromGold()
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine(Id);
+            Entities.ForEach(p => sb.AppendLine("Entity " + p.DiffFromGold()));
+            LocalizedTexts.ForEach(p =>  sb.AppendLine("Localized Text " + p.DiffFromGold()));
+
+            return sb.ToString();
         }
     }
 }

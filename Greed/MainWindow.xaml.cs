@@ -111,6 +111,7 @@ namespace Greed
         {
             Debug.WriteLine("Activate_Click()");
             Selected!.IsActive = !Selected.IsActive;
+            //Debug.WriteLine(Selected.DiffFromGold());
             string modDir = ConfigurationManager.AppSettings["modDir"]!;
             try
             {
