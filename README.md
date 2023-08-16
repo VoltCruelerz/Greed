@@ -26,6 +26,15 @@ First, some definitions:
 - **Source Files**: the files from the individual greedy mods.
 - **Greed Files**: the files that are going into the greed mod folder. When Greed activates a list of mods, it initializes any relevant greed files from gold copies and then successively applies the edits of each mod in the list.
 
+### Why Use Greed?
+
+- You can add C-style comments to your source files
+- Your mod only needs to include what you changed about a particular source file (eg add a new property, delete a property, or add an array element).
+- Intelligent merging of manifest and localization files
+- Automatic updates for your users (TODO)
+- Dependency management (TODO)
+- Conflict management (TODO)
+
 ### Greed Compatibility
 
 To make a mod compatible with Greed, you need only add a `greed.json` file to your mod's folder, as seen below.

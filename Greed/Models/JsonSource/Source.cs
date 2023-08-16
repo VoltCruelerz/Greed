@@ -8,6 +8,7 @@ using Greed.Extensions;
 using Greed.Models.JsonSource.Text;
 using Greed.Models.JsonSource.Entities;
 using JsonDiffer;
+using System.Text;
 
 namespace Greed.Models.JsonSource
 {
@@ -59,7 +60,7 @@ namespace Greed.Models.JsonSource
             GoldPath = $"{ConfigurationManager.AppSettings["sinsDir"]!}\\{Folder}\\{Mergename}";
             GreedPath = $"{ConfigurationManager.AppSettings["modDir"]!}\\greed\\{Folder}\\{Mergename}";
 
-            Json = File.ReadAllText(SourcePath);
+            Json = ReadJsonWithComments(SourcePath);
         }
 
         public virtual Source Merge(Source other)
@@ -182,6 +183,77 @@ namespace Greed.Models.JsonSource
             {
                 throw new InvalidOperationException("You cannot use the greedy file extensions on " + Mergename);
             }
+        }
+
+        /// <summary>
+        /// Greed supports source files with C-style comments.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public string ReadJsonWithComments(string path)
+        {
+            var str = File.ReadAllText(path);
+            var sb = new StringBuilder();
+
+            // All comment characters are length 2, so it's < -1
+            for (var i = 0; i < str.Length - 1; i++)
+            {
+                var cur = str[i];
+                var next = str[i + 1];
+
+                // Single-line comment
+                if (cur == '/' &&  next == '/')
+                {
+                    var found = false;
+                    for (var j = i + 2 ; j < str.Length; j++)
+                    {
+                        var hypo = str[j];
+                        if (hypo == '\r' ||  hypo == '\n')
+                        {
+                            // The loop's ++ will bump us back to j.
+                            i = j - 1;
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    // If we never found it a line break, that means we hit the end of he file, so we're done.
+                    if (!found)
+                    {
+                        return sb.ToString();
+                    }
+                }
+                // Multi-line comment.
+                else if (cur == '/' && next == '*')
+                {
+                    var found = false;
+                    for (var j = i + 2; j < str.Length - 1; j++)
+                    {
+                        var hypoCur = str[j];
+                        var hypoNext = str[j + 1];
+                        if (hypoCur == '*' && hypoNext == '/')
+                        {
+                            i = j + 1;
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    // If we never found it, that means they didn't close the comment.
+                    if (!found)
+                    {
+                        throw new InvalidOperationException("Invalid jsonc file: " + path);
+                    }
+                }
+                else
+                {
+                    sb.Append(cur);
+                }
+            }
+            // Don't forget to add the last character.
+            sb.Append(str[^1]);
+
+            return sb.ToString();
         }
     }
 }

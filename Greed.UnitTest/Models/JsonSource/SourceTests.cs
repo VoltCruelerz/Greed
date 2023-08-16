@@ -187,5 +187,17 @@ namespace Greed.UnitTest.Models.JsonSource
             // Assert
             Assert.AreEqual(expected.Minify(), c.Minify());
         }
+
+        [TestMethod]
+        public void ReadJsonc()
+        {
+            // Arrange
+            // Act
+            var jsonc = new Source("..\\..\\..\\json\\dummy\\Comments.jsonc");
+            var json = new Source("..\\..\\..\\json\\dummy\\CommentsNot.json");
+
+            // Assert
+            Assert.AreEqual(json.Minify(), jsonc.Minify());
+        }
     }
 }
