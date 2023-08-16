@@ -28,9 +28,9 @@ First, some definitions:
 
 ### Why Use Greed?
 
-- You can add C-style comments to your source files
+- You can add C-style comments to your source files.
 - Your mod only needs to include what you changed about a particular source file (eg add a new property, delete a property, or add an array element).
-- Intelligent merging of manifest and localization files
+- Intelligent merging of manifest and localization files.
 - Automatic updates for your users (TODO)
 - Dependency management (TODO)
 - Conflict management (TODO)
