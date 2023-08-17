@@ -40,6 +40,7 @@ namespace Greed.Models
         public List<Source> LocalizedTexts { get; set; } = new List<Source>();
 
         public bool IsActive { get; set; } = false;
+        public string Readme { get; set; } = string.Empty;
 
         public string Id { get; set; } = string.Empty;
 
@@ -58,6 +59,14 @@ namespace Greed.Models
             if (greedMetaFilename == null)
             {
                 return;
+            }
+
+            // Attempt to load the README.md
+            var options = new string[] { "readme.md", "readme.txt", "ReadMe.md", "ReadMe.txt", "README.md", "README.txt" };
+            var readmeFilename = options.FirstOrDefault(p => File.Exists(path + "\\" + p));
+            if (readmeFilename != null)
+            {
+                Readme = File.ReadAllText(path + "\\" + readmeFilename);
             }
 
             var pathTerms = path.Split("\\");

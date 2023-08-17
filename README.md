@@ -24,17 +24,19 @@ First, some definitions:
 
 - **Gold Files**: the gold copy, which is the original Sins II data files. These are _never_ changed by Greed.
 - **Source Files**: the files from the individual greedy mods.
-- **Greed Files**: the files that are going into the greed mod folder. When Greed activates a list of mods, it initializes any relevant greed files from gold copies and then successively applies the edits of each mod in the list.
+- **Greed Files**: the files that are going into the greed mod folder. When Greed activates a list of mods, it initializes any relevant greed files from gold copies and then successively applies the edits of each mod in the list, ultimately producing an execution product.
 
 ### Why Use Greed?
 
-- You can add C-style comments to your source files.
-- Your mod only needs to include what you changed about a particular source file (eg add a new property, delete a property, or add an array element), _drastically_ reducing the risk of collisions between mods.
-- Intelligent merging of manifest and localization files.
-- Automatic updates for your users (TODO)
-- Diff Preview (TODO)
-- Dependency management (TODO)
-- Conflict management (TODO)
+- **Comments**: You can add C-style comments to your source files.
+- **Selective Inclusion**: Your mod only needs to include what you changed about a particular source file (eg add a new property, delete a property, or add an array element), _drastically_ reducing the risk of collisions between mods.
+- **Intelligent Merge**: Intelligent merging of manifest and localization files.
+- **File Diff**: Greed ships with a diff tool specifically for Sins II data files, allowing you to readily see exactly what you've done.
+- **[TODO] Automated Updates**: Users will be able to update the latest version of your mod with a single click.
+- **[TODO] Dependency Management**: Users will be able to automatically install your mod's dependencies.
+- **[TODO] Conflict Detection**: Users will be alerted when they attempt to enable known conflicting mods.
+
+![screenshot](assets/DiffScreenshot.png)
 
 ### Greed Compatibility
 
@@ -54,14 +56,6 @@ To make a mod compatible with Greed, you need only add a `greed.json` file to yo
     "priority": 100
 }
 ```
-
-Note that unless you make use of other features (such as fractional files), Greed will only be able to:
-
-- turn your mod on and off
-- set load order (though you should really have it load early to avoid trampling)
-- install with one click (TODO)
-- check dependencies (TODO)
-- check what your mod changes (TODO)
 
 ### Merge Types
 
@@ -136,10 +130,3 @@ Priority is the mod load order. A mod with priority 10 will load before one with
 I welcome contributions. Just open a pull request.
 
 If at some point in the future, I can no longer maintain Greed, it's MIT licensed.
-
-## Future Work
-
-- folders beyond `entities` and `localized_text`
-- conflicts and dependencies
-- allow users to reorder priority lists
-- add installer from online repository

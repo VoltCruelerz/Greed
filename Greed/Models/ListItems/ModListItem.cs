@@ -1,4 +1,4 @@
-﻿namespace Greed.Models
+﻿namespace Greed.Models.ListItem
 {
     public class ModListItem
     {
@@ -10,6 +10,8 @@
 
         public string Version { get; set; }
 
+        public string GreedVersion { get; set; }
+
         public string SinsVersion { get; set; }
 
         public ModListItem(Mod m)
@@ -18,6 +20,7 @@
             Active = m.IsActive ? "✓" : " ";
             Name = m.Meta.Name;
             Version = m.Meta.Version.ToString();
+            GreedVersion = m.Meta.GreedVersion.ToString();
             SinsVersion = m.Meta.SinsVersion.ToString();
         }
     }

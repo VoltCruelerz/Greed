@@ -1,10 +1,13 @@
 ﻿using Greed.Models;
+using Greed.Models.JsonSource;
+using Greed.Models.ListItem;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -17,12 +20,15 @@ namespace Greed
     public partial class MainWindow : Window
     {
         private List<Mod> Mods = new();
-        private Mod? Selected;
+        private Mod? SelectedMod;
+        private List<Source> AllSources = new();
+        private Source? SelectedSource;
 
         public MainWindow()
         {
             Debug.WriteLine("Main Window");
             InitializeComponent();
+
             txtInfo.Document.Blocks.Clear();
             txtInfo.AppendText("Select a mod to view details about it.");
             Debug.WriteLine("Load Done");
@@ -52,7 +58,8 @@ namespace Greed
             Debug.WriteLine($"Sins II Dir: {sinsDir}");
             try
             {
-                this.Title = $"Greed Mod Loader (Detected Sins II v{FileVersionInfo.GetVersionInfo(sinsDir + "\\sins2.exe").FileVersion})";
+                var greedVersion = Assembly.GetExecutingAssembly().GetName().Version!;
+                this.Title = $"Greed Mod Loader v{greedVersion} (Detected Sins II v{FileVersionInfo.GetVersionInfo(sinsDir + "\\sins2.exe").FileVersion})";
             }
             catch (Exception)
             {
@@ -73,6 +80,7 @@ namespace Greed
 
             viewModList.Items.Clear();
             Mods.ForEach(m => viewModList.Items.Add(new ModListItem(m)));
+            RefreshSourceList();
         }
 
         private void ModList_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -85,33 +93,37 @@ namespace Greed
                 return;
             }
             var item = (ModListItem)e.AddedItems[0]!;
-            Selected = Mods.First(p => p.Id == item.Id);
+            SelectedMod = Mods.First(p => p.Id == item.Id);
 
-            var doc = new FlowDocument(new Paragraph(new Run($"{Selected.Meta.Name} v{Selected.Meta.Version} (Sins {Selected.Meta.SinsVersion})")
+            var doc = new FlowDocument(new Paragraph(new Run($"{SelectedMod.Meta.Name} v{SelectedMod.Meta.Version} (Sins {SelectedMod.Meta.SinsVersion})")
             {
                 FontWeight = FontWeights.Bold
             }));
-            doc.Blocks.Add(new Paragraph(new Run($"by {Selected.Meta.Author}")
+            doc.Blocks.Add(new Paragraph(new Run($"by {SelectedMod.Meta.Author}")
             {
                 FontStyle = FontStyles.Italic
             }));
-            doc.Blocks.Add(new Paragraph(new Run(Selected.Meta.Url)
+            doc.Blocks.Add(new Paragraph(new Run(SelectedMod.Meta.Url)
             {
                 TextDecorations = TextDecorations.Underline
             }));
-            doc.Blocks.Add(new Paragraph(new Run(Selected.Meta.Description)));
+            doc.Blocks.Add(new Paragraph(new Run(SelectedMod.Meta.Description)));
+            doc.Blocks.Add(new Paragraph(new Run(SelectedMod.Readme)));
             txtInfo.Document = doc;
 
             // It starts disabled since nothing is selected.
             cmdToggle.IsEnabled = true;
-            cmdToggle.Content = Selected.IsActive ? "Deactivate" : "Activate";
+            cmdToggle.Content = SelectedMod.IsActive ? "Deactivate" : "Activate";
+            cmdDiff.IsEnabled = false;
+
+            RefreshSourceList();
         }
 
         private void Toggle_Click(object sender, RoutedEventArgs e)
         {
-            Debug.WriteLine("Activate_Click()");
-            Selected!.IsActive = !Selected.IsActive;
-            //Debug.WriteLine(Selected.DiffFromGold());
+            Debug.WriteLine("Toggle_Click()");
+            SelectedMod!.IsActive = !SelectedMod.IsActive;
+
             string modDir = ConfigurationManager.AppSettings["modDir"]!;
             try
             {
@@ -148,11 +160,11 @@ namespace Greed
 
         private void ReselectSelection()
         {
-            Selected = Mods.Find(m => m.Id == Selected?.Id);
-            if (Selected != null)
+            SelectedMod = Mods.Find(m => m.Id == SelectedMod?.Id);
+            if (SelectedMod != null)
             {
-                var index = Mods.IndexOf(Selected!);
-                viewModList.SelectedItem = Selected;
+                var index = Mods.IndexOf(SelectedMod!);
+                viewModList.SelectedItem = SelectedMod;
                 viewModList.SelectedIndex = index;
             }
         }
@@ -161,6 +173,65 @@ namespace Greed
         {
             MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Error);
             this.Close();
+        }
+
+        private void RefreshSourceList()
+        {
+            SelectedSource = null;
+            viewFileList.Items.Clear();
+            if (SelectedMod != null)
+            {
+                AllSources.Clear();
+                AllSources.AddRange(SelectedMod.Brushes);
+                AllSources.AddRange(SelectedMod.Colors);
+                AllSources.AddRange(SelectedMod.Cursors);
+                AllSources.AddRange(SelectedMod.DeathSequences);
+                AllSources.AddRange(SelectedMod.Effects);
+                AllSources.AddRange(SelectedMod.Fonts);
+                AllSources.AddRange(SelectedMod.GravityWellProps);
+                AllSources.AddRange(SelectedMod.Gui);
+                AllSources.AddRange(SelectedMod.MeshMaterials);
+                AllSources.AddRange(SelectedMod.Meshes);
+                AllSources.AddRange(SelectedMod.PlayerColors);
+                AllSources.AddRange(SelectedMod.PlayerIcons);
+                AllSources.AddRange(SelectedMod.PlayerPortraits);
+                AllSources.AddRange(SelectedMod.Scenarios);
+                AllSources.AddRange(SelectedMod.Shaders);
+                AllSources.AddRange(SelectedMod.Skyboxes);
+                AllSources.AddRange(SelectedMod.Sounds);
+                AllSources.AddRange(SelectedMod.TextureAnimations);
+                AllSources.AddRange(SelectedMod.Textures);
+                AllSources.AddRange(SelectedMod.Uniforms);
+                AllSources.AddRange(SelectedMod.Entities);
+                AllSources.AddRange(SelectedMod.LocalizedTexts);
+                AllSources.ForEach(p => viewFileList.Items.Add(new SourceListItem(p)));
+            }
+        }
+
+        private void FileList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (e.AddedItems.Count == 0)
+            {
+                return;
+            }
+            var item = (SourceListItem)e.AddedItems[0]!;
+            SelectedSource = AllSources.Find(p => p.Mergename == item.Name && p.Folder == item.Folder);
+            Debug.WriteLine("Selected " + SelectedSource?.Mergename);
+            cmdDiff.IsEnabled = true;
+        }
+
+        private void Diff_Click(object sender, RoutedEventArgs e)
+        {
+            Debug.WriteLine("Diff_Click()");
+            try
+            {
+                var diffPopup = new DiffWindow(SelectedSource!);
+                diffPopup.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                CriticalAlertPopup("Failed to Load Diff", ex.Message + "\n" + ex.StackTrace);
+            }
         }
     }
 }

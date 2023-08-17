@@ -26,5 +26,10 @@ namespace Greed.Models.JsonSource.Entities
             }
             Json = JsonConvert.SerializeObject(this, Formatting.Indented);
         }
+
+        public override Source Clone()
+        {
+            return new EntityManifest(SourcePath);
+        }
     }
 }

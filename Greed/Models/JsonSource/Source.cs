@@ -5,6 +5,7 @@ using System.IO;
 using System;
 using Newtonsoft.Json;
 using Greed.Extensions;
+using Greed.Diff;
 using Greed.Models.JsonSource.Text;
 using Greed.Models.JsonSource.Entities;
 using JsonDiffer;
@@ -112,18 +113,26 @@ namespace Greed.Models.JsonSource
             return new Source(SourcePath);
         }
 
-        public virtual string Diff(Source other)
+        public virtual DiffResult Diff(Source Gold, Source Greedy)
         {
-            var j1 = JToken.Parse(Json);
-            var j2 = JToken.Parse(other.Json);
+            var j1 = JToken.Parse(Gold.Json);
+            var j2 = JToken.Parse(Greedy.Json);
+            var diffObj = JsonDifferentiator.Differentiate(j1, j2, OutputMode.Detailed, true);
 
-            var diff = JsonConvert.SerializeObject(JsonDifferentiator.Differentiate(j1, j2), Formatting.Indented);
-            return diff;
+            var diff = JsonConvert.SerializeObject(diffObj, Formatting.Indented);
+            return new DiffResult(Gold.Json, Greedy.Json, diff);
         }
 
-        public string DiffFromGold()
+        public DiffResult DiffFromGold()
         {
-            return Filename + "\n" + Diff(new Source(GoldPath));
+            if (File.Exists(GoldPath))
+            {
+                var gold = new Source(GoldPath);
+                var greed = gold.Clone().Merge(this);
+                greed.SourcePath = this.SourcePath;
+                return Diff(gold, greed);
+            }
+            return new DiffResult("", Json, Json);
         }
 
         /// <summary>

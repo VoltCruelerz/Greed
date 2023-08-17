@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using Greed.Diff;
+using JsonDiffer;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,6 +50,21 @@ namespace Greed.Models.JsonSource.Text
         public override Source Clone()
         {
             return new LocalizedText(SourcePath);
+        }
+
+        /// <summary>
+        /// Because Localized Text is only the relevant changes, we have to synthesize the diff.
+        /// </summary>
+        /// <param name="Gold"></param>
+        /// <param name="Greedy"></param>
+        /// <returns></returns>
+        public override DiffResult Diff(Source Gold, Source Greedy)
+        {
+            var mergeText = new LocalizedText(Gold.GoldPath);
+            var greedyText = new LocalizedText(Greedy.SourcePath);
+            greedyText.Text.ForEach((List<string> kv) => mergeText.Upsert(kv));
+
+            return new DiffResult(Gold.Json, JsonConvert.SerializeObject(mergeText, Formatting.Indented), JsonConvert.SerializeObject(greedyText, Formatting.Indented));
         }
 
         public bool HasKey(string key) => Text.Any(p => p[0] == key);
