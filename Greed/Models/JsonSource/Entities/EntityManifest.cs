@@ -6,16 +6,15 @@ using System.Linq;
 namespace Greed.Models.JsonSource.Entities
 {
     [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    public class EntityManifest : Source
+    public class EntityManifest : Entity
     {
         [JsonProperty(PropertyName = "ids")]
         public readonly List<string> Ids;
 
         public EntityManifest(string path) : base(path)
         {
-            NeedsMerge = true;
             var manifest = JObject.Parse(Json);
-            var arr = (JArray)manifest["ids"];
+            var arr = (JArray)manifest["ids"]!;
             Ids = arr.Select(i => i.ToString()).ToList();
         }
 
@@ -25,6 +24,12 @@ namespace Greed.Models.JsonSource.Entities
             {
                 Ids.Add(key);
             }
+            Json = JsonConvert.SerializeObject(this, Formatting.Indented);
+        }
+
+        public override Source Clone()
+        {
+            return new EntityManifest(SourcePath);
         }
     }
 }

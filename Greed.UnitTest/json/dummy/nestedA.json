@@ -1,0 +1,13 @@
+{
+  "intA": 1,
+  "strB": "beta",
+  "arrC": [
+    {
+      "intD": 2,
+      "arrE": [
+        "foo",
+        "sdf"
+      ]
+    }
+  ]
+}

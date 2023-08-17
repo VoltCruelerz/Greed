@@ -1,0 +1,15 @@
+// This is a json file with comments in it!
+{
+  "a": "foo", // This is foo.
+  "b": [
+    1,
+    /* inline */
+    2
+    /*
+    multiline
+    comment
+    here!
+  */
+  ]
+}
+// Another comment at the end.

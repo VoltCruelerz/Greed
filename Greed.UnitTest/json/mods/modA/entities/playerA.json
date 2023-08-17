@@ -1,0 +1,12 @@
+{
+  "ship_components": [
+    "componentA",
+    "componentB",
+    "componentC"
+  ],
+  "planet_components": [
+    "componentA",
+    "componentB",
+    "componentC"
+  ]
+}
