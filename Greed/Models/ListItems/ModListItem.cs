@@ -1,8 +1,4 @@
-﻿using System;
-using System.Configuration;
-using System.Diagnostics;
-
-namespace Greed.Models.ListItem
+﻿namespace Greed.Models.ListItem
 {
     public class ModListItem
     {
