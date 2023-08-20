@@ -1,14 +1,6 @@
-﻿using Greed.Models;
-using Greed.Models.JsonSource;
-using Greed.Models.ListItem;
-using System;
-using System.Collections.Generic;
-using System.Configuration;
+﻿using Greed.Models.Json;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Documents;
 
 namespace Greed
@@ -18,9 +10,9 @@ namespace Greed
     /// </summary>
     public partial class DiffWindow : Window
     {
-        private Source Source;
+        private JsonSource Source;
 
-        public DiffWindow(Source s)
+        public DiffWindow(JsonSource s)
         {
             Debug.WriteLine("DiffWindow()");
             Source = s;

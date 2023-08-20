@@ -1,42 +1,26 @@
-﻿using Newtonsoft.Json.Linq;
-using System.Configuration;
-using System.Diagnostics;
-using System.IO;
-using System;
-using Newtonsoft.Json;
+﻿using Greed.Diff;
 using Greed.Extensions;
-using Greed.Diff;
-using Greed.Models.JsonSource.Text;
-using Greed.Models.JsonSource.Entities;
 using JsonDiffer;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
+using System.Configuration;
+using System.IO;
 using System.Text;
 
-namespace Greed.Models.JsonSource
+namespace Greed.Models.Json
 {
-    public class Source
+    public class JsonSource : Source
     {
         private static readonly string MergeReplaceSuffix = ".gmr";
         private static readonly string MergeUnionSuffix = ".gmu";
         private static readonly string MergeConcatSuffix = ".gmc";
-
-        public string SourcePath { get; set; }
-        public string GreedPath { get; set; }
-        public string GoldPath { get; set; }
-        public string Mod { get; set; }
-        public string Folder { get; set; }
-        public string Filename { get; set; }
         public SourceType Type { get; set; }
         public string Mergename { get; set; }
         public string Json { get; set; }
 
-        public Source(string sourcePath)
+        public JsonSource(string sourcePath) : base(sourcePath)
         {
-            SourcePath = sourcePath;
-
-            var folders = SourcePath.Split('\\');
-            Mod = folders[^3];
-            Folder = folders[^2];
-            Filename = folders[^1];
             Mergename = Filename;
             Type = SourceType.Overwrite;
 
@@ -64,7 +48,7 @@ namespace Greed.Models.JsonSource
             Json = ReadJsonWithComments(SourcePath);
         }
 
-        public virtual Source Merge(Source other)
+        public virtual JsonSource Merge(JsonSource other)
         {
             var a = JObject.Parse(Json);
             var b = JObject.Parse(other.Json);
@@ -108,12 +92,12 @@ namespace Greed.Models.JsonSource
             return Json.JsonMinify();
         }
 
-        public virtual Source Clone()
+        public virtual JsonSource Clone()
         {
-            return new Source(SourcePath);
+            return new JsonSource(SourcePath);
         }
 
-        public virtual DiffResult Diff(Source Gold, Source Greedy)
+        public virtual DiffResult Diff(JsonSource Gold, JsonSource Greedy)
         {
             var j1 = JToken.Parse(Gold.Json);
             var j2 = JToken.Parse(Greedy.Json);
@@ -127,7 +111,7 @@ namespace Greed.Models.JsonSource
         {
             if (File.Exists(GoldPath))
             {
-                var gold = new Source(GoldPath);
+                var gold = new JsonSource(GoldPath);
                 var greed = gold.Clone().Merge(this);
                 greed.SourcePath = this.SourcePath;
                 return Diff(gold, greed);
@@ -211,13 +195,13 @@ namespace Greed.Models.JsonSource
                 var next = str[i + 1];
 
                 // Single-line comment
-                if (cur == '/' &&  next == '/')
+                if (cur == '/' && next == '/')
                 {
                     var found = false;
-                    for (var j = i + 2 ; j < str.Length; j++)
+                    for (var j = i + 2; j < str.Length; j++)
                     {
                         var hypo = str[j];
-                        if (hypo == '\r' ||  hypo == '\n')
+                        if (hypo == '\r' || hypo == '\n')
                         {
                             // The loop's ++ will bump us back to j.
                             i = j - 1;

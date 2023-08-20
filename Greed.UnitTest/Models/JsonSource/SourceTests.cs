@@ -1,9 +1,5 @@
-using Newtonsoft.Json;
+using Greed.Models.Json.Text;
 using Newtonsoft.Json.Linq;
-using System.Diagnostics;
-using System.Text.Json;
-using Greed.Models.JsonSource;
-using Greed.Models.JsonSource.Text;
 
 namespace Greed.UnitTest.Models.JsonSource
 {
@@ -15,9 +11,9 @@ namespace Greed.UnitTest.Models.JsonSource
         {
             // Arrange
             //var a = JObject.Parse(File.ReadAllText());
-            var a = new Source("..\\..\\..\\json\\dummy\\objA.json");
+            var a = new Greed.Models.Json.JsonSource("..\\..\\..\\json\\dummy\\objA.json");
             Console.WriteLine("\nA ===============\n" + a.ToString());
-            var b = new Source("..\\..\\..\\json\\dummy\\objB.json");
+            var b = new Greed.Models.Json.JsonSource("..\\..\\..\\json\\dummy\\objB.json");
             Console.WriteLine("\nB ===============\n" + b.ToString());
 
             // Act
@@ -39,9 +35,9 @@ namespace Greed.UnitTest.Models.JsonSource
         {
             // Arrange
             //var a = JObject.Parse(File.ReadAllText());
-            var a = new Source("..\\..\\..\\json\\dummy\\objA.json");
+            var a = new Greed.Models.Json.JsonSource("..\\..\\..\\json\\dummy\\objA.json");
             Console.WriteLine("\nA ===============\n" + a.ToString());
-            var b = new Source("..\\..\\..\\json\\dummy\\objB.json.gmr");
+            var b = new Greed.Models.Json.JsonSource("..\\..\\..\\json\\dummy\\objB.json.gmr");
             Console.WriteLine("\nB ===============\n" + b.ToString());
 
             // Act
@@ -63,9 +59,9 @@ namespace Greed.UnitTest.Models.JsonSource
         {
             // Arrange
             //var a = JObject.Parse(File.ReadAllText());
-            var a = new Source("..\\..\\..\\json\\dummy\\objA.json");
+            var a = new Greed.Models.Json.JsonSource("..\\..\\..\\json\\dummy\\objA.json");
             Console.WriteLine("\nA ===============\n" + a.ToString());
-            var b = new Source("..\\..\\..\\json\\dummy\\objB_null.json.gmr");
+            var b = new Greed.Models.Json.JsonSource("..\\..\\..\\json\\dummy\\objB_null.json.gmr");
             Console.WriteLine("\nB ===============\n" + b.ToString());
 
             // Act
@@ -86,9 +82,9 @@ namespace Greed.UnitTest.Models.JsonSource
         {
             // Arrange
             //var a = JObject.Parse(File.ReadAllText());
-            var a = new Source("..\\..\\..\\json\\dummy\\arrA.json");
+            var a = new Greed.Models.Json.JsonSource("..\\..\\..\\json\\dummy\\arrA.json");
             Console.WriteLine("\nA ===============\n" + a.ToString());
-            var b = new Source("..\\..\\..\\json\\dummy\\arrB.json.gmr");
+            var b = new Greed.Models.Json.JsonSource("..\\..\\..\\json\\dummy\\arrB.json.gmr");
             Console.WriteLine("\nB ===============\n" + b.ToString());
 
             // Act
@@ -109,9 +105,9 @@ namespace Greed.UnitTest.Models.JsonSource
         {
             // Arrange
             //var a = JObject.Parse(File.ReadAllText());
-            var a = new Source("..\\..\\..\\json\\dummy\\arrA.json");
+            var a = new Greed.Models.Json.JsonSource("..\\..\\..\\json\\dummy\\arrA.json");
             Console.WriteLine("\nA ===============\n" + a.ToString());
-            var b = new Source("..\\..\\..\\json\\dummy\\arrB.json.gmu");
+            var b = new Greed.Models.Json.JsonSource("..\\..\\..\\json\\dummy\\arrB.json.gmu");
             Console.WriteLine("\nB ===============\n" + b.ToString());
 
             // Act
@@ -130,9 +126,9 @@ namespace Greed.UnitTest.Models.JsonSource
         {
             // Arrange
             //var a = JObject.Parse(File.ReadAllText());
-            var a = new Source("..\\..\\..\\json\\dummy\\arrA.json");
+            var a = new Greed.Models.Json.JsonSource("..\\..\\..\\json\\dummy\\arrA.json");
             Console.WriteLine("\nA ===============\n" + a.ToString());
-            var b = new Source("..\\..\\..\\json\\dummy\\arrB.json.gmc");
+            var b = new Greed.Models.Json.JsonSource("..\\..\\..\\json\\dummy\\arrB.json.gmc");
             Console.WriteLine("\nB ===============\n" + b.ToString());
 
             // Act
@@ -173,11 +169,11 @@ namespace Greed.UnitTest.Models.JsonSource
         {
             // Arrange
             //var a = JObject.Parse(File.ReadAllText());
-            var a = new Source("..\\..\\..\\json\\entities\\playerA.json");
+            var a = new Greed.Models.Json.JsonSource("..\\..\\..\\json\\entities\\playerA.json");
             Console.WriteLine("\nA ===============\n" + a.ToString());
-            var b = new Source("..\\..\\..\\json\\entities\\playerB.json.gmc");
+            var b = new Greed.Models.Json.JsonSource("..\\..\\..\\json\\entities\\playerB.json.gmc");
             Console.WriteLine("\nB ===============\n" + b.ToString());
-            var expected = new Source("..\\..\\..\\json\\entities\\playerMerged.json");
+            var expected = new Greed.Models.Json.JsonSource("..\\..\\..\\json\\entities\\playerMerged.json");
 
             // Act
             var c = a.Clone();
@@ -193,8 +189,8 @@ namespace Greed.UnitTest.Models.JsonSource
         {
             // Arrange
             // Act
-            var jsonc = new Source("..\\..\\..\\json\\dummy\\Comments.jsonc");
-            var json = new Source("..\\..\\..\\json\\dummy\\CommentsNot.json");
+            var jsonc = new Greed.Models.Json.JsonSource("..\\..\\..\\json\\dummy\\Comments.jsonc");
+            var json = new Greed.Models.Json.JsonSource("..\\..\\..\\json\\dummy\\CommentsNot.json");
 
             // Assert
             Assert.AreEqual(json.Minify(), jsonc.Minify());

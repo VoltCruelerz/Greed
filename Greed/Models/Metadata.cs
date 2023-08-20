@@ -1,9 +1,9 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using System.Reflection;
-using System.Windows;
 
 namespace Greed.Models
 {
@@ -23,7 +23,7 @@ namespace Greed.Models
 
         [JsonRequired]
         [JsonProperty(PropertyName = "version")]
-        public Version Version { get; set; } = new System.Version("0.0.0");
+        public Version Version { get; set; } = new Version("0.0.0");
 
         [JsonRequired]
         [JsonProperty(PropertyName = "url")]
@@ -31,11 +31,11 @@ namespace Greed.Models
 
         [JsonRequired]
         [JsonProperty(PropertyName = "greedVersion")]
-        public Version GreedVersion { get; set; } = new System.Version("0.0.0");
+        public Version GreedVersion { get; set; } = new Version("0.0.0");
 
         [JsonRequired]
         [JsonProperty(PropertyName = "sinsVersion")]
-        public Version SinsVersion { get; set; } = new System.Version("0.0.0.0");
+        public Version SinsVersion { get; set; } = new Version("0.0.0.0");
 
         [JsonRequired]
         [JsonProperty(PropertyName = "priority")]
@@ -48,20 +48,32 @@ namespace Greed.Models
         [JsonProperty(PropertyName = "conflicts")]
         public List<string> Conflicts { get; set; } = new List<string>();
 
-        public bool IsLegalVersion(Version liveSinsVersion)
+        /// <summary>
+        /// Returns which file version is mismatched.
+        /// </summary>
+        /// <returns>"Greed" and/or/neither "Sins", as invalid</returns>
+        public List<string> IsLegalVersion()
         {
+            var sinsDir = ConfigurationManager.AppSettings["sinsDir"]!;
+            var sinsVersion = new Version(FileVersionInfo.GetVersionInfo(sinsDir + "\\sins2.exe").FileVersion!);
+            return IsLegalVersion(sinsVersion);
+        }
+
+        public List<string> IsLegalVersion(Version liveSinsVersion)
+        {
+            var violations = new List<string>();
             var liveVersion = Assembly.GetExecutingAssembly().GetName().Version!;
             if (liveVersion.CompareTo(GreedVersion) < 0)
             {
                 Debug.WriteLine("Deprecated greed version.");
-                return false;
+                violations.Add("Greed");
             }
             if (liveSinsVersion.CompareTo(SinsVersion) < 0)
             {
                 Debug.WriteLine("Deprecated sins version.");
-                return false;
+                violations.Add("Sins");
             }
-            return true;
+            return violations;
         }
     }
 }

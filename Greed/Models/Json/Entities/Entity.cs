@@ -1,8 +1,6 @@
-﻿using Greed.Models.JsonSource.Text;
-
-namespace Greed.Models.JsonSource.Entities
+﻿namespace Greed.Models.Json.Entities
 {
-    public class Entity : Source
+    public class Entity : JsonSource
     {
         public Entity(string path) : base(path)
         {
@@ -18,7 +16,7 @@ namespace Greed.Models.JsonSource.Entities
             return new Entity(path);
         }
 
-        public override Source Clone()
+        public override JsonSource Clone()
         {
             return new Entity(SourcePath);
         }

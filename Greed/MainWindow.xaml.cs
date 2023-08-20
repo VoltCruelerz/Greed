@@ -1,5 +1,5 @@
 ﻿using Greed.Models;
-using Greed.Models.JsonSource;
+using Greed.Models.Json;
 using Greed.Models.ListItem;
 using System;
 using System.Collections.Generic;
@@ -21,8 +21,8 @@ namespace Greed
     {
         private List<Mod> Mods = new();
         private Mod? SelectedMod;
-        private List<Source> AllSources = new();
-        private Source? SelectedSource;
+        private readonly List<JsonSource> AllSources = new();
+        private JsonSource? SelectedSource;
 
         public MainWindow()
         {
@@ -182,6 +182,8 @@ namespace Greed
             if (SelectedMod != null)
             {
                 AllSources.Clear();
+
+                // Json
                 AllSources.AddRange(SelectedMod.Brushes);
                 AllSources.AddRange(SelectedMod.Colors);
                 AllSources.AddRange(SelectedMod.Cursors);
@@ -191,19 +193,23 @@ namespace Greed
                 AllSources.AddRange(SelectedMod.GravityWellProps);
                 AllSources.AddRange(SelectedMod.Gui);
                 AllSources.AddRange(SelectedMod.MeshMaterials);
-                AllSources.AddRange(SelectedMod.Meshes);
                 AllSources.AddRange(SelectedMod.PlayerColors);
                 AllSources.AddRange(SelectedMod.PlayerIcons);
                 AllSources.AddRange(SelectedMod.PlayerPortraits);
-                AllSources.AddRange(SelectedMod.Scenarios);
-                AllSources.AddRange(SelectedMod.Shaders);
                 AllSources.AddRange(SelectedMod.Skyboxes);
-                AllSources.AddRange(SelectedMod.Sounds);
                 AllSources.AddRange(SelectedMod.TextureAnimations);
-                AllSources.AddRange(SelectedMod.Textures);
                 AllSources.AddRange(SelectedMod.Uniforms);
                 AllSources.AddRange(SelectedMod.Entities);
                 AllSources.AddRange(SelectedMod.LocalizedTexts);
+
+                // Non-Json
+                //AllSources.AddRange(SelectedMod.Meshes);
+                //AllSources.AddRange(SelectedMod.Scenarios);
+                //AllSources.AddRange(SelectedMod.Shaders);
+                //AllSources.AddRange(SelectedMod.Sounds);
+                //AllSources.AddRange(SelectedMod.Textures);
+
+
                 AllSources.ForEach(p => viewFileList.Items.Add(new SourceListItem(p)));
             }
         }

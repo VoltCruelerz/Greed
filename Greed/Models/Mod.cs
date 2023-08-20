@@ -1,6 +1,6 @@
-﻿using Greed.Models.JsonSource;
-using Greed.Models.JsonSource.Entities;
-using Greed.Models.JsonSource.Text;
+﻿using Greed.Models.Json;
+using Greed.Models.Json.Entities;
+using Greed.Models.Json.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -16,28 +16,31 @@ namespace Greed.Models
     {
         private Metadata? Metadata { get; set; }
 
-        public List<Source> Brushes { get; set; } = new List<Source>();
-        public List<Source> Colors { get; set; } = new List<Source>();
-        public List<Source> Cursors { get; set; } = new List<Source>();
-        public List<Source> DeathSequences { get; set; } = new List<Source>();
-        public List<Source> Effects { get; set; } = new List<Source>();
-        public List<Source> Fonts { get; set; } = new List<Source>();
-        public List<Source> GravityWellProps { get; set; } = new List<Source>();
-        public List<Source> Gui { get; set; } = new List<Source>();
-        public List<Source> MeshMaterials { get; set; } = new List<Source>();
+        // Json
+        public List<JsonSource> Brushes { get; set; } = new List<JsonSource>();
+        public List<JsonSource> Colors { get; set; } = new List<JsonSource>();
+        public List<JsonSource> Cursors { get; set; } = new List<JsonSource>();
+        public List<JsonSource> DeathSequences { get; set; } = new List<JsonSource>();
+        public List<JsonSource> Effects { get; set; } = new List<JsonSource>();
+        public List<JsonSource> Fonts { get; set; } = new List<JsonSource>();
+        public List<JsonSource> GravityWellProps { get; set; } = new List<JsonSource>();
+        public List<JsonSource> Gui { get; set; } = new List<JsonSource>();
+        public List<JsonSource> MeshMaterials { get; set; } = new List<JsonSource>();
+        public List<JsonSource> PlayerColors { get; set; } = new List<JsonSource>();
+        public List<JsonSource> PlayerIcons { get; set; } = new List<JsonSource>();
+        public List<JsonSource> PlayerPortraits { get; set; } = new List<JsonSource>();
+        public List<JsonSource> Skyboxes { get; set; } = new List<JsonSource>();
+        public List<JsonSource> TextureAnimations { get; set; } = new List<JsonSource>();
+        public List<JsonSource> Uniforms { get; set; } = new List<JsonSource>();
+        public List<JsonSource> Entities { get; set; } = new List<JsonSource>();
+        public List<JsonSource> LocalizedTexts { get; set; } = new List<JsonSource>();
+
+        // Non-Json
         public List<Source> Meshes { get; set; } = new List<Source>();
-        public List<Source> PlayerColors { get; set; } = new List<Source>();
-        public List<Source> PlayerIcons { get; set; } = new List<Source>();
-        public List<Source> PlayerPortraits { get; set; } = new List<Source>();
         public List<Source> Scenarios { get; set; } = new List<Source>();
         public List<Source> Shaders { get; set; } = new List<Source>();
-        public List<Source> Skyboxes { get; set; } = new List<Source>();
         public List<Source> Sounds { get; set; } = new List<Source>();
-        public List<Source> TextureAnimations { get; set; } = new List<Source>();
         public List<Source> Textures { get; set; } = new List<Source>();
-        public List<Source> Uniforms { get; set; } = new List<Source>();
-        public List<Source> Entities { get; set; } = new List<Source>();
-        public List<Source> LocalizedTexts { get; set; } = new List<Source>();
 
         public bool IsActive { get; set; } = false;
         public string Readme { get; set; } = string.Empty;
@@ -81,31 +84,34 @@ namespace Greed.Models
             var subpaths = Directory.GetDirectories(path);
             var subdirs = subpaths.Select(p => p[(path.Length + 1)..]);
 
-            Brushes =           ImportFolder(subdirs, path, "brushes", (string p) => new Source(p))                 ?? new List<Source>();
-            Colors =            ImportFolder(subdirs, path, "colors", (string p) => new Source(p))                  ?? new List<Source>();
-            Cursors =           ImportFolder(subdirs, path, "cursors", (string p) => new Source(p))                 ?? new List<Source>();
-            DeathSequences =    ImportFolder(subdirs, path, "death_sequences", (string p) => new Source(p))         ?? new List<Source>();
-            Effects =           ImportFolder(subdirs, path, "effects", (string p) => new Source(p))                 ?? new List<Source>();
-            Entities =          ImportFolder(subdirs, path, "entities", Entity.Create)                              ?? new List<Source>();
-            Fonts =             ImportFolder(subdirs, path, "fonts", (string p) => new Source(p))                   ?? new List<Source>();
-            GravityWellProps =  ImportFolder(subdirs, path, "gravity_well_props", (string p) => new Source(p))      ?? new List<Source>();
-            Gui =               ImportFolder(subdirs, path, "gui", (string p) => new Source(p))                     ?? new List<Source>();
-            MeshMaterials =     ImportFolder(subdirs, path, "mesh_materials", (string p) => new Source(p))          ?? new List<Source>();
-            Meshes =            ImportFolder(subdirs, path, "meshes", (string p) => new Source(p))                  ?? new List<Source>();
-            PlayerColors =      ImportFolder(subdirs, path, "player_colors", (string p) => new Source(p))           ?? new List<Source>();
-            PlayerIcons =       ImportFolder(subdirs, path, "player_icons", (string p) => new Source(p))            ?? new List<Source>();
-            PlayerPortraits =   ImportFolder(subdirs, path, "player_portraits", (string p) => new Source(p))        ?? new List<Source>();
-            Scenarios =         ImportFolder(subdirs, path, "scenarios", (string p) => new Source(p))               ?? new List<Source>();
-            Shaders =           ImportFolder(subdirs, path, "shaders", (string p) => new Source(p))                 ?? new List<Source>();
-            Skyboxes =          ImportFolder(subdirs, path, "skyboxes", (string p) => new Source(p))                ?? new List<Source>();
-            Sounds =            ImportFolder(subdirs, path, "sounds", (string p) => new Source(p))                  ?? new List<Source>();
-            TextureAnimations = ImportFolder(subdirs, path, "texture_animations", (string p) => new Source(p))      ?? new List<Source>();
-            Textures =          ImportFolder(subdirs, path, "textures", (string p) => new Source(p))                ?? new List<Source>();
-            Uniforms =          ImportFolder(subdirs, path, "uniforms", (string p) => new Source(p))                ?? new List<Source>();
-            LocalizedTexts =    ImportFolder(subdirs, path, "localized_text", (string p) => new LocalizedText(p))   ?? new List<Source>();
+            // Json data
+            Brushes = ImportJsonFolder(subdirs, path, "brushes", (string p) => new JsonSource(p));
+            Colors = ImportJsonFolder(subdirs, path, "colors", (string p) => new JsonSource(p));
+            Cursors = ImportJsonFolder(subdirs, path, "cursors", (string p) => new JsonSource(p));
+            DeathSequences = ImportJsonFolder(subdirs, path, "death_sequences", (string p) => new JsonSource(p));
+            Effects = ImportJsonFolder(subdirs, path, "effects", (string p) => new JsonSource(p));
+            Entities = ImportJsonFolder(subdirs, path, "entities", Entity.Create);
+            Fonts = ImportJsonFolder(subdirs, path, "fonts", (string p) => new JsonSource(p));
+            GravityWellProps = ImportJsonFolder(subdirs, path, "gravity_well_props", (string p) => new JsonSource(p));
+            Gui = ImportJsonFolder(subdirs, path, "gui", (string p) => new JsonSource(p));
+            MeshMaterials = ImportJsonFolder(subdirs, path, "mesh_materials", (string p) => new JsonSource(p));
+            PlayerColors = ImportJsonFolder(subdirs, path, "player_colors", (string p) => new JsonSource(p));
+            PlayerIcons = ImportJsonFolder(subdirs, path, "player_icons", (string p) => new JsonSource(p));
+            PlayerPortraits = ImportJsonFolder(subdirs, path, "player_portraits", (string p) => new JsonSource(p));
+            Skyboxes = ImportJsonFolder(subdirs, path, "skyboxes", (string p) => new JsonSource(p));
+            TextureAnimations = ImportJsonFolder(subdirs, path, "texture_animations", (string p) => new JsonSource(p));
+            Uniforms = ImportJsonFolder(subdirs, path, "uniforms", (string p) => new JsonSource(p));
+            LocalizedTexts = ImportJsonFolder(subdirs, path, "localized_text", (string p) => new LocalizedText(p));
+
+            // Non-JSON
+            Sounds = ImportFolder(subdirs, path, "sounds");
+            Shaders = ImportFolder(subdirs, path, "shaders");
+            Scenarios = ImportFolder(subdirs, path, "scenarios");
+            Meshes = ImportFolder(subdirs, path, "meshes");
+            Textures = ImportFolder(subdirs, path, "textures");
         }
 
-        private static List<Source>? ImportFolder(IEnumerable<string> subdirs, string path, string folder, Func<string, Source> handleFileImport)
+        private static List<JsonSource> ImportJsonFolder(IEnumerable<string> subdirs, string path, string folder, Func<string, JsonSource> handleFileImport)
         {
             if (subdirs.Contains(folder))
             {
@@ -113,38 +119,52 @@ namespace Greed.Models
                     .Select(p => handleFileImport(p))
                     .ToList();
             }
-            return null;
+            return new List<JsonSource>();
+        }
+
+        private static List<Source> ImportFolder(IEnumerable<string> subdirs, string path, string folder)
+        {
+            if (subdirs.Contains(folder))
+            {
+                return Directory.GetFiles(path + "\\" + folder)
+                    .Select(p => new Source(p))
+                    .ToList();
+            }
+            return new List<Source>();
         }
 
         public void Export()
         {
             Debug.WriteLine("- Exporting " + Id);
 
-            ExportFolder(Brushes,               (greedPath, modSource) => new Source(greedPath).Merge(modSource));
-            ExportFolder(Colors,                (greedPath, modSource) => new Source(greedPath).Merge(modSource));
-            ExportFolder(Cursors,               (greedPath, modSource) => new Source(greedPath).Merge(modSource));
-            ExportFolder(DeathSequences,        (greedPath, modSource) => new Source(greedPath).Merge(modSource));
-            ExportFolder(Effects,               (greedPath, modSource) => new Source(greedPath).Merge(modSource));
-            ExportFolder(Entities,              (greedPath, modSource) => Entity.Create(greedPath).Merge(modSource));
-            ExportFolder(Fonts,                 (greedPath, modSource) => new Source(greedPath).Merge(modSource));
-            ExportFolder(GravityWellProps,      (greedPath, modSource) => new Source(greedPath).Merge(modSource));
-            ExportFolder(Gui,                   (greedPath, modSource) => new Source(greedPath).Merge(modSource));
-            ExportFolder(MeshMaterials,         (greedPath, modSource) => new Source(greedPath).Merge(modSource));
-            ExportFolder(Meshes,                (greedPath, modSource) => new Source(greedPath).Merge(modSource));
-            ExportFolder(PlayerColors,          (greedPath, modSource) => new Source(greedPath).Merge(modSource));
-            ExportFolder(PlayerIcons,           (greedPath, modSource) => new Source(greedPath).Merge(modSource));
-            ExportFolder(PlayerPortraits,       (greedPath, modSource) => new Source(greedPath).Merge(modSource));
-            ExportFolder(Scenarios,             (greedPath, modSource) => new Source(greedPath).Merge(modSource));
-            ExportFolder(Shaders,               (greedPath, modSource) => new Source(greedPath).Merge(modSource));
-            ExportFolder(Skyboxes,              (greedPath, modSource) => new Source(greedPath).Merge(modSource));
-            ExportFolder(Sounds,                (greedPath, modSource) => new Source(greedPath).Merge(modSource));
-            ExportFolder(TextureAnimations,     (greedPath, modSource) => new Source(greedPath).Merge(modSource));
-            ExportFolder(Textures,              (greedPath, modSource) => new Source(greedPath).Merge(modSource));
-            ExportFolder(Uniforms,              (greedPath, modSource) => new Source(greedPath).Merge(modSource));
-            ExportFolder(LocalizedTexts,        (greedPath, modSource) => new LocalizedText(greedPath).Merge((LocalizedText)modSource));
+            // Merge Json
+            ExportJsonFolder(Brushes, (greedPath, modSource) => new JsonSource(greedPath).Merge(modSource));
+            ExportJsonFolder(Colors, (greedPath, modSource) => new JsonSource(greedPath).Merge(modSource));
+            ExportJsonFolder(Cursors, (greedPath, modSource) => new JsonSource(greedPath).Merge(modSource));
+            ExportJsonFolder(DeathSequences, (greedPath, modSource) => new JsonSource(greedPath).Merge(modSource));
+            ExportJsonFolder(Effects, (greedPath, modSource) => new JsonSource(greedPath).Merge(modSource));
+            ExportJsonFolder(Entities, (greedPath, modSource) => Entity.Create(greedPath).Merge(modSource));
+            ExportJsonFolder(Fonts, (greedPath, modSource) => new JsonSource(greedPath).Merge(modSource));
+            ExportJsonFolder(GravityWellProps, (greedPath, modSource) => new JsonSource(greedPath).Merge(modSource));
+            ExportJsonFolder(Gui, (greedPath, modSource) => new JsonSource(greedPath).Merge(modSource));
+            ExportJsonFolder(MeshMaterials, (greedPath, modSource) => new JsonSource(greedPath).Merge(modSource));
+            ExportJsonFolder(PlayerColors, (greedPath, modSource) => new JsonSource(greedPath).Merge(modSource));
+            ExportJsonFolder(PlayerIcons, (greedPath, modSource) => new JsonSource(greedPath).Merge(modSource));
+            ExportJsonFolder(PlayerPortraits, (greedPath, modSource) => new JsonSource(greedPath).Merge(modSource));
+            ExportJsonFolder(Skyboxes, (greedPath, modSource) => new JsonSource(greedPath).Merge(modSource));
+            ExportJsonFolder(TextureAnimations, (greedPath, modSource) => new JsonSource(greedPath).Merge(modSource));
+            ExportJsonFolder(Uniforms, (greedPath, modSource) => new JsonSource(greedPath).Merge(modSource));
+            ExportJsonFolder(LocalizedTexts, (greedPath, modSource) => new LocalizedText(greedPath).Merge((LocalizedText)modSource));
+
+            // Overwrite binary types
+            ExportSourceFolder(Meshes);
+            ExportSourceFolder(Scenarios);
+            ExportSourceFolder(Shaders);
+            ExportSourceFolder(Sounds);
+            ExportSourceFolder(Textures);
         }
 
-        private static void ExportFolder(List<Source> sources, Func<string, Source, Source> mergeHandler)
+        private static void ExportJsonFolder(List<JsonSource> sources, Func<string, JsonSource, JsonSource> mergeHandler)
         {
             foreach (var source in sources)
             {
@@ -174,6 +194,16 @@ namespace Greed.Models
             }
         }
 
+        private static void ExportSourceFolder(List<Source> sources)
+        {
+            foreach (var source in sources)
+            {
+                Debug.WriteLine("- - " + source.Filename);
+                CreateGreedDirIfNotExists(source.GreedPath);
+                File.Copy(source.SourcePath, source.GreedPath);
+            }
+        }
+
         private static void CreateGreedDirIfNotExists(string greedPath)
         {
             var info = new FileInfo(greedPath);
@@ -188,7 +218,7 @@ namespace Greed.Models
             var sb = new StringBuilder();
             sb.AppendLine(Id);
             Entities.ForEach(p => sb.AppendLine("Entity " + p.DiffFromGold()));
-            LocalizedTexts.ForEach(p =>  sb.AppendLine("Localized Text " + p.DiffFromGold()));
+            LocalizedTexts.ForEach(p => sb.AppendLine("Localized Text " + p.DiffFromGold()));
 
             return sb.ToString();
         }

@@ -3,7 +3,7 @@ using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Greed.Models.JsonSource.Entities
+namespace Greed.Models.Json.Entities
 {
     [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
     public class EntityManifest : Entity
@@ -27,7 +27,7 @@ namespace Greed.Models.JsonSource.Entities
             Json = JsonConvert.SerializeObject(this, Formatting.Indented);
         }
 
-        public override Source Clone()
+        public override JsonSource Clone()
         {
             return new EntityManifest(SourcePath);
         }

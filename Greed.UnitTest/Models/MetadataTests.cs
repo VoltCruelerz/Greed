@@ -1,11 +1,5 @@
 ﻿using Greed.Models;
-using Greed.Models.JsonSource;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Greed.UnitTest.Models
 {
@@ -19,7 +13,7 @@ namespace Greed.UnitTest.Models
 
             // Act
             var meta = JsonConvert.DeserializeObject<Metadata>(File.ReadAllText("..\\..\\..\\json\\metadata\\greed.json"))!;
-            var isLegal = meta.IsLegalVersion(new Version("1.14.3.0"));
+            var violations = meta.IsLegalVersion(new Version("1.14.3.0"));
 
             // Assert
             Assert.AreEqual(meta.Name, "Mod Name");
@@ -29,7 +23,7 @@ namespace Greed.UnitTest.Models
             Assert.AreEqual(meta.Version.ToString(), "1.0.0");
             Assert.AreEqual(meta.SinsVersion.ToString(), "1.14.3.0");
             Assert.AreEqual(meta.GreedVersion.ToString(), "1.1.0");
-            Assert.IsTrue(isLegal);
+            Assert.AreEqual(0, violations.Count);
         }
 
         [TestMethod]
@@ -39,10 +33,10 @@ namespace Greed.UnitTest.Models
             var meta = JsonConvert.DeserializeObject<Metadata>(File.ReadAllText("..\\..\\..\\json\\metadata\\\\deprecatedGreed.json"))!;
 
             // Act
-            var isLegal = meta.IsLegalVersion(new Version("1.14.3.0"));
+            var violations = meta.IsLegalVersion(new Version("1.14.3.0"));
 
             // Assert
-            Assert.IsFalse(isLegal);
+            Assert.AreEqual(1, violations.Count);
         }
 
         [TestMethod]
@@ -52,10 +46,10 @@ namespace Greed.UnitTest.Models
             var meta = JsonConvert.DeserializeObject<Metadata>(File.ReadAllText("..\\..\\..\\json\\metadata\\\\deprecatedSins.json"))!;
 
             // Act
-            var isLegal = meta.IsLegalVersion(new Version("1.14.3.0"));
+            var violations = meta.IsLegalVersion(new Version("1.14.3.0"));
 
             // Assert
-            Assert.IsFalse(isLegal);
+            Assert.AreEqual(1, violations.Count);
         }
     }
 }

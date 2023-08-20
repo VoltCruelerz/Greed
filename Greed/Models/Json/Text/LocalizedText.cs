@@ -1,14 +1,13 @@
 ﻿using Greed.Diff;
-using JsonDiffer;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Greed.Models.JsonSource.Text
+namespace Greed.Models.Json.Text
 {
     [JsonObject(MemberSerialization = MemberSerialization.OptIn)]
-    public class LocalizedText : Source
+    public class LocalizedText : JsonSource
     {
         [JsonProperty(PropertyName = "text")]
         public List<List<string>> Text { get; set; } = new();
@@ -33,7 +32,7 @@ namespace Greed.Models.JsonSource.Text
             }
         }
 
-        public override Source Merge(Source other)
+        public override JsonSource Merge(JsonSource other)
         {
             var otherText = (LocalizedText)other;
             otherText.Text.ForEach(okv => Upsert(okv));
@@ -47,7 +46,7 @@ namespace Greed.Models.JsonSource.Text
             return Json;
         }
 
-        public override Source Clone()
+        public override JsonSource Clone()
         {
             return new LocalizedText(SourcePath);
         }
@@ -58,7 +57,7 @@ namespace Greed.Models.JsonSource.Text
         /// <param name="Gold"></param>
         /// <param name="Greedy"></param>
         /// <returns></returns>
-        public override DiffResult Diff(Source Gold, Source Greedy)
+        public override DiffResult Diff(JsonSource Gold, JsonSource Greedy)
         {
             var mergeText = new LocalizedText(Gold.GoldPath);
             var greedyText = new LocalizedText(Greedy.SourcePath);
@@ -79,7 +78,8 @@ namespace Greed.Models.JsonSource.Text
             if (index != -1)
             {
                 Text[index][1] = value;
-            } else
+            }
+            else
             {
                 Text.Add(new List<string>() { key, value });
             }

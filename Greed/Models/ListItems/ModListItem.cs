@@ -1,4 +1,8 @@
-﻿namespace Greed.Models.ListItem
+﻿using System;
+using System.Configuration;
+using System.Diagnostics;
+
+namespace Greed.Models.ListItem
 {
     public class ModListItem
     {
@@ -14,6 +18,8 @@
 
         public string SinsVersion { get; set; }
 
+        public bool IsLegal { get; set; }
+
         public ModListItem(Mod m)
         {
             Id = m.Id;
@@ -22,6 +28,16 @@
             Version = m.Meta.Version.ToString();
             GreedVersion = m.Meta.GreedVersion.ToString();
             SinsVersion = m.Meta.SinsVersion.ToString();
+
+            var versionViolation = m.Meta.IsLegalVersion();
+            if (versionViolation.Contains("Greed"))
+            {
+                GreedVersion = "⚠ " + GreedVersion;
+            }
+            if (versionViolation.Contains("Sins"))
+            {
+                SinsVersion = "⚠ " + SinsVersion;
+            }
         }
     }
 }

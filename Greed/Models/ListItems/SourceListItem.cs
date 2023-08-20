@@ -1,5 +1,4 @@
-﻿using Greed.Models.JsonSource;
-using System;
+﻿using Greed.Models.Json;
 using System.IO;
 
 namespace Greed.Models.ListItem
@@ -12,12 +11,12 @@ namespace Greed.Models.ListItem
 
         public string Name { get; set; }
 
-        public SourceListItem(Source s)
+        public SourceListItem(JsonSource s)
         {
             DeltaSymbol = "+";
             if (File.Exists(s.GoldPath))
             {
-                var goldStr = new Source(s.GoldPath).Minify();
+                var goldStr = new JsonSource(s.GoldPath).Minify();
                 var modStr = s.Minify();
                 DeltaSymbol = modStr == goldStr ? "" : "Δ";
             }

@@ -15,19 +15,19 @@
         <ListView x:Name="viewModList" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="11,33,11,10" SelectionChanged="ModList_SelectionChanged" MouseDoubleClick="Toggle_Click">
             <ListView.View>
                 <GridView x:Name="grdView">
-                    <GridViewColumn Header="" Width="20" DisplayMemberBinding="{Binding Active}" />
-                    <GridViewColumn Header="Mod Name" Width="170" DisplayMemberBinding="{Binding Name}" />
+                    <GridViewColumn Header="" Width="30" DisplayMemberBinding="{Binding Active}" />
+                    <GridViewColumn Header="Mod Name" Width="160" DisplayMemberBinding="{Binding Name}" />
                     <GridViewColumn Header="Version" Width="60" DisplayMemberBinding="{Binding Version}" />
                     <GridViewColumn Header="Greed" Width="60" DisplayMemberBinding="{Binding GreedVersion}" />
                     <GridViewColumn Header="Sins" Width="60" DisplayMemberBinding="{Binding SinsVersion}" />
                 </GridView>
             </ListView.View>
         </ListView>
-        <GroupBox x:Name="gbxSummary" Header="Selected Mod Info" Margin="10,19,9,61" Grid.Column="1">
+        <GroupBox x:Name="gbxSummary" Header="Mod Details" Margin="10,19,9,61" Grid.Column="1">
             <RichTextBox x:Name="txtInfo" AutomationProperties.HelpText="Select a mod to see its details." IsReadOnly="True" Margin="2,0,-2,0">
                 <FlowDocument>
                     <Paragraph>
-                        <Run Text="RichTextBox"/>
+                        <Run Text=""/>
                     </Paragraph>
                 </FlowDocument>
             </RichTextBox>
@@ -45,7 +45,7 @@
             </ListView.View>
         </ListView>
         <Button x:Name="cmdDiff" Content="View Difference Report" Margin="10,0,0,35" VerticalAlignment="Bottom" Click="Diff_Click" IsEnabled="False" HorizontalAlignment="Left" Width="133" Height="20" Grid.Column="2" ToolTip="Display a difference report between the gold copy and the execution product."/>
-        <Label Content="Selected Mod Files" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="26" Width="265" Grid.Column="2"/>
+        <Label Content="JSON Files" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="26" Width="265" Grid.Column="2"/>
 
     </Grid>
 </Window>
