@@ -9,7 +9,7 @@
 
         public static Entity Create(string path)
         {
-            if (path.EndsWith("._entity_manifest"))
+            if (path.EndsWith(".entity_manifest"))
             {
                 return new EntityManifest(path);
             }

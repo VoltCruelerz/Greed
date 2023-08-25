@@ -101,7 +101,7 @@ namespace Greed.Models.Json
         {
             var j1 = JToken.Parse(Gold.Json);
             var j2 = JToken.Parse(Greedy.Json);
-            var diffObj = JsonDifferentiator.Differentiate(j1, j2, OutputMode.Detailed, true);
+            var diffObj = JsonDifferentiator.Differentiate(j1, j2, OutputMode.Symbol, true);
 
             var diff = JsonConvert.SerializeObject(diffObj, Formatting.Indented);
             return new DiffResult(Gold.Json, Greedy.Json, diff);
