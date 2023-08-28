@@ -6,13 +6,21 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Windows.Media;
+using System.Windows.Media.Media3D;
+using FontFamily = System.Windows.Media.FontFamily;
 
 namespace Greed.Models
 {
-    public class Mod
+    public partial class Mod
     {
         private Metadata? Metadata { get; set; }
 
@@ -85,23 +93,23 @@ namespace Greed.Models
             var subdirs = subpaths.Select(p => p[(path.Length + 1)..]);
 
             // Json data
-            Brushes = ImportJsonFolder(subdirs, path, "brushes", (string p) => new JsonSource(p));
-            Colors = ImportJsonFolder(subdirs, path, "colors", (string p) => new JsonSource(p));
-            Cursors = ImportJsonFolder(subdirs, path, "cursors", (string p) => new JsonSource(p));
-            DeathSequences = ImportJsonFolder(subdirs, path, "death_sequences", (string p) => new JsonSource(p));
-            Effects = ImportJsonFolder(subdirs, path, "effects", (string p) => new JsonSource(p));
+            Brushes = ImportJsonFolder(subdirs, path, "brushes", (p) => new JsonSource(p));
+            Colors = ImportJsonFolder(subdirs, path, "colors", (p) => new JsonSource(p));
+            Cursors = ImportJsonFolder(subdirs, path, "cursors", (p) => new JsonSource(p));
+            DeathSequences = ImportJsonFolder(subdirs, path, "death_sequences", (p) => new JsonSource(p));
+            Effects = ImportJsonFolder(subdirs, path, "effects", (p) => new JsonSource(p));
             Entities = ImportJsonFolder(subdirs, path, "entities", Entity.Create);
-            Fonts = ImportJsonFolder(subdirs, path, "fonts", (string p) => new JsonSource(p));
-            GravityWellProps = ImportJsonFolder(subdirs, path, "gravity_well_props", (string p) => new JsonSource(p));
-            Gui = ImportJsonFolder(subdirs, path, "gui", (string p) => new JsonSource(p));
-            MeshMaterials = ImportJsonFolder(subdirs, path, "mesh_materials", (string p) => new JsonSource(p));
-            PlayerColors = ImportJsonFolder(subdirs, path, "player_colors", (string p) => new JsonSource(p));
-            PlayerIcons = ImportJsonFolder(subdirs, path, "player_icons", (string p) => new JsonSource(p));
-            PlayerPortraits = ImportJsonFolder(subdirs, path, "player_portraits", (string p) => new JsonSource(p));
-            Skyboxes = ImportJsonFolder(subdirs, path, "skyboxes", (string p) => new JsonSource(p));
-            TextureAnimations = ImportJsonFolder(subdirs, path, "texture_animations", (string p) => new JsonSource(p));
-            Uniforms = ImportJsonFolder(subdirs, path, "uniforms", (string p) => new JsonSource(p));
-            LocalizedTexts = ImportJsonFolder(subdirs, path, "localized_text", (string p) => new LocalizedText(p));
+            Fonts = ImportJsonFolder(subdirs, path, "fonts", (p) => new JsonSource(p));
+            GravityWellProps = ImportJsonFolder(subdirs, path, "gravity_well_props", (p) => new JsonSource(p));
+            Gui = ImportJsonFolder(subdirs, path, "gui", (p) => new JsonSource(p));
+            MeshMaterials = ImportJsonFolder(subdirs, path, "mesh_materials", (p) => new JsonSource(p));
+            PlayerColors = ImportJsonFolder(subdirs, path, "player_colors", (p) => new JsonSource(p));
+            PlayerIcons = ImportJsonFolder(subdirs, path, "player_icons", (p) => new JsonSource(p));
+            PlayerPortraits = ImportJsonFolder(subdirs, path, "player_portraits", (p) => new JsonSource(p));
+            Skyboxes = ImportJsonFolder(subdirs, path, "skyboxes", (p) => new JsonSource(p));
+            TextureAnimations = ImportJsonFolder(subdirs, path, "texture_animations", (p) => new JsonSource(p));
+            Uniforms = ImportJsonFolder(subdirs, path, "uniforms", (p) => new JsonSource(p));
+            LocalizedTexts = ImportJsonFolder(subdirs, path, "localized_text", (p) => new LocalizedText(p));
 
             // Non-JSON
             Sounds = ImportFolder(subdirs, path, "sounds");
@@ -222,5 +230,110 @@ namespace Greed.Models
 
             return sb.ToString();
         }
+
+        public void RenderReadme(BlockCollection blocks)
+        {
+            var listRegex = GetIsListRegex();
+            var noSpace = new Thickness(0);
+            var lines = Readme.Split("\r\n")
+                .Where(line => !string.IsNullOrWhiteSpace(line))
+                .ToList();
+
+            for (var i = 0; i < lines.Count; i++)
+            {
+                var line = lines[i];
+                var trimmed = line.Trim();
+                if (line.StartsWith("#"))
+                {
+                    var boost = 2 * (5 - line.Count(c => c == '#'));
+                    var titleText = line.Substring(line.IndexOf(" ") + 1);
+                    var p = new Paragraph();
+                    FormatLine(p.Inlines, titleText, 10 + boost, true);
+                    blocks.Add(p);
+                }
+                else if (trimmed.StartsWith("*") || trimmed.StartsWith("-"))
+                {
+                    var p = new Paragraph();
+                    FormatLine(p.Inlines, line + "\r\n");
+                    for (int j = i + 1; j < lines.Count; j++)
+                    {
+                        var trimJ = lines[j].Trim();
+                        if (GetIsListRegex().IsMatch(trimJ))
+                        {
+                            FormatLine(p.Inlines, lines[j] + "\r\n");
+                            i++;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                    blocks.Add(p);
+                } else
+                {
+                    var p = new Paragraph();
+                    FormatLine(p.Inlines, line);
+                    blocks.Add(p);
+                }
+            };
+        }
+
+        private void FormatLine(InlineCollection inlines, string line, int fontSize = 10, bool forceBold = false, bool forceItalics = false)
+        {
+            var consolas = new FontFamily("Consolas");
+            var segoe = new FontFamily("Segoe UI");
+            var pattern = @"\[([^\]]+)\]\(([^)]+)\)";
+
+            // The below works because consider the string "**Foo:** this is _my_ sentence."
+            // it would get split into bold terms "", "Foo:", ...
+            // with bold term [2] getting split into italicTerms " this is ", "my", " sentence."
+            // Thus, if it's an odd index, that flag is live.
+
+            var codeTerms = line.Split("`");
+            for (int i = 0; i < codeTerms.Length; i++)
+            {
+                var isCode = i % 2 == 1;
+
+                if (isCode)
+                {
+                    // Don't otherwise format code
+                    inlines.Add(new Run(codeTerms[i])
+                    {
+                        FontSize = fontSize,
+                        FontFamily = consolas
+                    });
+                }
+                else
+                {
+                    var boldTerms = codeTerms[i].Split("**");
+                    for (var j = 0; j < boldTerms.Length; j++)
+                    {
+                        var italicTerms = boldTerms[j].Split("_");
+                        for (var k = 0; k < italicTerms.Length; k++)
+                        {
+                            // Strip out links
+                            var term = Regex.Replace(italicTerms[k], pattern, "$1");
+
+                            // Format
+                            var isBold = j % 2 == 1;
+                            var isItalics = k % 2 == 1;
+                            var weight = isBold || forceBold ? FontWeights.Bold : FontWeights.Normal;
+                            var style = isItalics || forceItalics ? FontStyles.Italic : FontStyles.Normal;
+
+                            inlines.Add(new Run(term)
+                            {
+                                FontWeight = weight,
+                                FontStyle = style,
+                                FontSize = fontSize,
+                                FontFamily = segoe
+                            });
+                        }
+                    }
+                }
+            }
+        }
+
+        [GeneratedRegex("^(\\d+\\.|\\*|-) ")]
+        private static partial Regex GetIsListRegex();
     }
 }

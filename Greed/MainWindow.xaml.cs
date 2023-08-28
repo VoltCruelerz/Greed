@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using System.Windows.Media;
 
 namespace Greed
 {
@@ -19,43 +20,57 @@ namespace Greed
     /// </summary>
     public partial class MainWindow : Window
     {
+        private const int ModPageIndex = 0;
+        private const int SettingsPageIndex = 1;
+
         private List<Mod> Mods = new();
         private Mod? SelectedMod;
         private readonly List<JsonSource> AllSources = new();
         private JsonSource? SelectedSource;
+        private readonly SolidColorBrush Valid = new(Colors.White);
+        private readonly SolidColorBrush Invalid = new(Colors.Pink);
+        private int SelectedTabIndex = 0;
 
         public MainWindow()
         {
-            Debug.WriteLine("Main Window");
             InitializeComponent();
+            PrintSync("Components Loaded");
 
             txtInfo.Document.Blocks.Clear();
             txtInfo.AppendText("Select a mod to view details about it.");
-            Debug.WriteLine("Load Done");
 
             string? modDir = ConfigurationManager.AppSettings["modDir"];
+            txtModsDir.Text = modDir ?? "";
             if (modDir == null || !Directory.Exists(modDir))
             {
-                CriticalAlertPopup("Configuration Error", "You need to set the modDir element in Greed.dll.config file to your mod directory.");
-                return;
+                txtModsDir.Background = Invalid;
+                Tabs.SelectedIndex = SettingsPageIndex;
             }
             string? sinsDir = ConfigurationManager.AppSettings["sinsDir"];
+            txtSinsDir.Text = sinsDir ?? "";
             if (sinsDir == null || !Directory.Exists(sinsDir))
             {
-                CriticalAlertPopup("Configuration Error", "You need to set the sinsDir element in Greed.dll.config file to where sins2.exe lives.");
-                return;
+                txtSinsDir.Background = Invalid;
+                Tabs.SelectedIndex = SettingsPageIndex;
+            }
+            PrintSync("Directories Explored");
+
+            // Only load mods if there's something to load.
+            if (Tabs.SelectedIndex != SettingsPageIndex)
+            {
+                RefreshModList();
             }
 
-            RefreshModList();
+            pgbProgress.Value = 0;// Ranges [0, 100].
         }
 
         private void RefreshModList()
         {
-            Debug.WriteLine("Loading Settings...");
+            PrintSync("Loading Settings...");
             string modDir = ConfigurationManager.AppSettings["modDir"]!;
             string sinsDir = ConfigurationManager.AppSettings["sinsDir"]!;
-            Debug.WriteLine($"Mod Dir: {modDir}");
-            Debug.WriteLine($"Sins II Dir: {sinsDir}");
+            PrintSync($"Mod Dir: {modDir}");
+            PrintSync($"Sins II Dir: {sinsDir}");
             try
             {
                 var greedVersion = Assembly.GetExecutingAssembly().GetName().Version!;
@@ -64,10 +79,12 @@ namespace Greed
             catch (Exception)
             {
                 CriticalAlertPopup("No SinsII", "sins2.exe could not be found at the specified location. Please double check that it is within the place indicated by the App.config.");
+                viewModList.Items.Clear();
+                Tabs.SelectedIndex = SettingsPageIndex;
                 return;
             }
 
-            Debug.WriteLine("Loading mods...");
+            PrintSync("Loading mods...");
             try
             {
                 Mods = ModManager.LoadGreedyMods();
@@ -75,8 +92,11 @@ namespace Greed
             catch (Exception e)
             {
                 CriticalAlertPopup("Mod Load Error", "Unable to locate all files.\n" + e.Message + "\n" + e.StackTrace);
+                viewModList.Items.Clear();
+                Tabs.SelectedIndex = SettingsPageIndex;
                 return;
             }
+            PrintSync("Load succeeded.");
 
             viewModList.Items.Clear();
             Mods.ForEach(m => viewModList.Items.Add(new ModListItem(m)));
@@ -108,7 +128,8 @@ namespace Greed
                 TextDecorations = TextDecorations.Underline
             }));
             doc.Blocks.Add(new Paragraph(new Run(SelectedMod.Meta.Description)));
-            doc.Blocks.Add(new Paragraph(new Run(SelectedMod.Readme)));
+
+            SelectedMod.RenderReadme(doc.Blocks);
             txtInfo.Document = doc;
 
             // It starts disabled since nothing is selected.
@@ -121,8 +142,31 @@ namespace Greed
 
         private void Toggle_Click(object sender, RoutedEventArgs e)
         {
-            Debug.WriteLine("Toggle_Click()");
+            PrintSync("Toggle_Click()");
             SelectedMod!.IsActive = !SelectedMod.IsActive;
+
+            string modDir = ConfigurationManager.AppSettings["modDir"]!;
+            try
+            {
+                ModManager.SetGreedyMods(Mods.Where(m => m.IsActive).ToList());
+            }
+            catch (Exception ex)
+            {
+                CriticalAlertPopup("Mod Set Error", "Unable to locate all files.\n" + ex.Message + "\n" + ex.StackTrace);
+                return;
+            }
+            RefreshModList();
+            ReselectSelection();
+        }
+
+        private void Toggle_ClickAll(object sender, RoutedEventArgs e)
+        {
+            PrintSync("Toggle_Click()");
+            var areAllActive = Mods.All(m => m.IsActive);
+            Mods.ForEach(m =>
+            {
+                m.IsActive = !areAllActive;
+            });
 
             string modDir = ConfigurationManager.AppSettings["modDir"]!;
             try
@@ -144,18 +188,29 @@ namespace Greed
             RefreshModList();
             ReselectSelection();
 
-            try
+            PrintSync("Exporting...");
+            var active = Mods.Where(m => m.IsGreedy && m.IsActive).ToList();
+            ModManager.ExportGreedyMods(active, pgbProgress, this, (exportSucceeded) =>
             {
-                ModManager.ExportGreedyMods(Mods.Where(m => m.IsGreedy && m.IsActive).ToList());
-                MessageBox.Show("Greedy mods are now active. Have fun Sinning!", "Export Success", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            catch (Exception ex)
-            {
-                CriticalAlertPopup("Mod Export Error", "Unable to locate all files.\n" + ex.Message + "\n" + ex.StackTrace);
-                return;
-            }
+                if (exportSucceeded)
+                {
+                    PrintAsync("Export Complete");
+                    var response = MessageBox.Show("Greedy mods are now active. Would you like to start sinning?", "Export Success", MessageBoxButton.YesNo, MessageBoxImage.Information);
 
-            cmdExport.IsEnabled = true;
+                    if (response == MessageBoxResult.Yes)
+                    {
+                        Play();
+                    }
+                }
+                else
+                {
+                    CriticalAlertPopup("Mod Export Error", "Unable to locate all files.\nSee log for details.");
+                }
+                cmdExport.Dispatcher.Invoke(() =>
+                {
+                    cmdExport.IsEnabled = true;
+                });
+            });
         }
 
         private void ReselectSelection()
@@ -171,8 +226,8 @@ namespace Greed
 
         private void CriticalAlertPopup(string title, string message)
         {
+            PrintAsync(message);
             MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Error);
-            this.Close();
         }
 
         private void RefreshSourceList()
@@ -222,13 +277,13 @@ namespace Greed
             }
             var item = (SourceListItem)e.AddedItems[0]!;
             SelectedSource = AllSources.Find(p => p.Mergename == item.Name && p.Folder == item.Folder);
-            Debug.WriteLine("Selected " + SelectedSource?.Mergename);
+            PrintSync("Selected " + SelectedSource?.Mergename);
             cmdDiff.IsEnabled = true;
         }
 
         private void Diff_Click(object sender, RoutedEventArgs e)
         {
-            Debug.WriteLine("Diff_Click()");
+            PrintSync("Diff_Click()");
             try
             {
                 var diffPopup = new DiffWindow(SelectedSource!);
@@ -238,6 +293,74 @@ namespace Greed
             {
                 CriticalAlertPopup("Failed to Load Diff", ex.Message + "\n" + ex.StackTrace);
             }
+        }
+
+        private void TxtSinsDir_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var txt = (TextBox)sender;
+            string newVal = txt.Text.Replace("/", "\\");
+            var exists = Directory.Exists(newVal);
+            txt.Background = exists ? Valid : Invalid;
+            if (exists && newVal != ConfigurationManager.AppSettings["sinsDir"])
+            {
+                Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+                config.AppSettings.Settings["sinsDir"].Value = newVal;
+                config.Save(ConfigurationSaveMode.Modified);
+                ConfigurationManager.RefreshSection("appSettings");
+            }
+        }
+
+        private void TxtModDir_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var txt = (TextBox)sender;
+            string newVal = txt.Text.Replace("/", "\\");
+            var exists = Directory.Exists(newVal);
+            txt.Background = exists ? Valid : Invalid;
+            if (exists && newVal != ConfigurationManager.AppSettings["modDir"])
+            {
+                Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+                config.AppSettings.Settings["modDir"].Value = newVal;
+                config.Save(ConfigurationSaveMode.Modified);
+                ConfigurationManager.RefreshSection("appSettings");
+            }
+        }
+
+        private void Tabs_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var i = ((TabControl)sender).SelectedIndex;
+            if (i == ModPageIndex && SelectedTabIndex != ModPageIndex)
+            {
+                RefreshModList();
+            }
+            SelectedTabIndex = i;
+        }
+
+        private void Play_Click(object sender, RoutedEventArgs e)
+        {
+            Play();
+        }
+
+        private void Play()
+        {
+            var execPath = ConfigurationManager.AppSettings["sinsDir"]! + "\\sins2.exe";
+            PrintAsync("Executing: " + execPath);
+            Process.Start(new ProcessStartInfo(execPath)
+            {
+                WorkingDirectory = ConfigurationManager.AppSettings["sinsDir"]!
+            });
+        }
+
+        public void PrintSync(string str)
+        {
+            txtLog.Text = txtLog.Text.Any()
+                ? txtLog.Text + '\n' + str
+                : str;
+            txtLog.ScrollToEnd();
+        }
+
+        public void PrintAsync(string str)
+        {
+            Dispatcher.Invoke(() => PrintSync(str));
         }
     }
 }

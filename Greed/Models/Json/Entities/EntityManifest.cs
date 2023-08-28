@@ -50,11 +50,7 @@ namespace Greed.Models.Json.Entities
 
         public override JsonSource Merge(JsonSource other)
         {
-            var otherManifest = other as EntityManifest;
-            if (otherManifest == null)
-            {
-                throw new InvalidOperationException($"Attempted to merge entity {other.SourcePath} into manifest {this.SourcePath}");
-            }
+            var otherManifest = other as EntityManifest ?? throw new InvalidOperationException($"Attempted to merge entity {other.SourcePath} into manifest {this.SourcePath}");
             UpsertRange(otherManifest.Ids);
             return this;
         }

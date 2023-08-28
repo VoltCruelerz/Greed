@@ -7,6 +7,13 @@ using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Windows.Controls;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Threading;
+using System;
 
 namespace Greed
 {
@@ -45,7 +52,7 @@ namespace Greed
             File.WriteAllText(enabledPath, arr.ToString());
         }
 
-        public static void ExportGreedyMods(List<Mod> active)
+        public static void ExportGreedyMods(List<Mod> active, ProgressBar pgbProgress, MainWindow window, Action<bool> callback)
         {
             Debug.WriteLine("Exporting Active Mods");
             string modDir = ConfigurationManager.AppSettings["modDir"]!;
@@ -60,11 +67,33 @@ namespace Greed
             Directory.CreateDirectory(greedPath);
             File.WriteAllText(greedPath + "\\mod_manifest.json", "{ \"is_cosmetic_only\": false }");
 
-            // For each greedy mod, overwrite as needed.
-            active.ForEach(m => m.Export());
+            Task.Run(() =>
+            {
+                try
+                {
+                    // For each greedy mod, overwrite as needed.
+                    var interval = 100 / active.Count;
+                    for (int i = 0; i < active.Count; i++)
+                    {
+                        var mod = active[i];
+                        window.PrintAsync($"[{i + 1}/{active.Count}]: Merging {mod.Meta.Name}...");
+                        mod.Export();
+                        pgbProgress.Dispatcher.Invoke(() =>
+                        {
+                            pgbProgress.Value = 100 * (i + 1) / active.Count;
+                        });
+                    }
+                    // Set Greed as active mod #0.
+                    ActivateGreed();
 
-            // Set Greed as active mod #0.
-            ActivateGreed();
+                    callback(true);
+                }
+                catch (Exception ex)
+                {
+                    window.PrintAsync("Error: " + ex.ToString());
+                    callback(false);
+                }
+            }).ConfigureAwait(false);
         }
 
         private static void ActivateGreed()
@@ -75,7 +104,7 @@ namespace Greed
             var greedKey = new ModKey()
             {
                 Name = "greed",
-                Version = int.Parse(ConfigurationManager.AppSettings["greedVersion"]!)
+                Version = 0// Sins wants this to be an int for whatever reason.
             };
 
             if (File.Exists(enabledPath))
