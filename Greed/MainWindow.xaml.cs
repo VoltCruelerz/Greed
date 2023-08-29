@@ -99,7 +99,7 @@ namespace Greed
             PrintSync("Load succeeded.");
 
             viewModList.Items.Clear();
-            Mods.ForEach(m => viewModList.Items.Add(new ModListItem(m)));
+            Mods.ForEach(m => viewModList.Items.Add(new ModListItem(m, this)));
             RefreshSourceList();
         }
 
@@ -189,28 +189,38 @@ namespace Greed
             ReselectSelection();
 
             PrintSync("Exporting...");
-            var active = Mods.Where(m => m.IsGreedy && m.IsActive).ToList();
-            ModManager.ExportGreedyMods(active, pgbProgress, this, (exportSucceeded) =>
+            try
             {
-                if (exportSucceeded)
+                var active = Mods.Where(m => m.IsGreedy && m.IsActive).ToList();
+                ModManager.ExportGreedyMods(active, pgbProgress, this, (exportSucceeded) =>
                 {
-                    PrintAsync("Export Complete");
-                    var response = MessageBox.Show("Greedy mods are now active. Would you like to start sinning?", "Export Success", MessageBoxButton.YesNo, MessageBoxImage.Information);
-
-                    if (response == MessageBoxResult.Yes)
+                    if (exportSucceeded)
                     {
-                        Play();
+                        PrintAsync("Export Complete");
+                        var response = MessageBox.Show("Greedy mods are now active. Would you like to start sinning?", "Export Success", MessageBoxButton.YesNo, MessageBoxImage.Information);
+
+                        if (response == MessageBoxResult.Yes)
+                        {
+                            Play();
+                        }
                     }
-                }
-                else
-                {
-                    CriticalAlertPopup("Mod Export Error", "Unable to locate all files.\nSee log for details.");
-                }
+                    else
+                    {
+                        CriticalAlertPopup("Mod Export Error", "Unable to locate all files.\nSee log for details.");
+                    }
+                });
+            }
+            catch(Exception ex)
+            {
+                CriticalAlertPopup("Failed to Export", ex.Message + "\n" + ex.StackTrace);
+            }
+            finally
+            {
                 cmdExport.Dispatcher.Invoke(() =>
                 {
                     cmdExport.IsEnabled = true;
                 });
-            });
+            }
         }
 
         private void ReselectSelection()

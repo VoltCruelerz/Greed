@@ -1,21 +1,16 @@
 ﻿using Greed.Models.Json;
-using Greed.Models.Json.Entities;
 using Greed.Models.Json.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Documents;
-using System.Windows.Media;
-using System.Windows.Media.Media3D;
 using FontFamily = System.Windows.Media.FontFamily;
 
 namespace Greed.Models
@@ -98,7 +93,7 @@ namespace Greed.Models
             Cursors = ImportJsonFolder(subdirs, path, "cursors", (p) => new JsonSource(p));
             DeathSequences = ImportJsonFolder(subdirs, path, "death_sequences", (p) => new JsonSource(p));
             Effects = ImportJsonFolder(subdirs, path, "effects", (p) => new JsonSource(p));
-            Entities = ImportJsonFolder(subdirs, path, "entities", Entity.Create);
+            Entities = ImportJsonFolder(subdirs, path, "entities", (p) => new JsonSource(p));
             Fonts = ImportJsonFolder(subdirs, path, "fonts", (p) => new JsonSource(p));
             GravityWellProps = ImportJsonFolder(subdirs, path, "gravity_well_props", (p) => new JsonSource(p));
             Gui = ImportJsonFolder(subdirs, path, "gui", (p) => new JsonSource(p));
@@ -151,7 +146,7 @@ namespace Greed.Models
             ExportJsonFolder(Cursors, (greedPath, modSource) => new JsonSource(greedPath).Merge(modSource));
             ExportJsonFolder(DeathSequences, (greedPath, modSource) => new JsonSource(greedPath).Merge(modSource));
             ExportJsonFolder(Effects, (greedPath, modSource) => new JsonSource(greedPath).Merge(modSource));
-            ExportJsonFolder(Entities, (greedPath, modSource) => Entity.Create(greedPath).Merge(modSource));
+            ExportJsonFolder(Entities, (greedPath, modSource) => new JsonSource(greedPath).Merge(modSource));
             ExportJsonFolder(Fonts, (greedPath, modSource) => new JsonSource(greedPath).Merge(modSource));
             ExportJsonFolder(GravityWellProps, (greedPath, modSource) => new JsonSource(greedPath).Merge(modSource));
             ExportJsonFolder(Gui, (greedPath, modSource) => new JsonSource(greedPath).Merge(modSource));
@@ -182,11 +177,8 @@ namespace Greed.Models
                 var greedExists = File.Exists(source.GreedPath);
                 var goldExists = File.Exists(source.GoldPath);
 
-                // Not all types are initialized from gold.
-                var initializeFromGold = source is not EntityManifest;
-
-                // If greed doesn't exist yet, initialize it from gold
-                if (!greedExists && goldExists && initializeFromGold)
+                // If greed doesn't exist yet, initialize it from gold as needed.
+                if (!greedExists && goldExists && source.RequiresGold())
                 {
                     File.Copy(source.GoldPath, source.GreedPath);
                     greedExists = true;

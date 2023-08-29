@@ -61,17 +61,26 @@ namespace Greed.Models
 
         public List<string> IsLegalVersion(Version liveSinsVersion)
         {
+            // This needs to be updated any time there's a breaking Greed change.
+            var minimumCompatibleVersion = new Version("1.4.0");
+
             var violations = new List<string>();
             var liveVersion = Assembly.GetExecutingAssembly().GetName().Version!;
             if (liveVersion.CompareTo(GreedVersion) < 0)
             {
                 Debug.WriteLine("Deprecated greed version.");
-                violations.Add("Greed");
+                violations.Add("A new version of Greed is required.");
             }
+            else if (GreedVersion.CompareTo(minimumCompatibleVersion) < 0)
+            {
+                Debug.WriteLine("Greed no longer supports this version.");
+                violations.Add("Mod must be updated. Contact developer if none is available.");
+            }
+
             if (liveSinsVersion.CompareTo(SinsVersion) < 0)
             {
                 Debug.WriteLine("Deprecated sins version.");
-                violations.Add("Sins");
+                violations.Add("This Sins version is no longer supported");
             }
             return violations;
         }

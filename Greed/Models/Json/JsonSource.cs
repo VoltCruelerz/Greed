@@ -4,6 +4,7 @@ using JsonDiffer;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Text;
@@ -15,6 +16,13 @@ namespace Greed.Models.Json
         private static readonly string MergeReplaceSuffix = ".gmr";
         private static readonly string MergeUnionSuffix = ".gmu";
         private static readonly string MergeConcatSuffix = ".gmc";
+
+        private static List<string> NoGoldFiles = new()
+        {
+            "*.entity_manifest",
+            "unit_tag.uniforms"
+        };
+
         public SourceType Type { get; set; }
         public string Mergename { get; set; }
         public string Json { get; set; }
@@ -170,12 +178,33 @@ namespace Greed.Models.Json
 
         private void ValidateFileExtension()
         {
-            var isBespoke = Mergename.EndsWith(".localized_text") || Mergename.EndsWith(".entity_manifest");
+            var isBespoke = Mergename.EndsWith(".localized_text");
 
             if (isBespoke && Type != SourceType.Overwrite)
             {
                 throw new InvalidOperationException("You cannot use the greedy file extensions on " + Mergename);
             }
+        }
+
+        public bool RequiresGold()
+        {
+            for (int i = 0; i < NoGoldFiles.Count; i++)
+            {
+                var noGold = NoGoldFiles[i];
+                if (noGold.StartsWith("*"))
+                {
+                    var realNoGold = noGold[1..];
+                    if (Mergename.EndsWith(realNoGold))
+                    {
+                        return false;
+                    }
+                }
+                else if (noGold == Mergename)
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         /// <summary>

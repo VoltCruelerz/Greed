@@ -10,13 +10,12 @@ _A mod deconfliction tool for [Sins of a Solar Empire II](https://www.sinsofasol
 
 1. Download `Greed.zip` from the [latest github release](https://github.com/VoltCruelerz/Greed/releases)
 2. Extract the file wherever you please on your machine.
-3. Edit `Greed.dll.config` to have your own file paths using backslashes.
-    1. `sinsDir` should be the location of Sins II's exe. (eg `E:\Epic Games\SinsII`)
-    2. `modDir` should be the location of the mod folder. (eg `C:\Users\VoltC\AppData\Local\sins2\mods`)
-4. Run `Greed.exe`
-5. In the window, you'll find a list of Greed-compatible mods to the left, which you can activate or deactivate as you wish.
-6. When you have the mods activated that you want, click `[Export]`.
-7. Congratulations, those mods are now active for your game! Start up Sins II and have at it!
+3. Run `Greed.exe`
+4. Set the directories on the Settings tab. They will autosave if the paths exist.
+    1. **Sins Directory** should be the location of Sins II's exe. (eg `E:\Epic Games\SinsII`)
+    2. **Mods Directory** should be the location of the mod folder. (eg `C:\Users\VoltC\AppData\Local\sins2\mods`)
+5. In the main tab, you'll find a list of Greed-compatible mods to the left, which you can activate or deactivate as you wish either with the button or double-clicking.
+6. When you have the mods activated that you want, click `[Export Greedy Selections]`.
 
 ## For Mod Developers
 
@@ -30,7 +29,7 @@ First, some definitions:
 
 - **Comments**: You can add C-style comments to your source files.
 - **Selective Inclusion**: Your mod only needs to include what you changed about a particular source file (eg add a new property, delete a property, or add an array element), _drastically_ reducing the risk of collisions between mods.
-- **Intelligent Merge**: Intelligent merging of manifest and localization files.
+- **Intelligent Merge**: Intelligent merging of localization files.
 - **File Diff**: Greed ships with a diff tool specifically for Sins II data files, allowing you to readily see exactly what you've done.
 - **[TODO] Automated Updates**: Users will be able to update the latest version of your mod with a single click.
 - **[TODO] Dependency Management**: Users will be able to automatically install your mod's dependencies.
@@ -50,7 +49,7 @@ To make a mod compatible with Greed, you need only add a `greed.json` file to yo
     "description": "Blurb goes here.",
     "version": "1.0.0",
     "sinsVersion": "1.14.3.0",
-    "greedVersion": "1.1.0",
+    "greedVersion": "1.4.0",
     "dependencies": [],
     "conflicts": [],
     "priority": 100
@@ -105,23 +104,9 @@ You should write your localized text files as if they were truncated to just the
 }
 ```
 
-#### Entity Manifest
-
-Entity manifests are another weird case. Unlike normal mod files, manifests must only contain those entities added within that particular mod, which means they do not import gold copies. Because they don't import gold copies, you don't need to bother with greed file types here, and can do these as normal in your mod, with Greed merging them together.
-
-```json
-{
-    "ids": [
-        "my_new_id",
-        "my_other_new_id"
-    ]
-}
-
-```
-
 ### Priority
 
-Priority is the mod load order. A mod with priority 10 will load before one with priority 20. This means that any conflicting files between the two will have the latter mod's contents unless it is a file for which deconfliction is handled like an `entity_manifest` file.
+Priority is the mod load order. A mod with priority 10 will load before one with priority 20. This means that any conflicting files between the two will have the latter mod's contents.
 
 > **Note**: Priority will likely be supplanted by dependency lists in a future update.
 
