@@ -114,12 +114,6 @@ You should write your localized text files as if they were truncated to just the
 }
 ```
 
-### Priority
-
-Priority is the mod load order. A mod with priority 10 will load before one with priority 20. This means that any conflicting files between the two will have the latter mod's contents.
-
-> **Note**: Priority will likely be supplanted by dependency lists in a future update.
-
 ## Contributing to Greed
 
 I welcome contributions. Just open a pull request.
