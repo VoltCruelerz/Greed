@@ -208,7 +208,13 @@ namespace Greed.Models
             {
                 Debug.WriteLine("- - " + source.Filename);
                 CreateGreedDirIfNotExists(source.GreedPath);
-                File.Copy(source.SourcePath, source.GreedPath, true);
+                if (File.Exists(source.GreedPath))
+                {
+                    File.Copy(source.SourcePath, source.GreedPath, true);
+                } else
+                {
+                    File.Copy(source.SourcePath, source.GreedPath);
+                }
             }
         }
 
