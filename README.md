@@ -34,7 +34,7 @@ First, some definitions:
 
 - **Gold Files**: the gold copy, which is the original Sins II data files. These are _never_ changed by Greed.
 - **Source Files**: the files from the individual greedy mods.
-- **Greed Files**: the files that are going into the greed mod folder. When Greed activates a list of mods, it initializes any relevant greed files from gold copies and then successively applies the edits of each mod in the list, ultimately producing an execution product.
+- **Greed Files**: the files that are going into the greed mod folder. When Greed activates a list of mods, it initializes any relevant greed files from gold copies and then sequentially applies the edits of each mod in the list, ultimately producing an execution product.
 
 ### Why Develop Greedy Mods?
 
