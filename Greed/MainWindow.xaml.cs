@@ -30,6 +30,8 @@ namespace Greed
         private readonly SolidColorBrush Valid = new(Colors.White);
         private readonly SolidColorBrush Invalid = new(Colors.Pink);
         private int SelectedTabIndex = 0;
+        private Mod? DragMod;
+        private Mod? DestMod;
 
         public MainWindow()
         {
@@ -58,13 +60,13 @@ namespace Greed
             // Only load mods if there's something to load.
             if (Tabs.SelectedIndex != SettingsPageIndex)
             {
-                RefreshModList();
+                ReloadModList();
             }
 
             pgbProgress.Value = 0;// Ranges [0, 100].
         }
 
-        private void RefreshModList()
+        private void ReloadModList()
         {
             PrintSync("Loading Settings...");
             string modDir = ConfigurationManager.AppSettings["modDir"]!;
@@ -98,9 +100,14 @@ namespace Greed
             }
             PrintSync("Load succeeded.");
 
+            RefreshModListUI();
+            ReloadSourceList();
+        }
+
+        private void RefreshModListUI()
+        {
             viewModList.Items.Clear();
             Mods.ForEach(m => viewModList.Items.Add(new ModListItem(m, this)));
-            RefreshSourceList();
         }
 
         private void ModList_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -113,7 +120,27 @@ namespace Greed
                 return;
             }
             var item = (ModListItem)e.AddedItems[0]!;
-            SelectedMod = Mods.First(p => p.Id == item.Id);
+            var newSelection = Mods.First(p => p.Id == item.Id);
+
+            // Ignore the user re-clicking.
+            if (newSelection == SelectedMod)
+            {
+                // Cleanup the button text and return.
+                cmdToggle.IsEnabled = true;
+                cmdToggle.Content = SelectedMod.IsActive ? "Deactivate" : "Activate";
+                return;
+            }
+            SelectedMod = newSelection;
+
+            // If there is no mod currently selected, start the drag process.
+            if (DragMod == null)
+            {
+                DragMod = SelectedMod;
+            }
+            else
+            {
+                DestMod = SelectedMod;
+            }
 
             var doc = new FlowDocument(new Paragraph(new Run($"{SelectedMod.Meta.Name} v{SelectedMod.Meta.Version} (Sins {SelectedMod.Meta.SinsVersion})")
             {
@@ -128,6 +155,24 @@ namespace Greed
                 TextDecorations = TextDecorations.Underline
             }));
             doc.Blocks.Add(new Paragraph(new Run(SelectedMod.Meta.Description)));
+            if (SelectedMod.Meta.Dependencies.Any())
+            {
+                var p = new Paragraph(new Run("Dependencies")
+                {
+                    FontWeight = FontWeights.Bold
+                });
+                SelectedMod.Meta.Dependencies.ForEach(c => p.Inlines.Add(new Run("\r\n- " + c)));
+                doc.Blocks.Add(p);
+            }
+            if (SelectedMod.Meta.Conflicts.Any())
+            {
+                var p = new Paragraph(new Run("Conflicts")
+                {
+                    FontWeight = FontWeights.Bold
+                });
+                SelectedMod.Meta.Conflicts.ForEach(c => p.Inlines.Add(new Run("\r\n- " + c)));
+                doc.Blocks.Add(p);
+            }
 
             SelectedMod.RenderReadme(doc.Blocks);
             txtInfo.Document = doc;
@@ -137,13 +182,45 @@ namespace Greed
             cmdToggle.Content = SelectedMod.IsActive ? "Deactivate" : "Activate";
             cmdDiff.IsEnabled = false;
 
-            RefreshSourceList();
+            ReloadSourceList();
+        }
+
+        private void ModList_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (DestMod == null || DragMod == DestMod)
+            {
+                // We aren't or aborted drag-and-drop.
+                DragMod = null;
+                DestMod = null;
+                return;
+            }
+
+            if (DragMod == null)
+            {
+                throw new InvalidOperationException("DragMod was somehow null.");
+            }
+
+            // We *are* actually reordering now.
+            var oldIndex = Mods.IndexOf(DragMod);
+            var newIndex = Mods.IndexOf(DestMod);
+            Mods.RemoveAt(oldIndex);
+            Mods.Insert(newIndex, DragMod);
+            DragMod = null;
+            DestMod = null;
+            ModManager.SetGreedyMods(Mods.Where(m => m.IsActive).ToList());
+            RefreshModListUI();
+        }
+
+        private void ModList_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            DragMod = null;
+            DestMod = null;
         }
 
         private void Toggle_Click(object sender, RoutedEventArgs e)
         {
             PrintSync("Toggle_Click()");
-            SelectedMod!.IsActive = !SelectedMod.IsActive;
+            SelectedMod!.SetModActivity(Mods, !SelectedMod.IsActive);
 
             string modDir = ConfigurationManager.AppSettings["modDir"]!;
             try
@@ -155,18 +232,15 @@ namespace Greed
                 CriticalAlertPopup("Mod Set Error", "Unable to locate all files.\n" + ex.Message + "\n" + ex.StackTrace);
                 return;
             }
-            RefreshModList();
+            RefreshModListUI();
             ReselectSelection();
         }
 
-        private void Toggle_ClickAll(object sender, RoutedEventArgs e)
+        private void ToggleAll_Click(object sender, RoutedEventArgs e)
         {
-            PrintSync("Toggle_Click()");
+            PrintSync("ToggleAll_Click()");
             var areAllActive = Mods.All(m => m.IsActive);
-            Mods.ForEach(m =>
-            {
-                m.IsActive = !areAllActive;
-            });
+            Mods.ForEach(m => m.SetModActivity(Mods, !areAllActive));
 
             string modDir = ConfigurationManager.AppSettings["modDir"]!;
             try
@@ -178,14 +252,19 @@ namespace Greed
                 CriticalAlertPopup("Mod Set Error", "Unable to locate all files.\n" + ex.Message + "\n" + ex.StackTrace);
                 return;
             }
-            RefreshModList();
+            RefreshModListUI();
             ReselectSelection();
+        }
+
+        private void Refresh_Click(object sender, RoutedEventArgs e)
+        {
+            PrintSync("Refresh_Click()");
+            ReloadModList();
         }
 
         private void Export_Click(object sender, RoutedEventArgs e)
         {
             cmdExport.IsEnabled = false;
-            RefreshModList();
             ReselectSelection();
 
             PrintSync("Exporting...");
@@ -240,7 +319,7 @@ namespace Greed
             MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
-        private void RefreshSourceList()
+        private void ReloadSourceList()
         {
             SelectedSource = null;
             viewFileList.Items.Clear();
@@ -338,11 +417,15 @@ namespace Greed
         private void Tabs_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var i = ((TabControl)sender).SelectedIndex;
-            if (i == ModPageIndex && SelectedTabIndex != ModPageIndex)
+            if (i != SelectedTabIndex)
             {
-                RefreshModList();
+                PrintSync($"Tabs_SelectionChanged(): {i}");
+                if (i == ModPageIndex && SelectedTabIndex != ModPageIndex)
+                {
+                    ReloadModList();
+                }
+                SelectedTabIndex = i;
             }
-            SelectedTabIndex = i;
         }
 
         private void Play_Click(object sender, RoutedEventArgs e)

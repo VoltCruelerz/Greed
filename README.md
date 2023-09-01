@@ -1,8 +1,10 @@
 # The Greed Mod Manager
 
-_A mod deconfliction tool for [Sins of a Solar Empire II](https://www.sinsofasolarempire2.com/)_
+_A mod decloader for [Sins of a Solar Empire II](https://www.sinsofasolarempire2.com/)_
 
-[Github](https://github.com/VoltCruelerz/Greed) [Forum](https://forums.sinsofasolarempire2.com/522050/page/1)
+- [Github](https://github.com/VoltCruelerz/Greed)
+- [Forum](https://forums.sinsofasolarempire2.com/522050/page/1)
+- [Discord](https://discord.com/channels/266693357093257216/1146234939315069008/1146234939315069008)
 
 ![screenshot](assets/Screenshot.png)
 
@@ -12,10 +14,19 @@ _A mod deconfliction tool for [Sins of a Solar Empire II](https://www.sinsofasol
 2. Extract the file wherever you please on your machine.
 3. Run `Greed.exe`
 4. Set the directories on the Settings tab. They will autosave if the paths exist.
-    1. **Sins Directory** should be the location of Sins II's exe. (eg `E:\Epic Games\SinsII`)
-    2. **Mods Directory** should be the location of the mod folder. (eg `C:\Users\VoltC\AppData\Local\sins2\mods`)
+    1. **Sins Directory** should be the location of Sins II's exe. (eg `C:\Epic Games\SinsII`)
+    2. **Mods Directory** should be the location of the mod folder. (eg `C:\Users\YourUser\AppData\Local\sins2\mods`)
 5. In the main tab, you'll find a list of Greed-compatible mods to the left, which you can activate or deactivate as you wish either with the button or double-clicking.
 6. When you have the mods activated that you want, click `[Export Greedy Selections]`.
+
+## Features for Users
+
+- **No More Manual Deconfliction**: Deconfliction of commonly modified files happens automatically for you.
+- **Easy Activation**: Enable/disable mods with a click.
+- **Easy Viewing**: Easily view the metadata, readme, and source files for any mod you download.
+- **Simple Load Order Control**: Drag-and-drop elements in the order of your choice.
+- **Conflict Detection**: You will be warned if you try to enable mods with a known conflict between them.
+- **[TODO] Dependency Management**: You will be warned if you attempt to enable a mod without its dependencies active.
 
 ## For Mod Developers
 
@@ -25,15 +36,15 @@ First, some definitions:
 - **Source Files**: the files from the individual greedy mods.
 - **Greed Files**: the files that are going into the greed mod folder. When Greed activates a list of mods, it initializes any relevant greed files from gold copies and then successively applies the edits of each mod in the list, ultimately producing an execution product.
 
-### Why Use Greed?
+### Why Develop Greedy Mods?
 
 - **Comments**: You can add C-style comments to your source files.
 - **Selective Inclusion**: Your mod only needs to include what you changed about a particular source file (eg add a new property, delete a property, or add an array element), _drastically_ reducing the risk of collisions between mods.
 - **Intelligent Merge**: Intelligent merging of localization files.
 - **File Diff**: Greed ships with a diff tool specifically for Sins II data files, allowing you to readily see exactly what you've done.
+- **Reduced Boilerplate**: Fractional files reduces the effort required to make small mods
 - **[TODO] Automated Updates**: Users will be able to update the latest version of your mod with a single click.
 - **[TODO] Dependency Management**: Users will be able to automatically install your mod's dependencies.
-- **[TODO] Conflict Detection**: Users will be alerted when they attempt to enable known conflicting mods.
 
 ![screenshot](assets/DiffScreenshot.png)
 
@@ -43,16 +54,15 @@ To make a mod compatible with Greed, you need only add a `greed.json` file to yo
 
 ```json
 {
-    "name": "Point Defense Strings",
-    "author": "Volt Cruelerz",
-    "url": "https://github.com/VoltCruelerz/pd-strings",
+    "name": "Your Mod",
+    "author": "Your Name",
+    "url": "https://github.com/YourName/your-mod",
     "description": "Blurb goes here.",
     "version": "1.0.0",
-    "sinsVersion": "1.14.3.0",
-    "greedVersion": "1.4.0",
-    "dependencies": [],
-    "conflicts": [],
-    "priority": 100
+    "sinsVersion": "1.15.1.0",
+    "greedVersion": "1.5.0",
+    "dependencies": ["required-mod"],
+    "conflicts": ["conflicting-mod"]
 }
 ```
 
@@ -85,7 +95,7 @@ This applies regardless of whether you are using a `.gm*` file type or not.
 
 #### Localized Text
 
-If `*.localized_text` files were actually key-value pairs like they _should_ be, you could just use `*.gmr`, but they're not. They're weird little arrays of size 2. Additionally, a mod must have the _full_ list of all strings for it to be legal. This complications merging them, so I've created a custom solution for them:
+If `*.localized_text` files were actually key-value pairs like they _should_ be (and will be in a future update), you could just use `*.gmr`, but they're not. They're weird little arrays of size 2. Additionally, a mod must have the _full_ list of all strings for it to be legal. This complications merging them, so I've created a custom solution for them:
 
 You should write your localized text files as if they were truncated to just the things you add or update. Greed will automatically upsert them for you when the greed files are generated.
 

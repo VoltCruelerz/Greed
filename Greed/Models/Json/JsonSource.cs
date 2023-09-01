@@ -17,7 +17,7 @@ namespace Greed.Models.Json
         private static readonly string MergeUnionSuffix = ".gmu";
         private static readonly string MergeConcatSuffix = ".gmc";
 
-        private static List<string> NoGoldFiles = new()
+        private static readonly List<string> NoGoldFiles = new()
         {
             "*.entity_manifest",
             "unit_tag.uniforms"

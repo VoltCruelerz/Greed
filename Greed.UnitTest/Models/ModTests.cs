@@ -9,8 +9,10 @@ namespace Greed.UnitTest.Models
         public void Import_Basic()
         {
             // Arrange
+            var index = 0;
+
             // Act
-            var mod = new Mod(new List<string>(), "..\\..\\..\\json\\mods\\modA");
+            var mod = new Mod(new List<string>(), "..\\..\\..\\json\\mods\\modA", ref index);
 
             // Assert
             Assert.AreEqual(2, mod.Entities.Count);

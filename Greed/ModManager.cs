@@ -37,10 +37,11 @@ namespace Greed
                 File.WriteAllText(enabledPath, "[]");
             }
 
+            var modIndex = 0;
             return modDirs
-                .Select(d => new Mod(enabledModFolders, d))
+                .Select(d => new Mod(enabledModFolders, d, ref modIndex))
                 .Where(m => m.IsGreedy)
-                .OrderBy(m => m.Meta.Priority)
+                .OrderBy(m => m.LoadOrder)
                 .ToList();
         }
 
@@ -54,7 +55,7 @@ namespace Greed
 
         public static void ExportGreedyMods(List<Mod> active, ProgressBar pgbProgress, MainWindow window, Action<bool> callback)
         {
-            Debug.WriteLine("Exporting Active Mods");
+            window.PrintAsync($"Exporting {active.Count} Active Mods");
             string modDir = ConfigurationManager.AppSettings["modDir"]!;
             string sinsDir = ConfigurationManager.AppSettings["sinsDir"]!;
             var greedPath = modDir + "\\greed";
@@ -69,6 +70,11 @@ namespace Greed
 
             Task.Run(() =>
             {
+                if (!active.Any())
+                {
+                    window.PrintAsync("No active mods.");
+                    return;
+                }
                 try
                 {
                     // For each greedy mod, overwrite as needed.

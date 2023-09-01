@@ -38,10 +38,6 @@ namespace Greed.Models
         public Version SinsVersion { get; set; } = new Version("0.0.0.0");
 
         [JsonRequired]
-        [JsonProperty(PropertyName = "priority")]
-        public int Priority { get; set; }
-
-        [JsonRequired]
         [JsonProperty(PropertyName = "dependencies")]
         public List<string> Dependencies { get; set; } = new List<string>();
 

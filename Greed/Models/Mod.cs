@@ -51,9 +51,10 @@ namespace Greed.Models
         public string Id { get; set; } = string.Empty;
 
         public bool IsGreedy => Metadata != null;
+        public int LoadOrder = -1;
         public Metadata Meta => Metadata!;
 
-        public Mod(List<string> enabledModIds, string path)
+        public Mod(List<string> enabledModIds, string path, ref int modIndex)
         {
             Debug.WriteLine("Loading " + path);
             var contents = Directory.GetFiles(path);
@@ -77,9 +78,16 @@ namespace Greed.Models
 
             var pathTerms = path.Split("\\");
             Id = pathTerms[^1];
-            if (enabledModIds.Contains(Id))
+            LoadOrder = enabledModIds.IndexOf(Id);
+            if (LoadOrder != -1)
             {
                 IsActive = true;
+                modIndex++;
+            }
+            else
+            {
+                // Stick it at the bottom of the list.
+                LoadOrder = int.MaxValue;
             }
 
             Metadata = JsonConvert.DeserializeObject<Metadata>(File.ReadAllText(greedMetaFilename));
@@ -327,5 +335,54 @@ namespace Greed.Models
 
         [GeneratedRegex("^(\\d+\\.|\\*|-) ")]
         private static partial Regex GetIsListRegex();
+
+        public override string ToString()
+        {
+            return Id;
+        }
+
+        public void SetModActivity(List<Mod> allMods, bool willBeActive)
+        {
+            // If we're just turning off a mod, that's easy.
+            if (!willBeActive)
+            {
+                IsActive = false;
+                ModManager.SetGreedyMods(allMods.Where(m => m.IsActive).ToList());
+                return;
+            }
+
+            // If we're turning a mod on, we need to check for conflicts in both directions because one mod might not know about the other.
+            var activeMods = allMods.Where(mod => mod.IsActive);
+
+            var conflicts = activeMods.Where(am => Meta.Conflicts.Contains(am.Id) || am.Meta.Conflicts.Contains(Id));
+
+            if (!conflicts.Any())
+            {
+                IsActive = true;
+                return;
+            }
+
+            var conflictRows = string.Join('\n', conflicts.Select(c => "- " + c.Meta.Name));
+            var plural = conflicts.Count() > 1 ? "s" : "";
+            var response = MessageBox.Show($"A known conflict was detected while enabling {Meta.Name}:\n{conflictRows}\n\nTo continue activating {Meta.Name}, would you like to disable the conflicting mod{plural}?", "Conflict Detected", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
+
+            if (response == MessageBoxResult.Yes)
+            {
+                foreach (var c in conflicts)
+                {
+                    c.IsActive = false;
+                }
+                IsActive = true;
+            }
+            else if (response == MessageBoxResult.No)
+            {
+                IsActive = true;
+            }
+            else
+            {
+                // Abort. Do nothing.
+            }
+            ModManager.SetGreedyMods(allMods.Where(m => m.IsActive).ToList());
+        }
     }
 }
