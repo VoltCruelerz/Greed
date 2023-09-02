@@ -102,10 +102,12 @@ namespace Greed
 
             RefreshModListUI();
             ReloadSourceList();
+            PrintSync("Refresh Complete");
         }
 
         private void RefreshModListUI()
         {
+            PrintSync($"RefreshModListUI for {Mods.Count} mods.");
             viewModList.Items.Clear();
             Mods.ForEach(m => viewModList.Items.Add(new ModListItem(m, this)));
         }
@@ -266,6 +268,7 @@ namespace Greed
         {
             cmdExport.IsEnabled = false;
             ReselectSelection();
+            ReloadModList();
 
             PrintSync("Exporting...");
             try
@@ -416,15 +419,21 @@ namespace Greed
 
         private void Tabs_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var i = ((TabControl)sender).SelectedIndex;
+            var control = ((TabControl)sender);
+            var i = control.SelectedIndex;
             if (i != SelectedTabIndex)
             {
                 PrintSync($"Tabs_SelectionChanged(): {i}");
                 if (i == ModPageIndex && SelectedTabIndex != ModPageIndex)
                 {
+                    // We have to set this BEFORE the file I/O so we don't start trying to load a second time while still in the first one.
+                    // (This can happen if we focus an element and then switch tabs twice.)
+                    SelectedTabIndex = i;
                     ReloadModList();
+                } else
+                {
+                    SelectedTabIndex = i;
                 }
-                SelectedTabIndex = i;
             }
         }
 
@@ -433,6 +442,9 @@ namespace Greed
             Play();
         }
 
+        /// <summary>
+        /// Start the game.
+        /// </summary>
         private void Play()
         {
             var execPath = ConfigurationManager.AppSettings["sinsDir"]! + "\\sins2.exe";
@@ -443,6 +455,10 @@ namespace Greed
             });
         }
 
+        /// <summary>
+        /// Print synchronously.
+        /// </summary>
+        /// <param name="str"></param>
         public void PrintSync(string str)
         {
             txtLog.Text = txtLog.Text.Any()
@@ -451,6 +467,10 @@ namespace Greed
             txtLog.ScrollToEnd();
         }
 
+        /// <summary>
+        /// Invoke the print function when possible.
+        /// </summary>
+        /// <param name="str"></param>
         public void PrintAsync(string str)
         {
             Dispatcher.Invoke(() => PrintSync(str));

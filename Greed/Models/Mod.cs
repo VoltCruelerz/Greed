@@ -252,7 +252,7 @@ namespace Greed.Models
                 if (line.StartsWith("#"))
                 {
                     var boost = 2 * (5 - line.Count(c => c == '#'));
-                    var titleText = line.Substring(line.IndexOf(" ") + 1);
+                    var titleText = line[(line.IndexOf(" ") + 1)..];
                     var p = new Paragraph();
                     FormatLine(p.Inlines, titleText, 10 + boost, true);
                     blocks.Add(p);

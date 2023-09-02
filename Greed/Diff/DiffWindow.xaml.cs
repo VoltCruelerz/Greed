@@ -11,7 +11,7 @@ namespace Greed
     /// </summary>
     public partial class DiffWindow : Window
     {
-        private JsonSource Source;
+        private readonly JsonSource Source;
         private readonly SolidColorBrush Addition = new(Colors.LightBlue);
         private readonly SolidColorBrush Removal = new(Colors.Pink);
         private readonly SolidColorBrush Mutation = new(Colors.LightYellow);
