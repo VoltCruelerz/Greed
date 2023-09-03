@@ -112,7 +112,7 @@ namespace Greed.Models.Json
             var diffObj = JsonDifferentiator.Differentiate(j1, j2, OutputMode.Symbol, true);
 
             var diff = JsonConvert.SerializeObject(diffObj, Formatting.Indented);
-            return new DiffResult(Gold.Json, Greedy.Json, diff);
+            return new DiffResult(Gold.Json.JsonFormat(), Greedy.Json.JsonFormat(), diff);
         }
 
         public DiffResult DiffFromGold()
@@ -212,7 +212,7 @@ namespace Greed.Models.Json
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
-        public string ReadJsonWithComments(string path)
+        public static string ReadJsonWithComments(string path)
         {
             var str = File.ReadAllText(path);
             var sb = new StringBuilder();

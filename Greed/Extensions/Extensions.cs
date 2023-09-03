@@ -6,6 +6,19 @@ namespace Greed.Extensions
     public static class Extensions
     {
         public static string JsonMinify(this string json)
-            => Serialize(Deserialize<JsonDocument>(json));
+            => Serialize(Deserialize<JsonDocument>(json, new JsonSerializerOptions
+            {
+                AllowTrailingCommas = true
+            }));
+
+        public static string JsonFormat(this string json)
+            => Serialize(Deserialize<JsonDocument>(json, new JsonSerializerOptions
+            {
+                AllowTrailingCommas = true
+            }), new JsonSerializerOptions
+            {
+                AllowTrailingCommas = true,
+                WriteIndented = true
+            });
     }
 }

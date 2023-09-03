@@ -15,7 +15,7 @@ namespace Greed.Diff
             Diff = diff;
         }
 
-        private string Lineify(string json)
+        private static string Lineify(string json)
         {
             var lines = json
                 .Split('\n')

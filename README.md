@@ -119,3 +119,11 @@ You should write your localized text files as if they were truncated to just the
 I welcome contributions. Just open a pull request.
 
 If at some point in the future, I can no longer maintain Greed, it's MIT licensed.
+
+## Bug Reports
+
+In the event of an error, consult the log (viewable both in the textbox at the bottom of the frame and also in `log.txt`, found in whatever directory you've got Greed in).
+
+- If the error appears to be one with Greed itself, please [create a GitHub issue](https://github.com/VoltCruelerz/Greed/issues/new).
+    - Be sure to use an appropriate label and include the log when submitting so I can hunt down the error easier.
+- Otherwise, contact the appropriate mod developer.

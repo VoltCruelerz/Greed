@@ -294,7 +294,7 @@ namespace Greed
             }
             catch(Exception ex)
             {
-                CriticalAlertPopup("Failed to Export", ex.Message + "\n" + ex.StackTrace);
+                CriticalAlertPopup("Failed to Export", ex);
             }
             finally
             {
@@ -314,6 +314,11 @@ namespace Greed
                 viewModList.SelectedItem = SelectedMod;
                 viewModList.SelectedIndex = index;
             }
+        }
+
+        private void CriticalAlertPopup(string title, Exception ex)
+        {
+            CriticalAlertPopup(title, ex.Message + "\n" + ex.StackTrace);
         }
 
         private void CriticalAlertPopup(string title, string message)
@@ -356,8 +361,14 @@ namespace Greed
                 //AllSources.AddRange(SelectedMod.Sounds);
                 //AllSources.AddRange(SelectedMod.Textures);
 
-
-                AllSources.ForEach(p => viewFileList.Items.Add(new SourceListItem(p)));
+                try
+                {
+                    AllSources.ForEach(p => viewFileList.Items.Add(new SourceListItem(p)));
+                }
+                catch (Exception ex)
+                {
+                    CriticalAlertPopup("Failed to Load Mod", ex);
+                }
             }
         }
 
@@ -465,6 +476,7 @@ namespace Greed
                 ? txtLog.Text + '\n' + str
                 : str;
             txtLog.ScrollToEnd();
+            File.AppendAllText(Directory.GetCurrentDirectory() + "\\log.txt", str + "\r\n");
         }
 
         /// <summary>
