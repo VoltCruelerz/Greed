@@ -10,25 +10,36 @@ _A mod decloader for [Sins of a Solar Empire II](https://www.sinsofasolarempire2
 
 ## Installation
 
+### Greed Installation
+
 1. Download `Greed.zip` from the [latest github release](https://github.com/VoltCruelerz/Greed/releases)
 2. Extract the file wherever you please on your machine.
 3. Run `Greed.exe`
 4. Set the directories on the Settings tab. They will autosave if the paths exist.
     1. **Sins Directory** should be the location of Sins II's exe. (eg `C:\Epic Games\SinsII`)
-    2. **Mods Directory** should be the location of the mod folder. (eg `C:\Users\YourUser\AppData\Local\sins2\mods`)
-5. In the main tab, you'll find a list of Greed-compatible mods to the left, which you can activate or deactivate as you wish either with the button or double-clicking.
+    2. **Mods Directory** should be the location of the mod folder. (eg `C:\Users\YOUR_USER\AppData\Local\sins2\mods`)
+5. In the main tab, you'll find a list of installed Greed-compatible mods to the left (see below for instructions to install mods), which you can activate or deactivate as you wish either with the button or double-clicking.
 6. When you have the mods activated that you want, click `[Export Greedy Selections]`.
 
-## Features for Users
+### Mod Installation
+
+1. Download the mod from GitHub, ModDB, or wherever else.
+    1. If needed, unzip it.
+2. Deposit it in `C:\Users\YOUR_USER\AppData\Local\sins2\mods` (change the path to use your Windows username).
+    1. If the mod's name is `example-mod`, you should be able to find `greed.json` at `C:\Users\YOUR_USER\AppData\Local\sins2\mods\example-mod\greed.json`
+3. Open Greed or press the Refresh button to see the new mod appear.
+
+## Advantages for Users
 
 - **No More Manual Deconfliction**: Deconfliction of commonly modified files happens automatically for you.
 - **Easy Activation**: Enable/disable mods with a click.
 - **Easy Viewing**: Easily view the metadata, readme, and source files for any mod you download.
 - **Simple Load Order Control**: Drag-and-drop elements in the order of your choice.
-- **Conflict Detection**: You will be warned if you try to enable mods with a known conflict between them.
+- **Conflict Detection**: You are warned if you try to enable mods with a known conflict between them.
 - **[TODO] Dependency Management**: You will be warned if you attempt to enable a mod without its dependencies active.
+- **[TODO] Automated Installation**: You will be able to download from a curated list.
 
-## For Mod Developers
+## Greedy Mod Development
 
 First, some definitions:
 
@@ -66,30 +77,38 @@ To make a mod compatible with Greed, you need only add a `greed.json` file to yo
 }
 ```
 
+While I recommend you take advantage of Greed's more powerful features like merge file extensions, merely adding the above will make any mod interactible for Greed.
+
 ### Merge Types
 
-The ultimate goal of Greed is to allow multiple mods to gracefully integrate together so that we can release smaller, more targeted mods, rather than these massive bundles that nobody really knows what's inside them. To facilitate this, Greed acts as the ultimate arbiter, compiling greedy mods into a single "mod" in the mods directory which is then listed as active for Sins II to read from.
+The ultimate goal of Greed is to allow multiple mods to gracefully integrate together so that we can release smaller, more targeted mods, rather than these massive bundles that nobody really knows what's inside them. To facilitate this, Greed acts as an arbiter, compiling greedy mods into a single "mod" in the mods directory which is then listed as active for Sins II to read from.
 
 Ideally, a mod should change **_as little as it can_** to have its desired effect so that multiple mods could even modify the same file.
 
-#### Greed Merge Types
+#### Greed Merge Extensions
 
 To that end, Greed introduces several json file extensions that allow targeted edits within a given file. For example, if you want to edit the Kol, you might name your file `trader_battle_capital_ship.unit.gmr`.
 
 - `.gmr` **(Greed Merge Replace)**: for each element in the the mod file's arrays, it replaces the greed file's corresponding element at that index, per **Newtonsoft**'s `MergeArrayHandling.Replace`.
     - eg `[1, 2, 3]` + `[4, 5]` = `[4, 5, 3]`
+    - [Example](https://github.com/VoltCruelerz/constituent-components/blob/master/entities/trader_heavy_gauss_slugs.unit_item.gmr) removing an element from an array
 - `.gmc` **(Greed Merge Concatenate)**: for each element in the mod's array, it concatenates them onto the original array, per **Newtonsoft**'s `MergeArrayHandling.Concat`.
     - eg `[1, 2]` + `[2, 3]` = `[1, 2, 2, 3]`
+    - [Example](https://github.com/VoltCruelerz/constituent-components/blob/master/entities/buff.entity_manifest.gmc) of adding elements to an entity_manifest
 - `.gmu` **(Greed Merge Union)**: for each element in the mod's array that does not already exist in the original array, add it to the end of the array, per **Newtonsoft**'s `MergeArrayHandling.Union`.
     - eg `[1, 2]` + `[2, 3]` = `[1, 2, 3]`
+    - [Example](https://github.com/VoltCruelerz/constituent-components/blob/master/entities/trader_antimatter_engine_unit_item.ability.gmu) of adding autocast
 
 In all of these cases, if you leave an object's field undefined, it will not be edited. So, if you wanted to edit just one of the many arrays in a `.player` file to add a new ship type, you'd only declare the one array you want to edit, and you'd probably do it in a `.gmc` file so you can concatenate what you want to what's already there without redeclaring everything.
 
 #### Null Removal
 
-If a field within your mod is null (not undefined, but actually `null`), it will **delete** that field from the greed file under construction. If inside an array, it will delete the element at that original index from an array, so if in the array `[ 1, 2, 3, 4 ]`, you want to remove the middle two elements, your mod would have `[ 1, null, null, 4 ]`, which would result in `[ 1, 4 ]`.
+- If a field within your mod is null (not undefined, but actually `null`), it will **delete** that field from the greed file under construction. 
+    - This applies regardless of whether you are using a `.gm*` file type or not.
+- If inside an array in a `*.gmr`, it will delete the element at that original index from an array.
+    - For example, in the array `[ 1, 2, 3, 4 ]`, if you want to remove the middle two elements, your mod would have `[ 1, null, null ]`, which would result in `[ 1, 4 ]`.
 
-This applies regardless of whether you are using a `.gm*` file type or not.
+[Example](https://github.com/VoltCruelerz/constituent-components/blob/master/entities/trader_reserve_squadron_hangar.unit_item.gmr) removing a field from an item
 
 > _**Note**: be very careful when removing elements by index that you know _exactly_ what is there already._
 
@@ -113,6 +132,8 @@ You should write your localized text files as if they were truncated to just the
     ]
 }
 ```
+
+[Here's](https://github.com/VoltCruelerz/krosov-prova-guns/blob/main/localized_text/core_en.localized_text) another example.
 
 ## Contributing to Greed
 
