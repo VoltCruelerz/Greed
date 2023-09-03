@@ -18,12 +18,12 @@ _A mod decloader for [Sins of a Solar Empire II](https://www.sinsofasolarempire2
 4. Set the directories on the Settings tab. They will autosave if the paths exist.
     1. **Sins Directory** should be the location of Sins II's exe. (eg `C:\Epic Games\SinsII`)
     2. **Mods Directory** should be the location of the mod folder. (eg `C:\Users\YOUR_USER\AppData\Local\sins2\mods`)
-5. In the main tab, you'll find a list of installed Greed-compatible mods to the left, which you can activate or deactivate as you wish either with the button or double-clicking.
+5. In the main tab, you'll find a list of installed Greed-compatible mods to the left (see below for instructions to install mods), which you can activate or deactivate as you wish either with the button or double-clicking.
 6. When you have the mods activated that you want, click `[Export Greedy Selections]`.
 
 ### Mod Installation
 
-1. Download the mod from github, ModDB, or wherever else.
+1. Download the mod from GitHub, ModDB, or wherever else.
     1. If needed, unzip it.
 2. Deposit it in `C:\Users\YOUR_USER\AppData\Local\sins2\mods` (change the path to use your Windows username).
     1. If the mod's name is `example-mod`, you should be able to find `greed.json` at `C:\Users\YOUR_USER\AppData\Local\sins2\mods\example-mod\greed.json`
