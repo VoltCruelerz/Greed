@@ -1,11 +1,16 @@
 {
-  "name": "Mod A",
+  "name": "Mod Dependent",
   "author": "Author",
   "url": "https://www.google.com",
   "description": "If I were a rich man",
   "version": "1.0.0",
   "sinsVersion": "1.15.1.0",
   "greedVersion": "1.1.0",
-  "dependencies": [],
+  "dependencies": [
+    {
+      "id": "modA",
+      "version": "1.0.0"
+    }
+  ],
   "conflicts": []
 }

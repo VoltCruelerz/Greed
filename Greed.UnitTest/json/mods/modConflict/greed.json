@@ -1,5 +1,5 @@
 {
-  "name": "Mod A",
+  "name": "Mod Conflict",
   "author": "Author",
   "url": "https://www.google.com",
   "description": "If I were a rich man",
@@ -7,5 +7,5 @@
   "sinsVersion": "1.15.1.0",
   "greedVersion": "1.1.0",
   "dependencies": [],
-  "conflicts": []
+  "conflicts": ["modA"]
 }

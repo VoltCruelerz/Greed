@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 
 namespace Greed.Models
@@ -39,7 +40,7 @@ namespace Greed.Models
 
         [JsonRequired]
         [JsonProperty(PropertyName = "dependencies")]
-        public List<string> Dependencies { get; set; } = new List<string>();
+        public List<Dependency> Dependencies { get; set; } = new List<Dependency>();
 
         [JsonProperty(PropertyName = "conflicts")]
         public List<string> Conflicts { get; set; } = new List<string>();
@@ -79,6 +80,41 @@ namespace Greed.Models
                 violations.Add("This Sins version is no longer supported");
             }
             return violations;
+        }
+
+        public (List<string>, List<Mod>) GetDependencyViolations(List<Mod> allMods)
+        {
+            var active = allMods.Where(m => m.IsActive);
+            var violations = new List<string>();
+            var inactiveDependencies = new List<Mod>();
+
+            Dependencies.ForEach(d =>
+            {
+                var referencedMod = allMods.FirstOrDefault(a => a.Id == d.Id);
+                if (referencedMod == null)
+                {
+                    violations.Add($"- missing {d.Id} v {d.Version}");
+                }
+                else
+                {
+                    if (referencedMod.Meta.Version.CompareTo(d.Version) < 0)
+                    {
+                        violations.Add($"- outdated {referencedMod.Meta.Name} v{referencedMod.Meta.Version} (needs at least {d.Version})");
+                    }
+                    else if (!referencedMod.IsActive)
+                    {
+                        violations.Add($"- required mod {referencedMod.Meta.Name} v{referencedMod.Meta.Version} is inactive");
+                        inactiveDependencies.Add(referencedMod);
+                    }
+                }
+            });
+
+            return (violations, inactiveDependencies);
+        }
+
+        public List<Mod> GetDependencyMods(List<Mod> allMods)
+        {
+            return allMods.Where(m => Dependencies.Any(d => d.Id == m.Id)).ToList();
         }
     }
 }

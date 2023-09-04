@@ -20,23 +20,40 @@ namespace Greed
     /// </summary>
     public partial class MainWindow : Window
     {
+        private static readonly string LogPath = Directory.GetCurrentDirectory() + "\\log.txt";
+        private static readonly string LogPrevPath = Directory.GetCurrentDirectory() + "\\log_prev.txt";
         private const int ModPageIndex = 0;
         private const int SettingsPageIndex = 1;
+        private int SelectedTabIndex = 0;
 
+        private readonly ModManager Manager = new();
         private List<Mod> Mods = new();
         private Mod? SelectedMod;
         private readonly List<JsonSource> AllSources = new();
         private JsonSource? SelectedSource;
+
         private readonly SolidColorBrush Valid = new(Colors.White);
         private readonly SolidColorBrush Invalid = new(Colors.Pink);
-        private int SelectedTabIndex = 0;
+
         private Mod? DragMod;
         private Mod? DestMod;
+        private string SearchQuery = string.Empty;
+        private bool SearchActive = false;
 
         public MainWindow()
         {
             InitializeComponent();
             PrintSync("Components Loaded");
+
+            // Shift the log history.
+            if (File.Exists(LogPath))
+            {
+                if (File.Exists(LogPrevPath))
+                {
+                    File.Delete(LogPrevPath);
+                }
+                File.Move(LogPath, LogPrevPath);
+            }
 
             txtInfo.Document.Blocks.Clear();
             txtInfo.AppendText("Select a mod to view details about it.");
@@ -89,7 +106,7 @@ namespace Greed
             PrintSync("Loading mods...");
             try
             {
-                Mods = ModManager.LoadGreedyMods();
+                Mods = Manager.LoadGreedyMods();
             }
             catch (Exception e)
             {
@@ -109,7 +126,16 @@ namespace Greed
         {
             PrintSync($"RefreshModListUI for {Mods.Count} mods.");
             viewModList.Items.Clear();
-            Mods.ForEach(m => viewModList.Items.Add(new ModListItem(m, this)));
+            Mods
+                .Where(m => string.IsNullOrWhiteSpace(SearchQuery)
+                    || m.Id.Contains(SearchQuery)
+                    || m.Readme.Contains(SearchQuery)
+                    || m.Meta.Name.Contains(SearchQuery)
+                    || m.Meta.Author.Contains(SearchQuery)
+                    || m.Meta.Description.Contains(SearchQuery))
+                .Where(m => !SearchActive || m.IsActive)
+                .ToList()
+                .ForEach(m => viewModList.Items.Add(new ModListItem(m, this)));
         }
 
         private void ModList_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -203,13 +229,10 @@ namespace Greed
             }
 
             // We *are* actually reordering now.
-            var oldIndex = Mods.IndexOf(DragMod);
-            var newIndex = Mods.IndexOf(DestMod);
-            Mods.RemoveAt(oldIndex);
-            Mods.Insert(newIndex, DragMod);
+            Manager.MoveMod(Mods, DragMod, Mods.IndexOf(DestMod));
             DragMod = null;
             DestMod = null;
-            ModManager.SetGreedyMods(Mods.Where(m => m.IsActive).ToList());
+            Manager.SetGreedyMods(Mods.Where(m => m.IsActive).ToList());
             RefreshModListUI();
         }
 
@@ -227,7 +250,7 @@ namespace Greed
             string modDir = ConfigurationManager.AppSettings["modDir"]!;
             try
             {
-                ModManager.SetGreedyMods(Mods.Where(m => m.IsActive).ToList());
+                Manager.SetGreedyMods(Mods.Where(m => m.IsActive).ToList());
             }
             catch (Exception ex)
             {
@@ -247,7 +270,7 @@ namespace Greed
             string modDir = ConfigurationManager.AppSettings["modDir"]!;
             try
             {
-                ModManager.SetGreedyMods(Mods.Where(m => m.IsActive).ToList());
+                Manager.SetGreedyMods(Mods.Where(m => m.IsActive).ToList());
             }
             catch (Exception ex)
             {
@@ -274,7 +297,7 @@ namespace Greed
             try
             {
                 var active = Mods.Where(m => m.IsGreedy && m.IsActive).ToList();
-                ModManager.ExportGreedyMods(active, pgbProgress, this, (exportSucceeded) =>
+                Manager.ExportGreedyMods(active, pgbProgress, this, (exportSucceeded) =>
                 {
                     if (exportSucceeded)
                     {
@@ -292,7 +315,7 @@ namespace Greed
                     }
                 });
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 CriticalAlertPopup("Failed to Export", ex);
             }
@@ -441,7 +464,8 @@ namespace Greed
                     // (This can happen if we focus an element and then switch tabs twice.)
                     SelectedTabIndex = i;
                     ReloadModList();
-                } else
+                }
+                else
                 {
                     SelectedTabIndex = i;
                 }
@@ -476,7 +500,7 @@ namespace Greed
                 ? txtLog.Text + '\n' + str
                 : str;
             txtLog.ScrollToEnd();
-            File.AppendAllText(Directory.GetCurrentDirectory() + "\\log.txt", str + "\r\n");
+            File.AppendAllText(LogPath, str + "\r\n");
         }
 
         /// <summary>
@@ -486,6 +510,20 @@ namespace Greed
         public void PrintAsync(string str)
         {
             Dispatcher.Invoke(() => PrintSync(str));
+        }
+
+        private void TxtSearchMods_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var txt = (TextBox)sender;
+            SearchQuery = txt.Text;
+            RefreshModListUI();
+        }
+
+        private void CheckActive_Toggle(object sender, RoutedEventArgs e)
+        {
+            var cbx = (CheckBox)sender;
+            SearchActive = cbx.IsChecked ?? false;
+            RefreshModListUI();
         }
     }
 }

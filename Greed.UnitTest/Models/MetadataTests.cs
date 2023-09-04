@@ -1,5 +1,4 @@
-﻿using Greed.Models;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace Greed.UnitTest.Models
 {
@@ -13,7 +12,7 @@ namespace Greed.UnitTest.Models
 
             // Act
             var meta = JsonConvert.DeserializeObject<Metadata>(File.ReadAllText("..\\..\\..\\json\\metadata\\greed.json"))!;
-            var violations = meta.IsLegalVersion(new Version("1.14.3.0"));
+            var violations = meta.IsLegalVersion(new Version("1.15.1.0"));
 
             // Assert
             Assert.AreEqual(meta.Name, "Mod Name");
@@ -21,8 +20,8 @@ namespace Greed.UnitTest.Models
             Assert.AreEqual(meta.Url, "https://www.google.com");
             Assert.AreEqual(meta.Description, "If I were a rich man");
             Assert.AreEqual(meta.Version.ToString(), "1.0.0");
-            Assert.AreEqual(meta.SinsVersion.ToString(), "1.14.3.0");
-            Assert.AreEqual(meta.GreedVersion.ToString(), "1.1.0");
+            Assert.AreEqual(meta.SinsVersion.ToString(), "1.15.1.0");
+            Assert.AreEqual(meta.GreedVersion.ToString(), "1.5.3");
             Assert.AreEqual(0, violations.Count);
         }
 
@@ -49,7 +48,7 @@ namespace Greed.UnitTest.Models
             var violations = meta.IsLegalVersion(new Version("1.14.3.0"));
 
             // Assert
-            Assert.AreEqual(1, violations.Count);
+            Assert.AreEqual(2, violations.Count);
         }
     }
 }

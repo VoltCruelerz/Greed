@@ -36,7 +36,7 @@ _A mod decloader for [Sins of a Solar Empire II](https://www.sinsofasolarempire2
 - **Easy Viewing**: Easily view the metadata, readme, and source files for any mod you download.
 - **Simple Load Order Control**: Drag-and-drop elements in the order of your choice.
 - **Conflict Detection**: You are warned if you try to enable mods with a known conflict between them.
-- **[TODO] Dependency Management**: You will be warned if you attempt to enable a mod without its dependencies active.
+- **Dependency Management**: You are be warned if you attempt to enable a mod without its dependencies active.
 - **[TODO] Automated Installation**: You will be able to download from a curated list.
 
 ## Greedy Mod Development
@@ -55,7 +55,7 @@ First, some definitions:
 - **File Diff**: Greed ships with a diff tool specifically for Sins II data files, allowing you to readily see exactly what you've done.
 - **Reduced Boilerplate**: Fractional files reduces the effort required to make small mods
 - **[TODO] Automated Updates**: Users will be able to update the latest version of your mod with a single click.
-- **[TODO] Dependency Management**: Users will be able to automatically install your mod's dependencies.
+- **[TODO] Dependency Autoinstall**: Users will be able to automatically install your mod's dependencies.
 
 ![screenshot](assets/DiffScreenshot.png)
 
@@ -71,8 +71,13 @@ To make a mod compatible with Greed, you need only add a `greed.json` file to yo
     "description": "Blurb goes here.",
     "version": "1.0.0",
     "sinsVersion": "1.15.1.0",
-    "greedVersion": "1.5.0",
-    "dependencies": ["required-mod"],
+    "greedVersion": "1.6.0",
+    "dependencies": [
+        {
+            "id": "other-mod",
+            "version": "1.0.0"
+        }
+    ],
     "conflicts": ["conflicting-mod"]
 }
 ```

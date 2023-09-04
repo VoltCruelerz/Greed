@@ -1,4 +1,5 @@
-﻿using Greed.Models.Json;
+﻿using Greed.Interfaces;
+using Greed.Models.Json;
 using Greed.Models.Json.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -18,7 +19,17 @@ namespace Greed.Models
     public partial class Mod
     {
         private Metadata? Metadata { get; set; }
+        private readonly IModManager Manager;
+        private readonly IWarningPopup Warning;
 
+        public Metadata Meta => Metadata!;
+        public bool IsActive { get; private set; } = false;
+        public string Readme { get; set; } = string.Empty;
+        public string Id { get; set; } = string.Empty;
+        public bool IsGreedy => Metadata != null;
+        public int LoadOrder = -1;
+
+        #region Folder Contents
         // Json
         public List<JsonSource> Brushes { get; set; } = new List<JsonSource>();
         public List<JsonSource> Colors { get; set; } = new List<JsonSource>();
@@ -44,19 +55,13 @@ namespace Greed.Models
         public List<Source> Shaders { get; set; } = new List<Source>();
         public List<Source> Sounds { get; set; } = new List<Source>();
         public List<Source> Textures { get; set; } = new List<Source>();
+        #endregion
 
-        public bool IsActive { get; set; } = false;
-        public string Readme { get; set; } = string.Empty;
-
-        public string Id { get; set; } = string.Empty;
-
-        public bool IsGreedy => Metadata != null;
-        public int LoadOrder = -1;
-        public Metadata Meta => Metadata!;
-
-        public Mod(List<string> enabledModIds, string path, ref int modIndex)
+        public Mod(IModManager manager, IWarningPopup warning, List<string> enabledModIds, string path, ref int modIndex)
         {
             Debug.WriteLine("Loading " + path);
+            Manager = manager;
+            Warning = warning;
             var contents = Directory.GetFiles(path);
             foreach (var item in contents)
             {
@@ -211,7 +216,8 @@ namespace Greed.Models
                 if (File.Exists(source.GreedPath))
                 {
                     File.Copy(source.SourcePath, source.GreedPath, true);
-                } else
+                }
+                else
                 {
                     File.Copy(source.SourcePath, source.GreedPath);
                 }
@@ -275,7 +281,8 @@ namespace Greed.Models
                         }
                     }
                     blocks.Add(p);
-                } else
+                }
+                else
                 {
                     var p = new Paragraph();
                     FormatLine(p.Inlines, line);
@@ -349,30 +356,84 @@ namespace Greed.Models
 
         public void SetModActivity(List<Mod> allMods, bool willBeActive)
         {
-            // If we're just turning off a mod, that's easy.
+            var activeMods = allMods.Where(mod => mod.IsActive);
+
             if (!willBeActive)
             {
+                // Check if any other active mods need this mod
+                var dependents = activeMods.Where(m => m.Meta.Dependencies.Any(d => d.Id == this.Id)).ToList();
+
+                if (dependents.Any())
+                {
+                    var depResponse = Warning.WarnOfDependents(this, dependents);
+                    if (depResponse == MessageBoxResult.Yes)
+                    {
+                        dependents.ForEach(d => d.SetModActivity(allMods, false));
+                    }
+                    else if (depResponse == MessageBoxResult.No)
+                    {
+                        // Do nothing. Trust the user to know what they're doing.
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+
                 IsActive = false;
-                ModManager.SetGreedyMods(allMods.Where(m => m.IsActive).ToList());
+                Manager.SetGreedyMods(allMods.Where(m => m.IsActive).ToList());
                 return;
             }
 
-            // If we're turning a mod on, we need to check for conflicts in both directions because one mod might not know about the other.
-            var activeMods = allMods.Where(mod => mod.IsActive);
+            // Make sure all our dependencies are turned on.
+            var dependencyViolations = Meta.GetDependencyViolations(allMods);
+            var violationText = dependencyViolations.Item1;
+            var inactiveDependencies = dependencyViolations.Item2;
+            if (violationText.Any())
+            {
+                var depResponse = Warning.WarnOfDependencies(this, violationText, inactiveDependencies);
+                if (depResponse == MessageBoxResult.Yes)
+                {
+                    inactiveDependencies.ForEach(d =>
+                    {
+                        d.SetModActivity(allMods, true);
+                        // Recalculate the dependency violations
+                        dependencyViolations = Meta.GetDependencyViolations(allMods);
+                        violationText = dependencyViolations.Item1;
+                        inactiveDependencies = dependencyViolations.Item2;
+                    });
 
+                    // Unable to resolve all dependencies.
+                    if (violationText.Count > 0)
+                    {
+                        Warning.WarnFailedToResolveDependencies(violationText);
+                        return;
+                    }
+                }
+                else if (depResponse == MessageBoxResult.No)
+                {
+                    // Do nothing. Trust the user to know what they're doing.
+                }
+                else
+                {
+                    // Abort.
+                    return;
+                }
+            }
+
+            // If we're turning a mod on, we need to check for conflicts in both directions because one mod might not know about the other.
             var conflicts = activeMods.Where(am => Meta.Conflicts.Contains(am.Id) || am.Meta.Conflicts.Contains(Id));
 
             if (!conflicts.Any())
             {
                 IsActive = true;
+                Manager.SetGreedyMods(allMods.Where(m => m.IsActive).ToList());
                 return;
             }
 
-            var conflictRows = string.Join('\n', conflicts.Select(c => "- " + c.Meta.Name));
-            var plural = conflicts.Count() > 1 ? "s" : "";
-            var response = MessageBox.Show($"A known conflict was detected while enabling {Meta.Name}:\n{conflictRows}\n\nTo continue activating {Meta.Name}, would you like to disable the conflicting mod{plural}?", "Conflict Detected", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
+            var conResponse = Warning.WarnOfConflicts(this, conflicts.ToList());
 
-            if (response == MessageBoxResult.Yes)
+            if (conResponse == MessageBoxResult.Yes)
             {
                 foreach (var c in conflicts)
                 {
@@ -380,7 +441,7 @@ namespace Greed.Models
                 }
                 IsActive = true;
             }
-            else if (response == MessageBoxResult.No)
+            else if (conResponse == MessageBoxResult.No)
             {
                 IsActive = true;
             }
@@ -388,7 +449,17 @@ namespace Greed.Models
             {
                 // Abort. Do nothing.
             }
-            ModManager.SetGreedyMods(allMods.Where(m => m.IsActive).ToList());
+            Manager.SetGreedyMods(allMods.Where(m => m.IsActive).ToList());
+        }
+
+        public bool HasDirectDependent(Mod potentialDependent)
+        {
+            return potentialDependent.Meta.Dependencies.Any(d => d.Id == Id);
+        }
+
+        public bool HasDirectDependency(Mod potentialDependency)
+        {
+            return potentialDependency.HasDirectDependent(this);
         }
     }
 }
