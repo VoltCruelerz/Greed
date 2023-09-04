@@ -37,6 +37,7 @@ _A mod decloader for [Sins of a Solar Empire II](https://www.sinsofasolarempire2
 - **Simple Load Order Control**: Drag-and-drop elements in the order of your choice.
 - **Conflict Detection**: You are warned if you try to enable mods with a known conflict between them.
 - **Dependency Management**: You are be warned if you attempt to enable a mod without its dependencies active.
+- **Online Mod List**: View an online listing of available Greedy mods.
 - **[TODO] Automated Installation**: You will be able to download from a curated list.
 
 ## Greedy Mod Development
