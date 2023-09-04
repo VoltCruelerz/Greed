@@ -21,12 +21,13 @@
                 </GridView>
             </ListView.View>
         </ListView>
-        <RichTextBox x:Name="TxtOnlineInfo" AutomationProperties.HelpText="Select a mod to see its details." IsReadOnly="True" Grid.Column="1" Margin="5,5,5,5" Background="#FFBDBDBD">
+        <RichTextBox x:Name="TxtOnlineInfo" AutomationProperties.HelpText="Select a mod to see its details." IsReadOnly="True" Grid.Column="1" Margin="4,5,5,26" Background="#FFBDBDBD">
             <FlowDocument>
                 <Paragraph>
                     <Run Text=""/>
                 </Paragraph>
             </FlowDocument>
         </RichTextBox>
+        <Label Grid.Column="1" Content="Listed mods are not validated for safety. Download at your own risk." HorizontalAlignment="Right" Width="371" Height="26" VerticalAlignment="Bottom"/>
     </Grid>
 </Window>
