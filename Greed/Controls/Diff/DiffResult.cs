@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 
-namespace Greed.Diff
+namespace Greed.Controls.Diff
 {
     public class DiffResult
     {

@@ -1,33 +1,41 @@
-﻿<Window x:Class="Greed.OnlineWindow"
+﻿<Window x:Class="Greed.Controls.Online.OnlineWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Greed"
+        xmlns:localControls="clr-namespace:Greed.Controls"
         mc:Ignorable="d"
-        Title="Online Greedy Mods" Height="425" Width="955" Icon="../icon.png" Background="#FFEDEDED" WindowStyle="ToolWindow">
+        Title="Online Greedy Mods" Height="425" Width="955" Icon="../../icon.png" Background="#FFEDEDED" WindowStyle="ToolWindow">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <ListView x:Name="ViewOnlineModList" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="5,5,5,5" SelectionChanged="OnlineModList_SelectionChanged">
+        <ListView x:Name="ViewOnlineModList" Margin="5,5,5,5" SelectionChanged="OnlineModList_SelectionChanged">
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem x:Name="MenuInstall" Header="Install" Click="MenuInstall_Click"/>
+                </ContextMenu>
+            </ListView.ContextMenu>
             <ListView.View>
                 <GridView x:Name="grdView">
                     <GridViewColumn Header="Mod Name" Width="160" DisplayMemberBinding="{Binding Name}" />
+                    <GridViewColumn Header="Author" Width="60" DisplayMemberBinding="{Binding Author}" />
                     <GridViewColumn Header="Version" Width="60" DisplayMemberBinding="{Binding Version}" />
-                    <GridViewColumn Header="Greed" Width="60" DisplayMemberBinding="{Binding GreedVersion}" />
+                    <GridViewColumn Header="Greed" Width="50" DisplayMemberBinding="{Binding GreedVersion}" />
                     <GridViewColumn Header="Sins" Width="60" DisplayMemberBinding="{Binding SinsVersion}" />
+                    <GridViewColumn Header="Modified" Width="60" DisplayMemberBinding="{Binding LastUpdated}" />
                 </GridView>
             </ListView.View>
         </ListView>
-        <RichTextBox x:Name="TxtOnlineInfo" AutomationProperties.HelpText="Select a mod to see its details." IsReadOnly="True" Grid.Column="1" Margin="4,5,5,26" Background="#FFBDBDBD">
+        <localControls:TxtModBox x:Name="TxtOnlineInfo" AutomationProperties.HelpText="Select a mod to see its details." IsReadOnly="True" Grid.Column="1" Margin="4,5,5,26" Background="#FFBDBDBD">
             <FlowDocument>
                 <Paragraph>
                     <Run Text=""/>
                 </Paragraph>
             </FlowDocument>
-        </RichTextBox>
+        </localControls:TxtModBox>
         <Label Grid.Column="1" Content="Listed mods are not validated for safety. Download at your own risk." HorizontalAlignment="Right" Width="371" Height="26" VerticalAlignment="Bottom"/>
     </Grid>
 </Window>

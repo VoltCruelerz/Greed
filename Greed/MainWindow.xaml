@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Greed"
+        xmlns:localControls="clr-namespace:Greed.Controls"
         mc:Ignorable="d"
         Title="Greed Mod Loader" Height="780" Width="1243" Icon="/icon.png" Background="#FFEDEDED" WindowStyle="ThreeDBorderWindow">
     <TabControl x:Name="Tabs" SelectionChanged="Tabs_SelectionChanged">
@@ -24,6 +25,12 @@
                           MouseUp="ModList_MouseUp"
                           MouseLeave="ModList_MouseLeave"
                           ToolTip="Click to view details. Double click to toggle.">
+                    <ListView.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem x:Name="MenuUninstall" Header="Uninstall" Click="MenuUninstall_Click"/>
+                            <MenuItem x:Name="MenuToggle" Header="Toggle" Click="Toggle_Click"/>
+                        </ContextMenu>
+                    </ListView.ContextMenu>
                     <ListView.View>
                         <GridView x:Name="grdView">
                             <GridViewColumn Header="" Width="30" DisplayMemberBinding="{Binding Active}" />
@@ -34,13 +41,13 @@
                         </GridView>
                     </ListView.View>
                 </ListView>
-                <RichTextBox x:Name="txtInfo" AutomationProperties.HelpText="Select a mod to see its details." IsReadOnly="True" Grid.Column="1" Margin="10,33,10,60" Background="#FFBDBDBD">
+                <localControls:TxtModBox x:Name="TxtLocalModInfo" AutomationProperties.HelpText="Select a mod to see its details." IsReadOnly="True" Grid.Column="1" Margin="10,33,10,60" Background="#FFBDBDBD">
                     <FlowDocument>
                         <Paragraph>
                             <Run Text=""/>
                         </Paragraph>
                     </FlowDocument>
-                </RichTextBox>
+                </localControls:TxtModBox>
                 <Button x:Name="cmdToggle" Content="Toggle" Margin="10,0,0,35" Click="Toggle_Click" IsEnabled="False" HorizontalAlignment="Left" Width="62" Grid.Column="1" ToolTip="Toggle whether a mod is active or not." Height="20" VerticalAlignment="Bottom"/>
                 <Label Content="Later mods overwrite." HorizontalAlignment="Left" Margin="78,12,0,0" VerticalAlignment="Top" Height="26" Width="126"/>
                 <Button x:Name="cmdExport" Content="Export Greedy Selections" Click="Export_Click" Margin="10,0,0,10" Grid.Column="1" ToolTip="Imports the active mods and exports them to mods/greed and turns greed on." Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="152"/>

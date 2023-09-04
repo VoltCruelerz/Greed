@@ -1,4 +1,4 @@
-﻿using Greed.Diff;
+﻿using Greed.Controls.Diff;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;

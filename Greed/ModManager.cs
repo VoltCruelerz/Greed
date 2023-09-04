@@ -1,4 +1,5 @@
-﻿using Greed.Interfaces;
+﻿using Greed.Controls;
+using Greed.Interfaces;
 using Greed.Models;
 using Greed.Models.EnabledMods;
 using Newtonsoft.Json;
@@ -142,7 +143,7 @@ namespace Greed
         /// <param name="destination">the destination index in the list</param>
         public void MoveMod(List<Mod> mods, Mod mover, int destination)
         {
-            var didMove = MoveModRecursive(mods, mover, destination);
+            MoveModRecursive(mods, mover, destination);
             SyncLoadOrder(mods);
         }
 

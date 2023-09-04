@@ -1,11 +1,11 @@
-﻿<Window x:Class="Greed.DiffWindow"
+﻿<Window x:Class="Greed.Controls.Diff.DiffWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Greed"
         mc:Ignorable="d"
-        Title="Greed Diff Engine" Height="1024" Width="1248" Icon="../icon.png" Background="#FFEDEDED" WindowStyle="ThreeDBorderWindow">
+        Title="Greed Diff Engine" Height="1024" Width="1248" Icon="../../icon.png" Background="#FFEDEDED" WindowStyle="ThreeDBorderWindow">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="400*"/>

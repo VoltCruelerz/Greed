@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 
-namespace Greed
+namespace Greed.Controls
 {
     /// <summary>
     /// This is separated out for the sake of unit testing ModManager proper.

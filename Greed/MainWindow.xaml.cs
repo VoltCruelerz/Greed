@@ -1,4 +1,6 @@
-﻿using Greed.Models;
+﻿using Greed.Controls.Diff;
+using Greed.Controls.Online;
+using Greed.Models;
 using Greed.Models.Json;
 using Greed.Models.ListItem;
 using System;
@@ -10,7 +12,6 @@ using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Documents;
 using System.Windows.Media;
 
 namespace Greed
@@ -55,8 +56,8 @@ namespace Greed
                 File.Move(LogPath, LogPrevPath);
             }
 
-            txtInfo.Document.Blocks.Clear();
-            txtInfo.AppendText("Select a mod to view details about it.");
+            TxtLocalModInfo.Document.Blocks.Clear();
+            TxtLocalModInfo.AppendText("Select a mod to view details about it.");
 
             string? modDir = ConfigurationManager.AppSettings["modDir"];
             txtModsDir.Text = modDir ?? "";
@@ -77,13 +78,13 @@ namespace Greed
             // Only load mods if there's something to load.
             if (Tabs.SelectedIndex != SettingsPageIndex)
             {
-                ReloadModList();
+                ReloadModListFromDisk();
             }
 
             pgbProgress.Value = 0;// Ranges [0, 100].
         }
 
-        private void ReloadModList()
+        private void ReloadModListFromDisk()
         {
             PrintSync("Loading Settings...");
             string modDir = ConfigurationManager.AppSettings["modDir"]!;
@@ -118,7 +119,7 @@ namespace Greed
             PrintSync("Load succeeded.");
 
             RefreshModListUI();
-            ReloadSourceList();
+            ReloadSourceFileList();
             PrintSync("Refresh Complete");
         }
 
@@ -170,47 +171,14 @@ namespace Greed
                 DestMod = SelectedMod;
             }
 
-            var doc = new FlowDocument(new Paragraph(new Run($"{SelectedMod.Meta.Name} v{SelectedMod.Meta.Version} (Sins {SelectedMod.Meta.SinsVersion})")
-            {
-                FontWeight = FontWeights.Bold
-            }));
-            doc.Blocks.Add(new Paragraph(new Run($"by {SelectedMod.Meta.Author}")
-            {
-                FontStyle = FontStyles.Italic
-            }));
-            doc.Blocks.Add(new Paragraph(new Run(SelectedMod.Meta.Url)
-            {
-                TextDecorations = TextDecorations.Underline
-            }));
-            doc.Blocks.Add(new Paragraph(new Run(SelectedMod.Meta.Description)));
-            if (SelectedMod.Meta.Dependencies.Any())
-            {
-                var p = new Paragraph(new Run("Dependencies")
-                {
-                    FontWeight = FontWeights.Bold
-                });
-                SelectedMod.Meta.Dependencies.ForEach(c => p.Inlines.Add(new Run("\r\n- " + c)));
-                doc.Blocks.Add(p);
-            }
-            if (SelectedMod.Meta.Conflicts.Any())
-            {
-                var p = new Paragraph(new Run("Conflicts")
-                {
-                    FontWeight = FontWeights.Bold
-                });
-                SelectedMod.Meta.Conflicts.ForEach(c => p.Inlines.Add(new Run("\r\n- " + c)));
-                doc.Blocks.Add(p);
-            }
-
-            SelectedMod.RenderReadme(doc.Blocks);
-            txtInfo.Document = doc;
+            TxtLocalModInfo.SetContent(SelectedMod.Meta, SelectedMod);
 
             // It starts disabled since nothing is selected.
             cmdToggle.IsEnabled = true;
             cmdToggle.Content = SelectedMod.IsActive ? "Deactivate" : "Activate";
             cmdDiff.IsEnabled = false;
 
-            ReloadSourceList();
+            ReloadSourceFileList();
         }
 
         private void ModList_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -284,14 +252,14 @@ namespace Greed
         private void Refresh_Click(object sender, RoutedEventArgs e)
         {
             PrintSync("Refresh_Click()");
-            ReloadModList();
+            ReloadModListFromDisk();
         }
 
         private void Export_Click(object sender, RoutedEventArgs e)
         {
             cmdExport.IsEnabled = false;
             ReselectSelection();
-            ReloadModList();
+            ReloadModListFromDisk();
 
             PrintSync("Exporting...");
             try
@@ -350,7 +318,7 @@ namespace Greed
             MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
-        private void ReloadSourceList()
+        private void ReloadSourceFileList()
         {
             SelectedSource = null;
             viewFileList.Items.Clear();
@@ -463,7 +431,7 @@ namespace Greed
                     // We have to set this BEFORE the file I/O so we don't start trying to load a second time while still in the first one.
                     // (This can happen if we focus an element and then switch tabs twice.)
                     SelectedTabIndex = i;
-                    ReloadModList();
+                    ReloadModListFromDisk();
                 }
                 else
                 {
@@ -530,6 +498,22 @@ namespace Greed
         {
             var onlinePopup = new OnlineWindow(await OnlineListing.GetOnlineListing(this), this);
             onlinePopup.ShowDialog();
+        }
+
+        private void MenuUninstall_Click(object sender, RoutedEventArgs e)
+        {
+            var response = MessageBox.Show($"Are you sure you want to uninstall {SelectedMod!.Meta.Name}?", $"Uninstalling {SelectedMod!.Meta.Name}", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (response == MessageBoxResult.Yes)
+            {
+                PrintSync($"Uninstalling {SelectedMod!.Meta.Name}...");
+                string modDir = ConfigurationManager.AppSettings["modDir"]!;
+                var path = modDir + "\\" + SelectedMod.Id;
+                if (Directory.Exists(path))
+                {
+                    Directory.Delete(path, true);
+                }
+                ReloadModListFromDisk();
+            }
         }
     }
 }

@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
 
-namespace Greed
+namespace Greed.Controls.Diff
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

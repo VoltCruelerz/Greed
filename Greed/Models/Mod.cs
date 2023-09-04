@@ -1,6 +1,7 @@
 ﻿using Greed.Interfaces;
 using Greed.Models.Json;
 using Greed.Models.Json.Text;
+using Greed.Models.Metadata;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -18,11 +19,11 @@ namespace Greed.Models
 {
     public partial class Mod
     {
-        private Metadata? Metadata { get; set; }
+        private LocalMetadata? Metadata { get; set; }
         private readonly IModManager Manager;
         private readonly IWarningPopup Warning;
 
-        public Metadata Meta => Metadata!;
+        public LocalMetadata Meta => Metadata!;
         public bool IsActive { get; private set; } = false;
         public string Readme { get; set; } = string.Empty;
         public string Id { get; set; } = string.Empty;
@@ -95,7 +96,7 @@ namespace Greed.Models
                 LoadOrder = int.MaxValue;
             }
 
-            Metadata = JsonConvert.DeserializeObject<Metadata>(File.ReadAllText(greedMetaFilename));
+            Metadata = JsonConvert.DeserializeObject<LocalMetadata>(File.ReadAllText(greedMetaFilename));
 
             var subpaths = Directory.GetDirectories(path);
             var subdirs = subpaths.Select(p => p[(path.Length + 1)..]);

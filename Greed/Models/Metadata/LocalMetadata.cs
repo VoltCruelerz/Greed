@@ -6,9 +6,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 
-namespace Greed.Models
+namespace Greed.Models.Metadata
 {
-    public class Metadata
+    public class LocalMetadata
     {
         [JsonRequired]
         [JsonProperty(PropertyName = "name")]
