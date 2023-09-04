@@ -18,6 +18,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="github-mark-white.svg" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="favicon.ico" />
   </ItemGroup>
 
@@ -27,6 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="github-mark-black.png" />
     <Resource Include="icon.png" />
   </ItemGroup>
 

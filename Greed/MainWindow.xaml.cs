@@ -525,5 +525,11 @@ namespace Greed
             SearchActive = cbx.IsChecked ?? false;
             RefreshModListUI();
         }
+
+        private async void CmdOnline_Click(object sender, RoutedEventArgs e)
+        {
+            var onlinePopup = new OnlineWindow(await OnlineListing.GetOnlineListing(this), this);
+            onlinePopup.ShowDialog();
+        }
     }
 }
