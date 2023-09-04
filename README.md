@@ -55,6 +55,7 @@ First, some definitions:
 - **Intelligent Merge**: Intelligent merging of localization files.
 - **File Diff**: Greed ships with a diff tool specifically for Sins II data files, allowing you to readily see exactly what you've done.
 - **Reduced Boilerplate**: Fractional files reduces the effort required to make small mods
+- **Improved Exposure**: Greed ships with a viewer of curated Greedy mods. By getting added to that list, your mods can reach more users.
 - **[TODO] Automated Updates**: Users will be able to update the latest version of your mod with a single click.
 - **[TODO] Dependency Autoinstall**: Users will be able to automatically install your mod's dependencies.
 
@@ -147,10 +148,14 @@ I welcome contributions. Just open a pull request.
 
 If at some point in the future, I can no longer maintain Greed, it's MIT licensed.
 
-## Bug Reports
+### Bug Reports
 
 In the event of an error, consult the log (viewable both in the textbox at the bottom of the frame and also in `log.txt`, found in whatever directory you've got Greed in).
 
 - If the error appears to be one with Greed itself, please [create a GitHub issue](https://github.com/VoltCruelerz/Greed/issues/new).
     - Be sure to use an appropriate label and include the log when submitting so I can hunt down the error easier.
 - Otherwise, contact the appropriate mod developer.
+
+## Contributing Mods
+
+To contribute a mod to the curated list, open a merge request [here](https://github.com/League-of-Greedy-Modders/Greedy-Mods).
