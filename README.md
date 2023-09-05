@@ -121,7 +121,7 @@ In all of these cases, if you leave an object's field undefined, it will not be 
 
 #### Localized Text
 
-If `*.localized_text` files were actually key-value pairs like they _should_ be (and will be in a future update), you could just use `*.gmr`, but they're not. They're weird little arrays of size 2. Additionally, a mod must have the _full_ list of all strings for it to be legal. This complications merging them, so I've created a custom solution for them:
+If `*.localized_text` files were actually key-value pairs like they _should_ be (and will be in a future update), you could just use `*.gmr`, but they're not. They're weird little arrays of size 2. Additionally, a mod must have the _full_ list of all strings for it to be legal. This complicates merging them, so I've created a custom solution for them:
 
 You should write your localized text files as if they were truncated to just the things you add or update. Greed will automatically upsert them for you when the greed files are generated.
 
