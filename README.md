@@ -1,6 +1,6 @@
 # The Greed Mod Manager
 
-_A mod decloader for [Sins of a Solar Empire II](https://www.sinsofasolarempire2.com/)_
+_A mod loader for [Sins of a Solar Empire II](https://www.sinsofasolarempire2.com/)_
 
 - [Github](https://github.com/VoltCruelerz/Greed)
 - [Forum](https://forums.sinsofasolarempire2.com/522050/page/1)
