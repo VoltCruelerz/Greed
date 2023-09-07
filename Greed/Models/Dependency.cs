@@ -1,5 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Configuration;
+using System.IO;
 
 namespace Greed.Models
 {
@@ -17,6 +19,26 @@ namespace Greed.Models
         public override string ToString()
         {
             return Id + " v" + Version.ToString();
+        }
+
+        /// <summary>
+        /// Synchronously checks if the dependency is outdated or missing.
+        /// </summary>
+        /// <param name="desiredVersion"></param>
+        /// <returns></returns>
+        public bool IsOutdatedOrMissing()
+        {
+            if (!ModManager.IsModInstalled(Id))
+            {
+                return true;
+            }
+
+            var installed = LocalInstall.Load(Id);
+            if (installed.GetVersion().CompareTo(Version) < 0)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

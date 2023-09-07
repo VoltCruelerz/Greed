@@ -9,10 +9,13 @@
         Title="Online Greedy Mods" Height="425" Width="955" Icon="../../icon.png" Background="#FFEDEDED" WindowStyle="ToolWindow">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
+            <ColumnDefinition Width="108*"/>
+            <ColumnDefinition Width="83*"/>
         </Grid.ColumnDefinitions>
-        <ListView x:Name="ViewOnlineModList" Margin="5,5,5,5" SelectionChanged="OnlineModList_SelectionChanged">
+        <TextBox x:Name="TxtSearchOnline" Margin="0,10,5,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" HorizontalAlignment="Right" Width="158" AutomationProperties.HelpText="Search 🔍" HorizontalContentAlignment="Right" TextChanged="TxtSearchOnline_TextChanged" Height="18"/>
+        <Label Content="🔍" Margin="0,4,136,0" VerticalAlignment="Top" Height="28" HorizontalAlignment="Right" Width="32" FontSize="14"/>
+        <CheckBox x:Name="CheckUninstalled" Content="Uninstalled Only" HorizontalAlignment="Left" Margin="10,12,0,0" VerticalAlignment="Top" Unchecked="CheckUninstalled_Toggle" Checked="CheckUninstalled_Toggle" RenderTransformOrigin="0.017,-0.019" Height="15" Width="107"/>
+        <ListView x:Name="ViewOnlineModList" Margin="5,30,5,5" SelectionChanged="OnlineModList_SelectionChanged">
             <ListView.ContextMenu>
                 <ContextMenu>
                     <MenuItem x:Name="MenuInstall" Header="Install" Click="MenuInstall_Click"/>
@@ -20,8 +23,9 @@
             </ListView.ContextMenu>
             <ListView.View>
                 <GridView x:Name="grdView">
+                    <GridViewColumn Header="" Width="30" DisplayMemberBinding="{Binding IsInstalled}" />
                     <GridViewColumn Header="Mod Name" Width="160" DisplayMemberBinding="{Binding Name}" />
-                    <GridViewColumn Header="Author" Width="60" DisplayMemberBinding="{Binding Author}" />
+                    <GridViewColumn Header="Author" Width="100" DisplayMemberBinding="{Binding Author}" />
                     <GridViewColumn Header="Version" Width="60" DisplayMemberBinding="{Binding Version}" />
                     <GridViewColumn Header="Greed" Width="50" DisplayMemberBinding="{Binding GreedVersion}" />
                     <GridViewColumn Header="Sins" Width="60" DisplayMemberBinding="{Binding SinsVersion}" />

@@ -1,4 +1,4 @@
-﻿using Greed.Models.Metadata;
+﻿using Greed.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -6,9 +6,9 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace Greed.Models
+namespace Greed.Models.Online
 {
-    public class OnlineListing
+    public class OnlineChannel
     {
         [JsonRequired]
         [JsonProperty(PropertyName = "latestGreed")]
@@ -16,23 +16,23 @@ namespace Greed.Models
 
         [JsonRequired]
         [JsonProperty(PropertyName = "mods")]
-        public List<OnlineMetadata> Mods { get; set; } = new List<OnlineMetadata>();
+        public List<OnlineMod> Mods { get; set; } = new();
 
-        public async static Task<OnlineListing> GetOnlineListing(MainWindow window)
+        public async static Task<OnlineChannel> GetOnlineListing(MainWindow window)
         {
             var client = new HttpClient();
             try
             {
-                var result = await client.GetAsync("https://raw.githubusercontent.com/League-of-Greedy-Modders/Greedy-Mods/main/mods.json");
+                var result = await client.GetAsync("https://raw.githubusercontent.com/League-of-Greedy-Modders/Greedy-Mods/main/beta.json");// TODO - go back to live
                 var json = await result.Content.ReadAsStringAsync();
-                var listing = JsonConvert.DeserializeObject<OnlineListing>(json);
+                var listing = JsonConvert.DeserializeObject<OnlineChannel>(json);
                 return listing!;
             }
             catch (Exception ex)
             {
-                window.PrintAsync(ex.Message + "\n" + ex.StackTrace);
+                window.CriticalAlertPopup("Failed to Load Online Mod Listing", ex);
             }
-            return new OnlineListing();
+            return new OnlineChannel();
         }
     }
 }

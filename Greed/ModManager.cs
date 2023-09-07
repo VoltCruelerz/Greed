@@ -2,6 +2,7 @@
 using Greed.Interfaces;
 using Greed.Models;
 using Greed.Models.EnabledMods;
+using Greed.Models.Online;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -170,7 +171,7 @@ namespace Greed
             var moveDependencies = false;
             if (blockedByDependencies)
             {
-                var result = Warning.WarnOfDependencyOrder(mover, dependencyViolations.Select(d => $"- Dependency Order Violation: {d.Meta.Name}").ToList());
+                var result = Warning.DependencyOrder(mover, dependencyViolations.Select(d => $"- Dependency Order Violation: {d.Meta.Name}").ToList());
                 if (result == MessageBoxResult.Yes)
                 {
                     blockedByDependencies = false;
@@ -190,7 +191,7 @@ namespace Greed
             var moveDependents = false;
             if (blockedByDependents)
             {
-                var result = Warning.WarnOfDependencyOrder(mover, dependentViolations.Select(d => $"- Dependent Order Violation: {d.Meta.Name}").ToList());
+                var result = Warning.DependencyOrder(mover, dependentViolations.Select(d => $"- Dependent Order Violation: {d.Meta.Name}").ToList());
                 if (result == MessageBoxResult.Yes)
                 {
                     blockedByDependents = false;
@@ -311,6 +312,67 @@ namespace Greed
                     .ToList();
 
             return !dependencyViolations.Any();
+        }
+
+        /// <summary>
+        /// Syncronously checks for the existing of the specified mod in the directory.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public static bool IsModInstalled(string id)
+        {
+            string modDir = ConfigurationManager.AppSettings["modDir"]!;
+            var modDirs = Directory.GetDirectories(modDir).Select(d => d.Split("\\")[^1]);
+            return modDirs.Contains(id);
+        }
+
+        public static void Uninstall(MainWindow window, WarningPopup warning, List<Mod> installedMods, string id)
+        {
+            window.PrintAsync($"Uninstalling {id}...");
+            var modToUninstall = installedMods.Find(m => m.Id == id)!;
+            var dependents = installedMods.Where(m => m.Meta.Dependencies.Select(d => d.Id).Contains(id));
+            if (dependents.Any())
+            {
+                foreach (var dep in dependents)
+                {
+                    var response = warning.ChainedUninstall(modToUninstall, dep);
+                    if (response == MessageBoxResult.Yes)
+                    {
+                        Uninstall(window, warning, installedMods, dep.Id);
+                        DeleteModFolder(id);
+                        window.ReloadModListFromDiskAsync();
+                    }
+                    else if (response == MessageBoxResult.No)
+                    {
+                        DeleteModFolder(id);
+                        window.ReloadModListFromDiskAsync();
+                    }
+                    else
+                    {
+                        // Abort.
+                        return;
+                    }
+                }
+            }
+            else
+            {
+                var response = MessageBox.Show($"Are you sure you want to uninstall {id}?", $"Uninstalling {id}", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (response == MessageBoxResult.Yes)
+                {
+                    DeleteModFolder(id);
+                    window.ReloadModListFromDiskAsync();
+                }
+            }
+        }
+
+        private static void DeleteModFolder(string id)
+        {
+            string modDir = ConfigurationManager.AppSettings["modDir"]!;
+            var path = modDir + "\\" + id;
+            if (Directory.Exists(path))
+            {
+                Directory.Delete(path, true);
+            }
         }
     }
 }

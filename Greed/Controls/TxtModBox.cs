@@ -9,9 +9,9 @@ namespace Greed.Controls
 {
     public class TxtModBox : RichTextBox
     {
-        public void SetContent(LocalMetadata meta, Mod? localMod)
+        public void SetContent(BasicMetadata meta, Mod? localMod)
         {
-            var doc = new FlowDocument(new Paragraph(new Run($"{meta.Name} v{meta.Version} (Sins {meta.SinsVersion})")
+            var doc = new FlowDocument(new Paragraph(new Run($"{meta.Name} v{meta.GetVersion()} (Sins {meta.GetSinsVersion()})")
             {
                 FontWeight = FontWeights.Bold
             }));
@@ -24,22 +24,22 @@ namespace Greed.Controls
                 TextDecorations = System.Windows.TextDecorations.Underline
             }));
             doc.Blocks.Add(new Paragraph(new Run(meta.Description)));
-            if (meta.Dependencies.Any())
+            if (meta.GetDependencies().Any())
             {
                 var p = new Paragraph(new Run("Dependencies")
                 {
                     FontWeight = FontWeights.Bold
                 });
-                meta.Dependencies.ForEach(c => p.Inlines.Add(new Run("\r\n- " + c)));
+                meta.GetDependencies().ForEach(c => p.Inlines.Add(new Run("\r\n- " + c)));
                 doc.Blocks.Add(p);
             }
-            if (meta.Conflicts.Any())
+            if (meta.GetConflicts().Any())
             {
                 var p = new Paragraph(new Run("Conflicts")
                 {
                     FontWeight = FontWeights.Bold
                 });
-                meta.Conflicts.ForEach(c => p.Inlines.Add(new Run("\r\n- " + c)));
+                meta.GetConflicts().ForEach(c => p.Inlines.Add(new Run("\r\n- " + c)));
                 doc.Blocks.Add(p);
             }
 

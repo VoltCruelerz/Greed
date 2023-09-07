@@ -3,6 +3,7 @@ using Greed.Controls.Online;
 using Greed.Models;
 using Greed.Models.Json;
 using Greed.Models.ListItem;
+using Greed.Models.Online;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -82,6 +83,11 @@ namespace Greed
             }
 
             pgbProgress.Value = 0;// Ranges [0, 100].
+        }
+
+        public void ReloadModListFromDiskAsync()
+        {
+            Dispatcher.Invoke(() => ReloadModListFromDisk());
         }
 
         private void ReloadModListFromDisk()
@@ -307,7 +313,7 @@ namespace Greed
             }
         }
 
-        private void CriticalAlertPopup(string title, Exception ex)
+        public void CriticalAlertPopup(string title, Exception ex)
         {
             CriticalAlertPopup(title, ex.Message + "\n" + ex.StackTrace);
         }
@@ -496,24 +502,18 @@ namespace Greed
 
         private async void CmdOnline_Click(object sender, RoutedEventArgs e)
         {
-            var onlinePopup = new OnlineWindow(await OnlineListing.GetOnlineListing(this), this);
+            var onlinePopup = new OnlineWindow(await OnlineChannel.GetOnlineListing(this), this);
             onlinePopup.ShowDialog();
         }
 
         private void MenuUninstall_Click(object sender, RoutedEventArgs e)
         {
-            var response = MessageBox.Show($"Are you sure you want to uninstall {SelectedMod!.Meta.Name}?", $"Uninstalling {SelectedMod!.Meta.Name}", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            if (response == MessageBoxResult.Yes)
-            {
-                PrintSync($"Uninstalling {SelectedMod!.Meta.Name}...");
-                string modDir = ConfigurationManager.AppSettings["modDir"]!;
-                var path = modDir + "\\" + SelectedMod.Id;
-                if (Directory.Exists(path))
-                {
-                    Directory.Delete(path, true);
-                }
-                ReloadModListFromDisk();
-            }
+            ModManager.Uninstall(this, new Controls.WarningPopup(), Mods, SelectedMod!.Id);
+        }
+
+        public bool IsModInstalled(string id)
+        {
+            return Mods.Any(m => m.Id == id);
         }
     }
 }

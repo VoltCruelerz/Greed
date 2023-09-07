@@ -1,5 +1,4 @@
-﻿using Greed.Models.Metadata;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace Greed.UnitTest.Models
 {
@@ -12,7 +11,7 @@ namespace Greed.UnitTest.Models
             // Arrange
 
             // Act
-            var meta = JsonConvert.DeserializeObject<LocalMetadata>(File.ReadAllText("..\\..\\..\\json\\metadata\\greed.json"))!;
+            var meta = JsonConvert.DeserializeObject<LocalInstall>(File.ReadAllText("..\\..\\..\\json\\metadata\\greed.json"))!;
             var violations = meta.IsLegalVersion(new Version("1.15.1.0"));
 
             // Assert
@@ -30,7 +29,7 @@ namespace Greed.UnitTest.Models
         public void Load_Deprecated_Greed()
         {
             // Arrange
-            var meta = JsonConvert.DeserializeObject<LocalMetadata>(File.ReadAllText("..\\..\\..\\json\\metadata\\\\deprecatedGreed.json"))!;
+            var meta = JsonConvert.DeserializeObject<LocalInstall>(File.ReadAllText("..\\..\\..\\json\\metadata\\\\deprecatedGreed.json"))!;
 
             // Act
             var violations = meta.IsLegalVersion(new Version("1.14.3.0"));
@@ -43,7 +42,7 @@ namespace Greed.UnitTest.Models
         public void Load_Deprecated_Sins()
         {
             // Arrange
-            var meta = JsonConvert.DeserializeObject<LocalMetadata>(File.ReadAllText("..\\..\\..\\json\\metadata\\\\deprecatedSins.json"))!;
+            var meta = JsonConvert.DeserializeObject<LocalInstall>(File.ReadAllText("..\\..\\..\\json\\metadata\\\\deprecatedSins.json"))!;
 
             // Act
             var violations = meta.IsLegalVersion(new Version("1.14.3.0"));

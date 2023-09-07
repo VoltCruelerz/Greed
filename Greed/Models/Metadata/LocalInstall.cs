@@ -1,34 +1,21 @@
-﻿using Newtonsoft.Json;
+﻿using Greed.Models.Metadata;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json;
 
-namespace Greed.Models.Metadata
+namespace Greed.Models
 {
-    public class LocalMetadata
+    public class LocalInstall : BasicMetadata
     {
-        [JsonRequired]
-        [JsonProperty(PropertyName = "name")]
-        public string Name { get; set; } = string.Empty;
-
-        [JsonRequired]
-        [JsonProperty(PropertyName = "description")]
-        public string Description { get; set; } = string.Empty;
-
-        [JsonRequired]
-        [JsonProperty(PropertyName = "author")]
-        public string Author { get; set; } = string.Empty;
-
         [JsonRequired]
         [JsonProperty(PropertyName = "version")]
         public Version Version { get; set; } = new Version("0.0.0");
-
-        [JsonRequired]
-        [JsonProperty(PropertyName = "url")]
-        public string Url { get; set; } = string.Empty;
 
         [JsonRequired]
         [JsonProperty(PropertyName = "greedVersion")]
@@ -42,8 +29,19 @@ namespace Greed.Models.Metadata
         [JsonProperty(PropertyName = "dependencies")]
         public List<Dependency> Dependencies { get; set; } = new List<Dependency>();
 
+        [JsonRequired]
         [JsonProperty(PropertyName = "conflicts")]
         public List<string> Conflicts { get; set; } = new List<string>();
+
+        public override Version GetVersion() { return Version; }
+
+        public override Version GetGreedVersion() { return GreedVersion; }
+
+        public override Version GetSinsVersion() { return SinsVersion; }
+
+        public override List<Dependency> GetDependencies() { return Dependencies; }
+
+        public override List<string> GetConflicts() { return Conflicts; }
 
         /// <summary>
         /// Returns which file version is mismatched.
@@ -115,6 +113,18 @@ namespace Greed.Models.Metadata
         public List<Mod> GetDependencyMods(List<Mod> allMods)
         {
             return allMods.Where(m => Dependencies.Any(d => d.Id == m.Id)).ToList();
+        }
+
+        /// <summary>
+        /// Synchronously loads a LocalInstall from the mods directory.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public static LocalInstall Load(string id)
+        {
+            var modDir = ConfigurationManager.AppSettings["modDir"]!;
+            var greedPath = modDir + "\\" + id + "\\greed.json";
+            return JsonConvert.DeserializeObject<LocalInstall>(File.ReadAllText(greedPath))!;
         }
     }
 }

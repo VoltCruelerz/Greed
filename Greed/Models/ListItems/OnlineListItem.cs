@@ -1,5 +1,6 @@
-﻿using Greed.Models.Metadata;
+﻿using Greed.Models.Online;
 using System;
+using System.Windows.Shapes;
 
 namespace Greed.Models.ListItem
 {
@@ -17,15 +18,20 @@ namespace Greed.Models.ListItem
 
         public string LastUpdated { get; set; }
 
-        public OnlineListItem(OnlineMetadata m)
+        public string IsInstalled { get; set; }
+
+        public OnlineListItem(OnlineMod m)
         {
             Name = m.Name;
             Id = m.Id ?? m.Name;
             Author = m.Author;
-            Version = m.Version.ToString();
-            GreedVersion = m.GreedVersion.ToString();
-            SinsVersion = m.SinsVersion.ToString();
-            LastUpdated = !string.IsNullOrEmpty(m.LastUpdated) ? m.LastUpdated : DateTime.Today.ToString();
+            Version = m.Latest.ToString();
+            GreedVersion = m.Live.GreedVersion.ToString();
+            SinsVersion = m.Live.SinsVersion.ToString();
+            LastUpdated = !string.IsNullOrEmpty(m.Live.DateAdded)
+                ? m.Live.DateAdded
+                : DateTime.Today.ToString();
+            IsInstalled = ModManager.IsModInstalled(Id) ? "✓" : " ";
         }
     }
 }

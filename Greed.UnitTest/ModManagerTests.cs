@@ -143,7 +143,7 @@ namespace Greed.UnitTest
             });
 
             MockWarning
-                .Setup(w => w.WarnOfDependencyOrder(It.IsAny<Mod>(), It.IsAny<List<string>>()))
+                .Setup(w => w.DependencyOrder(It.IsAny<Mod>(), It.IsAny<List<string>>()))
                 .Returns(System.Windows.MessageBoxResult.Yes);
 
             // Act
@@ -181,7 +181,7 @@ namespace Greed.UnitTest
             });
 
             MockWarning
-                .Setup(w => w.WarnOfDependencyOrder(It.Is<Mod>(m => m == dependent), It.IsAny<List<string>>()))
+                .Setup(w => w.DependencyOrder(It.Is<Mod>(m => m == dependent), It.IsAny<List<string>>()))
                 .Returns(System.Windows.MessageBoxResult.Yes);
 
             // Act
@@ -217,7 +217,7 @@ namespace Greed.UnitTest
             });
 
             MockWarning
-                .Setup(w => w.WarnOfDependencyOrder(It.Is<Mod>(m => m == dependent), It.IsAny<List<string>>()))
+                .Setup(w => w.DependencyOrder(It.Is<Mod>(m => m == dependent), It.IsAny<List<string>>()))
                 .Returns(System.Windows.MessageBoxResult.Cancel);
 
             // Act
@@ -253,7 +253,7 @@ namespace Greed.UnitTest
             });
 
             MockWarning
-                .Setup(w => w.WarnOfDependencyOrder(It.Is<Mod>(m => m == dependent), It.IsAny<List<string>>()))
+                .Setup(w => w.DependencyOrder(It.Is<Mod>(m => m == dependent), It.IsAny<List<string>>()))
                 .Returns(System.Windows.MessageBoxResult.No);
 
             // Act
@@ -291,7 +291,7 @@ namespace Greed.UnitTest
             });
 
             MockWarning
-                .Setup(w => w.WarnOfDependencyOrder(It.IsAny<Mod>(), It.IsAny<List<string>>()))
+                .Setup(w => w.DependencyOrder(It.IsAny<Mod>(), It.IsAny<List<string>>()))
                 .Returns(System.Windows.MessageBoxResult.Yes);
 
             // Act
@@ -327,7 +327,7 @@ namespace Greed.UnitTest
             });
 
             MockWarning
-                .Setup(w => w.WarnOfDependencyOrder(It.IsAny<Mod>(), It.IsAny<List<string>>()))
+                .Setup(w => w.DependencyOrder(It.IsAny<Mod>(), It.IsAny<List<string>>()))
                 .Returns(System.Windows.MessageBoxResult.Cancel);
 
             // Act
@@ -363,7 +363,7 @@ namespace Greed.UnitTest
             });
 
             MockWarning
-                .Setup(w => w.WarnOfDependencyOrder(It.IsAny<Mod>(), It.IsAny<List<string>>()))
+                .Setup(w => w.DependencyOrder(It.IsAny<Mod>(), It.IsAny<List<string>>()))
                 .Returns(System.Windows.MessageBoxResult.No);
 
             // Act
@@ -401,7 +401,7 @@ namespace Greed.UnitTest
             });
 
             MockWarning
-                .Setup(w => w.WarnOfDependencyOrder(It.IsAny<Mod>(), It.IsAny<List<string>>()))
+                .Setup(w => w.DependencyOrder(It.IsAny<Mod>(), It.IsAny<List<string>>()))
                 .Returns(System.Windows.MessageBoxResult.Yes);
 
             // Act
@@ -439,7 +439,7 @@ namespace Greed.UnitTest
             });
 
             MockWarning
-                .Setup(w => w.WarnOfDependencyOrder(It.IsAny<Mod>(), It.IsAny<List<string>>()))
+                .Setup(w => w.DependencyOrder(It.IsAny<Mod>(), It.IsAny<List<string>>()))
                 .Returns(System.Windows.MessageBoxResult.Yes);
 
             // Act
@@ -475,7 +475,7 @@ namespace Greed.UnitTest
             });
 
             MockWarning
-                .Setup(w => w.WarnOfDependencyOrder(It.IsAny<Mod>(), It.IsAny<List<string>>()))
+                .Setup(w => w.DependencyOrder(It.IsAny<Mod>(), It.IsAny<List<string>>()))
                 .Returns(System.Windows.MessageBoxResult.Cancel);
 
             // Act
@@ -511,7 +511,7 @@ namespace Greed.UnitTest
             });
 
             MockWarning
-                .Setup(w => w.WarnOfDependencyOrder(It.IsAny<Mod>(), It.IsAny<List<string>>()))
+                .Setup(w => w.DependencyOrder(It.IsAny<Mod>(), It.IsAny<List<string>>()))
                 .Returns(System.Windows.MessageBoxResult.No);
 
             // Act

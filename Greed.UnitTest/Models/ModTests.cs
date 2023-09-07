@@ -38,7 +38,7 @@ namespace Greed.UnitTest.Models
                 conflict
             };
             MockWarning
-                .Setup(m => m.WarnOfConflicts(It.IsAny<Mod>(), It.IsAny<List<Mod>>()))
+                .Setup(m => m.Conflicts(It.IsAny<Mod>(), It.IsAny<List<Mod>>()))
                 .Returns(() => System.Windows.MessageBoxResult.Cancel);
 
             // Act
@@ -64,7 +64,7 @@ namespace Greed.UnitTest.Models
                 conflict
             };
             MockWarning
-                .Setup(m => m.WarnOfConflicts(It.IsAny<Mod>(), It.IsAny<List<Mod>>()))
+                .Setup(m => m.Conflicts(It.IsAny<Mod>(), It.IsAny<List<Mod>>()))
                 .Returns(() => System.Windows.MessageBoxResult.Yes);
 
             // Act
@@ -90,7 +90,7 @@ namespace Greed.UnitTest.Models
                 conflict
             };
             MockWarning
-                .Setup(m => m.WarnOfConflicts(It.IsAny<Mod>(), It.IsAny<List<Mod>>()))
+                .Setup(m => m.Conflicts(It.IsAny<Mod>(), It.IsAny<List<Mod>>()))
                 .Returns(() => System.Windows.MessageBoxResult.No);
 
             // Act
@@ -118,7 +118,7 @@ namespace Greed.UnitTest.Models
                 dep
             };
             MockWarning
-                .Setup(m => m.WarnOfDependents(It.IsAny<Mod>(), It.IsAny<List<Mod>>()))
+                .Setup(m => m.Dependents(It.IsAny<Mod>(), It.IsAny<List<Mod>>()))
                 .Returns(() => System.Windows.MessageBoxResult.Cancel);
 
             // Act
@@ -143,7 +143,7 @@ namespace Greed.UnitTest.Models
                 dep
             };
             MockWarning
-                .Setup(m => m.WarnOfDependencies(It.IsAny<Mod>(), It.IsAny<List<string>>(), It.IsAny<List<Mod>>()))
+                .Setup(m => m.Dependencies(It.IsAny<Mod>(), It.IsAny<List<string>>(), It.IsAny<List<Mod>>()))
                 .Returns(() => System.Windows.MessageBoxResult.Yes);
 
             // Act
@@ -168,7 +168,7 @@ namespace Greed.UnitTest.Models
                 dep
             };
             MockWarning
-                .Setup(m => m.WarnOfDependencies(It.IsAny<Mod>(), It.IsAny<List<string>>(), It.IsAny<List<Mod>>()))
+                .Setup(m => m.Dependencies(It.IsAny<Mod>(), It.IsAny<List<string>>(), It.IsAny<List<Mod>>()))
                 .Returns(() => System.Windows.MessageBoxResult.No);
 
             // Act
@@ -195,7 +195,7 @@ namespace Greed.UnitTest.Models
                 dep
             };
             MockWarning
-                .Setup(m => m.WarnOfDependents(It.IsAny<Mod>(), It.IsAny<List<Mod>>()))
+                .Setup(m => m.Dependents(It.IsAny<Mod>(), It.IsAny<List<Mod>>()))
                 .Returns(() => System.Windows.MessageBoxResult.Cancel);
 
             // Act
@@ -222,7 +222,7 @@ namespace Greed.UnitTest.Models
                 dep
             };
             MockWarning
-                .Setup(m => m.WarnOfDependents(It.IsAny<Mod>(), It.IsAny<List<Mod>>()))
+                .Setup(m => m.Dependents(It.IsAny<Mod>(), It.IsAny<List<Mod>>()))
                 .Returns(() => System.Windows.MessageBoxResult.Yes);
 
             // Act
@@ -249,7 +249,7 @@ namespace Greed.UnitTest.Models
                 dep
             };
             MockWarning
-                .Setup(m => m.WarnOfDependents(It.IsAny<Mod>(), It.IsAny<List<Mod>>()))
+                .Setup(m => m.Dependents(It.IsAny<Mod>(), It.IsAny<List<Mod>>()))
                 .Returns(() => System.Windows.MessageBoxResult.No);
 
             // Act
@@ -278,7 +278,7 @@ namespace Greed.UnitTest.Models
                 dep
             };
             MockWarning
-                .Setup(m => m.WarnOfDependencies(It.IsAny<Mod>(), It.IsAny<List<string>>(), It.IsAny<List<Mod>>()))
+                .Setup(m => m.Dependencies(It.IsAny<Mod>(), It.IsAny<List<string>>(), It.IsAny<List<Mod>>()))
                 .Returns(() => System.Windows.MessageBoxResult.Yes);
 
             // Act
@@ -288,7 +288,7 @@ namespace Greed.UnitTest.Models
             Assert.IsFalse(mod.IsActive);
             Assert.IsFalse(dep.IsActive);
             MockManager.Verify(m => m.SetGreedyMods(It.IsAny<List<Mod>>()), Times.Never);
-            MockWarning.Verify(m => m.WarnFailedToResolveDependencies(It.IsAny<List<string>>()), Times.Once);
+            MockWarning.Verify(m => m.FailedToResolveDependencies(It.IsAny<List<string>>()), Times.Once);
         }
         #endregion
     }

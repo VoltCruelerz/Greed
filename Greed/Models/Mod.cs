@@ -1,7 +1,6 @@
 ﻿using Greed.Interfaces;
 using Greed.Models.Json;
 using Greed.Models.Json.Text;
-using Greed.Models.Metadata;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -19,11 +18,11 @@ namespace Greed.Models
 {
     public partial class Mod
     {
-        private LocalMetadata? Metadata { get; set; }
+        private LocalInstall? Metadata { get; set; }
         private readonly IModManager Manager;
         private readonly IWarningPopup Warning;
 
-        public LocalMetadata Meta => Metadata!;
+        public LocalInstall Meta => Metadata!;
         public bool IsActive { get; private set; } = false;
         public string Readme { get; set; } = string.Empty;
         public string Id { get; set; } = string.Empty;
@@ -96,7 +95,7 @@ namespace Greed.Models
                 LoadOrder = int.MaxValue;
             }
 
-            Metadata = JsonConvert.DeserializeObject<LocalMetadata>(File.ReadAllText(greedMetaFilename));
+            Metadata = JsonConvert.DeserializeObject<LocalInstall>(File.ReadAllText(greedMetaFilename));
 
             var subpaths = Directory.GetDirectories(path);
             var subdirs = subpaths.Select(p => p[(path.Length + 1)..]);
@@ -366,7 +365,7 @@ namespace Greed.Models
 
                 if (dependents.Any())
                 {
-                    var depResponse = Warning.WarnOfDependents(this, dependents);
+                    var depResponse = Warning.Dependents(this, dependents);
                     if (depResponse == MessageBoxResult.Yes)
                     {
                         dependents.ForEach(d => d.SetModActivity(allMods, false));
@@ -392,7 +391,7 @@ namespace Greed.Models
             var inactiveDependencies = dependencyViolations.Item2;
             if (violationText.Any())
             {
-                var depResponse = Warning.WarnOfDependencies(this, violationText, inactiveDependencies);
+                var depResponse = Warning.Dependencies(this, violationText, inactiveDependencies);
                 if (depResponse == MessageBoxResult.Yes)
                 {
                     inactiveDependencies.ForEach(d =>
@@ -407,7 +406,7 @@ namespace Greed.Models
                     // Unable to resolve all dependencies.
                     if (violationText.Count > 0)
                     {
-                        Warning.WarnFailedToResolveDependencies(violationText);
+                        Warning.FailedToResolveDependencies(violationText);
                         return;
                     }
                 }
@@ -432,7 +431,7 @@ namespace Greed.Models
                 return;
             }
 
-            var conResponse = Warning.WarnOfConflicts(this, conflicts.ToList());
+            var conResponse = Warning.Conflicts(this, conflicts.ToList());
 
             if (conResponse == MessageBoxResult.Yes)
             {
