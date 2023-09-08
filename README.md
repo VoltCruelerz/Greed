@@ -38,7 +38,7 @@ _A mod loader for [Sins of a Solar Empire II](https://www.sinsofasolarempire2.co
 - **Conflict Detection**: You are warned if you try to enable mods with a known conflict between them.
 - **Dependency Management**: You are be warned if you attempt to enable a mod without its dependencies active.
 - **Online Mod List**: View an online listing of available Greedy mods.
-- **[TODO] Automated Installation**: You will be able to download from a curated list.
+- **Automated Installation**: You can automatically mods and their dependencies from a curated list.
 
 ## Greedy Mod Development
 
@@ -56,8 +56,8 @@ First, some definitions:
 - **File Diff**: Greed ships with a diff tool specifically for Sins II data files, allowing you to readily see exactly what you've done.
 - **Reduced Boilerplate**: Fractional files reduces the effort required to make small mods
 - **Improved Exposure**: Greed ships with a viewer of curated Greedy mods. By getting added to that list, your mods can reach more users.
-- **[TODO] Automated Updates**: Users will be able to update the latest version of your mod with a single click.
-- **[TODO] Dependency Autoinstall**: Users will be able to automatically install your mod's dependencies.
+- **Automated Updates**: Users can update to the latest version of your mod.
+- **Dependency Autoinstall**: Users can automatically install your mod's dependencies.
 
 ![screenshot](assets/DiffScreenshot.png)
 

@@ -14,6 +14,10 @@ namespace Greed.Models.Online
         public Version LatestGreed = new("0.0.0");
 
         [JsonRequired]
+        [JsonProperty(PropertyName = "latestSins")]
+        public Version LatestSins = new("0.0.0");
+
+        [JsonRequired]
         [JsonProperty(PropertyName = "mods")]
         public List<OnlineMod> Mods { get; set; } = new();
 

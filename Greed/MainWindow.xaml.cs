@@ -47,6 +47,7 @@ namespace Greed
         public MainWindow()
         {
             InitializeComponent();
+            SetTitle();
             ReloadCatalog();
             PrintSync("Components Loaded");
 
@@ -93,12 +94,8 @@ namespace Greed
             Dispatcher.Invoke(() => ReloadModListFromDisk());
         }
 
-        /// <summary>
-        /// Reloads the list of installed mods
-        /// </summary>
-        private void ReloadModListFromDisk()
+        private void SetTitle()
         {
-            PrintSync("Loading Settings...");
             string modDir = ConfigurationManager.AppSettings["modDir"]!;
             string sinsDir = ConfigurationManager.AppSettings["sinsDir"]!;
             PrintSync($"Mod Dir: {modDir}");
@@ -106,7 +103,10 @@ namespace Greed
             try
             {
                 var greedVersion = Assembly.GetExecutingAssembly().GetName().Version!;
-                this.Title = $"Greed Mod Loader v{greedVersion} (Detected Sins II v{FileVersionInfo.GetVersionInfo(sinsDir + "\\sins2.exe").FileVersion})";
+                var updateStr = greedVersion.CompareTo(Catalog.LatestGreed) < 0
+                    ? $" - ⚠ Greed v{Catalog.LatestGreed} is now available! ⚠"
+                    : "";
+                this.Title = $"Greed Mod Loader v{greedVersion} (Detected Sins II v{FileVersionInfo.GetVersionInfo(sinsDir + "\\sins2.exe").FileVersion}){updateStr}";
             }
             catch (Exception)
             {
@@ -115,7 +115,19 @@ namespace Greed
                 Tabs.SelectedIndex = SettingsPageIndex;
                 return;
             }
+        }
 
+        private void SetTitleAsync()
+        {
+            Dispatcher.Invoke(() => SetTitle());
+        }
+
+        /// <summary>
+        /// Reloads the list of installed mods
+        /// </summary>
+        private void ReloadModListFromDisk()
+        {
+            PrintSync("Loading Settings...");
             PrintSync("Loading mods...");
             try
             {
@@ -171,6 +183,7 @@ namespace Greed
             {
                 Catalog = await OnlineCatalog.GetOnlineListing(this);
                 RefreshModListUIAsync();
+                SetTitleAsync();
             }).ConfigureAwait(false);
         }
 
