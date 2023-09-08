@@ -10,7 +10,9 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -326,10 +328,18 @@ namespace Greed
             return modDirs.Contains(id);
         }
 
-        public static void Uninstall(MainWindow window, WarningPopup warning, List<Mod> installedMods, string id)
+        public static void Uninstall(MainWindow window, WarningPopup warning, List<Mod> installedMods, string id, bool force = false)
         {
             window.PrintAsync($"Uninstalling {id}...");
             var modToUninstall = installedMods.Find(m => m.Id == id)!;
+
+            if (force)
+            {
+                DeleteModFolder(id);
+                window.ReloadModListFromDiskAsync();
+                return;
+            }
+
             var dependents = installedMods.Where(m => m.Meta.Dependencies.Select(d => d.Id).Contains(id));
             if (dependents.Any())
             {
@@ -372,6 +382,128 @@ namespace Greed
             if (Directory.Exists(path))
             {
                 Directory.Delete(path, true);
+            }
+        }
+
+        public static async Task<bool> InstallModFromGitHub(MainWindow window, WarningPopup warning, OnlineCatalog channel, OnlineMod modToDownload, VersionEntry versionToDownload)
+        {
+            try
+            {
+                window.PrintAsync($"Installing {modToDownload.Name}...");
+                var url = versionToDownload.Download;
+
+                if (!await DependenciesReady(window, warning, channel, modToDownload, versionToDownload))
+                {
+                    window.PrintAsync($"Download of {modToDownload.Name} aborted.");
+                    return false;
+                }
+
+                // Download the file to the Downloads directory
+                var filename = modToDownload.Id + "_" + url.Split('/')[^1];
+                var zipPath = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                    "Downloads",
+                    filename
+                );
+                if (File.Exists(zipPath))
+                {
+                    File.Delete(zipPath);
+                }
+                await DownloadZipFile(window, url, zipPath);
+                window.PrintAsync($"Download of {modToDownload.Name} to {zipPath} complete.");
+
+                // Extract the mod.
+                var extractPath = zipPath.Split(".zip")[0];
+                if (Directory.Exists(extractPath))
+                {
+                    Directory.Delete(extractPath, true);
+                }
+                window.PrintAsync($"Extracting to {extractPath}...");
+                ZipFile.ExtractToDirectory(zipPath, extractPath);
+                window.PrintAsync($"Extract complete.");
+
+                // Shift to the mod directory
+                var internalDir = Directory.GetDirectories(extractPath)[0];
+                var modPath = ConfigurationManager.AppSettings["modDir"]! + "\\" + modToDownload!.Id;
+                if (Directory.Exists(modPath))
+                {
+                    Directory.Delete(modPath, true);
+                }
+                Directory.Move(internalDir, modPath);
+                window.PrintAsync($"Move complete.");
+                window.PrintAsync($"Install complete.");
+
+                // Cleanup
+                File.Delete(zipPath);
+                Directory.Delete(extractPath, true);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                window.PrintAsync(ex.Message + "\n" + ex.StackTrace);
+                return false;
+            }
+        }
+
+        public static async Task<bool> DependenciesReady(MainWindow window, WarningPopup warning, OnlineCatalog channel, OnlineMod onlineMod, VersionEntry desiredVersion)
+        {
+            foreach (var dep in desiredVersion.Dependencies)
+            {
+                if (dep.IsOutdatedOrMissing())
+                {
+                    var result = warning.ChainedInstall(onlineMod, dep);
+                    if (result == MessageBoxResult.Cancel)
+                    {
+                        return false;
+                    }
+                    else if (result == MessageBoxResult.Yes)
+                    {
+                        var dependencyMod = channel.Mods.Find(m => m.Id == dep.Id);
+                        var versionToInstall = dependencyMod!.Versions[dep.Version.ToString()];
+                        var chainResult = await InstallModFromGitHub(window, warning, channel, dependencyMod, versionToInstall);
+                        if (!chainResult)
+                        {
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        // No means do nothing.
+                    }
+                }
+            }
+            return true;
+        }
+
+        public static async Task DownloadZipFile(MainWindow window, string releaseUrl, string outputPath)
+        {
+            using HttpClient httpClient = new();
+            try
+            {
+                // Send an HTTP GET request to the GitHub release URL
+                HttpResponseMessage response = await httpClient.GetAsync(releaseUrl);
+
+                // Check if the request was successful (HTTP status code 200)
+                if (response.IsSuccessStatusCode)
+                {
+                    // Get the response stream and create a FileStream to save the .zip file
+                    using (Stream contentStream = await response.Content.ReadAsStreamAsync())
+                    using (FileStream fileStream = File.Create(outputPath))
+                    {
+                        // Copy the content stream to the file stream
+                        await contentStream.CopyToAsync(fileStream);
+                    }
+
+                    window.PrintAsync("Download completed successfully.");
+                }
+                else
+                {
+                    window.PrintAsync($"Failed to download. HTTP status code: {response.StatusCode}");
+                }
+            }
+            catch (Exception ex)
+            {
+                window.PrintAsync($"An error occurred: {ex.Message}");
             }
         }
     }

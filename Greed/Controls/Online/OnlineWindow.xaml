@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Greed"
         xmlns:localControls="clr-namespace:Greed.Controls"
         mc:Ignorable="d"
-        Title="Online Greedy Mods" Height="425" Width="955" Icon="../../icon.png" Background="#FFEDEDED" WindowStyle="ToolWindow">
+        Title="Online Catalog of Greedy Mods" Height="425" Width="955" Icon="../../icon.png" Background="#FFEDEDED" WindowStyle="ToolWindow">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="108*"/>

@@ -80,6 +80,11 @@ namespace Greed.Models
             return violations;
         }
 
+        /// <summary>
+        /// Gets the lists of violations when attempting to activate this mod caused by dependencies missing, being outdated, or being inactive.
+        /// </summary>
+        /// <param name="allMods"></param>
+        /// <returns>The list of violation strings (for a popup) and the list of offending mods.</returns>
         public (List<string>, List<Mod>) GetDependencyViolations(List<Mod> allMods)
         {
             var active = allMods.Where(m => m.IsActive);
@@ -91,7 +96,7 @@ namespace Greed.Models
                 var referencedMod = allMods.FirstOrDefault(a => a.Id == d.Id);
                 if (referencedMod == null)
                 {
-                    violations.Add($"- missing {d.Id} v {d.Version}");
+                    violations.Add($"- missing {d.Id} v{d.Version}");
                 }
                 else
                 {

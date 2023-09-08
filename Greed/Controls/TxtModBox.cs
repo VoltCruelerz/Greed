@@ -1,5 +1,7 @@
 ﻿using Greed.Models;
 using Greed.Models.Metadata;
+using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -11,6 +13,8 @@ namespace Greed.Controls
     {
         public void SetContent(BasicMetadata meta, Mod? localMod)
         {
+            IsDocumentEnabled = true;
+
             var doc = new FlowDocument(new Paragraph(new Run($"{meta.Name} v{meta.GetVersion()} (Sins {meta.GetSinsVersion()})")
             {
                 FontWeight = FontWeights.Bold
@@ -19,10 +23,18 @@ namespace Greed.Controls
             {
                 FontStyle = FontStyles.Italic
             }));
-            doc.Blocks.Add(new Paragraph(new Run(meta.Url)
+
+            var hyperParagraph = new Paragraph();
+            var hyper = new Hyperlink
             {
-                TextDecorations = System.Windows.TextDecorations.Underline
-            }));
+                IsEnabled = true,
+                NavigateUri = new Uri(meta.Url)
+            };
+            hyper.Inlines.Add(meta.Url);
+            hyper.RequestNavigate += (sender, args) => GoToUrl(meta.Url);
+            hyperParagraph.Inlines.Add(hyper);
+            doc.Blocks.Add(hyperParagraph);
+
             doc.Blocks.Add(new Paragraph(new Run(meta.Description)));
             if (meta.GetDependencies().Any())
             {
@@ -46,6 +58,11 @@ namespace Greed.Controls
             localMod?.RenderReadme(doc.Blocks);
 
             Document = doc;
+        }
+
+        private void GoToUrl(string url)
+        {
+            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
         }
     }
 }

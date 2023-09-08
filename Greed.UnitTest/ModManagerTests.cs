@@ -23,6 +23,7 @@ namespace Greed.UnitTest
             ConfigurationManager.AppSettings["modDir"] = mockModDir;
         }
 
+        #region Reorder Mod List
         #region Filler Move
         /// <summary>
         /// Move filler up
@@ -525,6 +526,40 @@ namespace Greed.UnitTest
             Assert.AreEqual(dependency, mods[pos++]);
         }
         #endregion
+        #endregion
+
+        [TestMethod]
+        public void IsInstalled_Yes()
+        {
+            // Arrange
+            int index = 0;
+            var mod = Helper.GetBasicMod(Manager, MockWarning.Object, ref index);
+            var srcPath = Helper.ModsFolder + "\\modA";
+            var destPath = ConfigurationManager.AppSettings["modDir"] + "\\modA";
+            if (Directory.Exists(destPath))
+            {
+                Directory.Delete(destPath, true);
+            }
+            CopyDirectory(srcPath, destPath, true);
+
+            // Act
+            var result = ModManager.IsModInstalled(mod.Id);
+
+            // Assert
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public void IsInstalled_No()
+        {
+            // Arrange
+
+            // Act
+            var result = ModManager.IsModInstalled("sldkfjsldkfjsldkfjsldkfjsdkfj");
+
+            // Assert
+            Assert.IsFalse(result);
+        }
 
         #region Helpers
         private List<Mod> ActivateAndSync(List<Mod> mods)
@@ -535,6 +570,41 @@ namespace Greed.UnitTest
             });
             Manager.SyncLoadOrder(mods);
             return mods;
+        }
+
+        /// <summary>
+        /// Recursively copies all contents from the source to the destination
+        /// </summary>
+        /// <param name="sourceDir"></param>
+        /// <param name="destDir"></param>
+        /// <param name="purgeExisting"></param>
+        /// <exception cref="InvalidOperationException"></exception>
+        private static void CopyDirectory(string sourceDir, string destDir, bool purgeExisting = false)
+        {
+            if (Directory.Exists(destDir))
+            {
+                if (purgeExisting)
+                {
+                    Directory.Delete(destDir, true);
+                }
+                else
+                {
+                    throw new InvalidOperationException("The destination folder already exists. Please delete it or pass purgeExisting=true");
+                }
+            }
+            Directory.CreateDirectory(destDir);
+
+            foreach (string file in Directory.GetFiles(sourceDir))
+            {
+                string destFile = Path.Combine(destDir, Path.GetFileName(file));
+                File.Copy(file, destFile);
+            }
+
+            foreach (string subDirectory in Directory.GetDirectories(sourceDir))
+            {
+                string destSubDirectory = Path.Combine(destDir, Path.GetFileName(subDirectory));
+                CopyDirectory(subDirectory, destSubDirectory, purgeExisting);
+            }
         }
         #endregion
     }

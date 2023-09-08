@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -41,10 +42,12 @@ namespace Greed
         private Mod? DestMod;
         private string SearchQuery = string.Empty;
         private bool SearchActive = false;
+        private OnlineCatalog Catalog = new();
 
         public MainWindow()
         {
             InitializeComponent();
+            ReloadCatalog();
             PrintSync("Components Loaded");
 
             // Shift the log history.
@@ -90,6 +93,9 @@ namespace Greed
             Dispatcher.Invoke(() => ReloadModListFromDisk());
         }
 
+        /// <summary>
+        /// Reloads the list of installed mods
+        /// </summary>
         private void ReloadModListFromDisk()
         {
             PrintSync("Loading Settings...");
@@ -129,6 +135,9 @@ namespace Greed
             PrintSync("Refresh Complete");
         }
 
+        /// <summary>
+        /// Reloads the mod list UI
+        /// </summary>
         private void RefreshModListUI()
         {
             PrintSync($"RefreshModListUI for {Mods.Count} mods.");
@@ -142,7 +151,27 @@ namespace Greed
                     || m.Meta.Description.Contains(SearchQuery))
                 .Where(m => !SearchActive || m.IsActive)
                 .ToList()
-                .ForEach(m => viewModList.Items.Add(new ModListItem(m, this)));
+                .ForEach(m => viewModList.Items.Add(new ModListItem(m, this, Catalog)));
+        }
+
+        /// <summary>
+        /// Reloads the mod list UI from non-main threads
+        /// </summary>
+        public void RefreshModListUIAsync()
+        {
+            Dispatcher.Invoke(() => RefreshModListUI());
+        }
+
+        /// <summary>
+        /// Reloads the update catalog in the background.
+        /// </summary>
+        public void ReloadCatalog()
+        {
+            Task.Run(async () =>
+            {
+                Catalog = await OnlineCatalog.GetOnlineListing(this);
+                RefreshModListUIAsync();
+            }).ConfigureAwait(false);
         }
 
         private void ModList_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -177,7 +206,10 @@ namespace Greed
                 DestMod = SelectedMod;
             }
 
+            // Load the text field.
             TxtLocalModInfo.SetContent(SelectedMod.Meta, SelectedMod);
+
+            UpdateRightClickMenuOptions();
 
             // It starts disabled since nothing is selected.
             cmdToggle.IsEnabled = true;
@@ -185,6 +217,38 @@ namespace Greed
             cmdDiff.IsEnabled = false;
 
             ReloadSourceFileList();
+        }
+
+        private void UpdateRightClickMenuOptions()
+        {
+            CtxRight.Items.Clear();
+
+            // Toggle
+            var toggle = new MenuItem();
+            toggle.Header = "Toggle";
+            toggle.Click += Toggle_Click;
+            CtxRight.Items.Add(toggle);
+
+            // Uninstall
+            var uninstall = new MenuItem();
+            uninstall.Header = "Uninstall";
+            uninstall.Click += MenuUninstall_Click;
+            CtxRight.Items.Add(uninstall);
+
+            // Set to Version
+            var catalogEntry = Catalog.Mods.Find(m => m.Id == SelectedMod!.Id);
+            if (catalogEntry != null)
+            {
+                var versions = catalogEntry.Versions.Keys.ToList();
+                versions.ForEach(v =>
+                {
+                    var update = new MenuItem();
+                    update.Header = "Set to v" + v;
+                    update.Click += (sender, e) => UpdateMod(SelectedMod!, catalogEntry.Versions[v]);
+                    update.IsEnabled = SelectedMod!.Meta.GetVersion().ToString() != v;
+                    CtxRight.Items.Add(update);
+                });
+            }
         }
 
         private void ModList_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -259,6 +323,7 @@ namespace Greed
         {
             PrintSync("Refresh_Click()");
             ReloadModListFromDisk();
+            ReloadCatalog();
         }
 
         private void Export_Click(object sender, RoutedEventArgs e)
@@ -500,9 +565,9 @@ namespace Greed
             RefreshModListUI();
         }
 
-        private async void CmdOnline_Click(object sender, RoutedEventArgs e)
+        private void CmdOnline_Click(object sender, RoutedEventArgs e)
         {
-            var onlinePopup = new OnlineWindow(await OnlineChannel.GetOnlineListing(this), this);
+            var onlinePopup = new OnlineWindow(Catalog, this);
             onlinePopup.ShowDialog();
         }
 
@@ -514,6 +579,26 @@ namespace Greed
         public bool IsModInstalled(string id)
         {
             return Mods.Any(m => m.Id == id);
+        }
+
+        private void UpdateMod(Mod modToUpdate, VersionEntry targetVersion)
+        {
+            _ = UpdateModInternal(modToUpdate, targetVersion);
+        }
+
+        private async Task UpdateModInternal(Mod modToUpdate, VersionEntry targetVersion)
+        {
+            PrintSync("MenuUpdate_Click()");
+
+            // Delete existing
+            ModManager.Uninstall(this, new Controls.WarningPopup(), Mods, modToUpdate.Id, true);
+
+            // Redownload
+            var catalogEntry = Catalog.Mods.Find(m => m.Id == SelectedMod!.Id)!;
+            await ModManager.InstallModFromGitHub(this, new Controls.WarningPopup(), Catalog, catalogEntry, targetVersion);
+
+            // Reload Mods
+            ReloadModListFromDiskAsync();
         }
     }
 }

@@ -1,10 +1,9 @@
 ﻿using Greed.Models.Online;
 using System;
-using System.Windows.Shapes;
 
 namespace Greed.Models.ListItem
 {
-    public class OnlineListItem
+    public class CatalogListItem
     {
         public string Name { get; set; }
         public string Id { get; set; }
@@ -20,7 +19,7 @@ namespace Greed.Models.ListItem
 
         public string IsInstalled { get; set; }
 
-        public OnlineListItem(OnlineMod m)
+        public CatalogListItem(OnlineMod m)
         {
             Name = m.Name;
             Id = m.Id ?? m.Name;

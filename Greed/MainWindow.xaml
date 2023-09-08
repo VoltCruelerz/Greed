@@ -24,11 +24,9 @@
                           MouseDoubleClick="Toggle_Click"
                           MouseUp="ModList_MouseUp"
                           MouseLeave="ModList_MouseLeave"
-                          ToolTip="Click to view details. Double click to toggle.">
+                          ToolTip="Later mods overwrite earlier ones. Click to view a mod's details. Double click to toggle.">
                     <ListView.ContextMenu>
-                        <ContextMenu>
-                            <MenuItem x:Name="MenuUninstall" Header="Uninstall" Click="MenuUninstall_Click"/>
-                            <MenuItem x:Name="MenuToggle" Header="Toggle" Click="Toggle_Click"/>
+                        <ContextMenu x:Name="CtxRight">
                         </ContextMenu>
                     </ListView.ContextMenu>
                     <ListView.View>
@@ -49,7 +47,6 @@
                     </FlowDocument>
                 </localControls:TxtModBox>
                 <Button x:Name="cmdToggle" Content="Toggle" Margin="10,0,0,35" Click="Toggle_Click" IsEnabled="False" HorizontalAlignment="Left" Width="62" Grid.Column="1" ToolTip="Toggle whether a mod is active or not." Height="20" VerticalAlignment="Bottom"/>
-                <Label Content="Later mods overwrite." HorizontalAlignment="Left" Margin="78,12,0,0" VerticalAlignment="Top" Height="26" Width="126"/>
                 <Button x:Name="cmdExport" Content="Export Greedy Selections" Click="Export_Click" Margin="10,0,0,10" Grid.Column="1" ToolTip="Imports the active mods and exports them to mods/greed and turns greed on." Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="152"/>
                 <ListView x:Name="viewFileList" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="10,33,10,35" MouseDoubleClick="Diff_Click" Grid.Column="2" SelectionChanged="FileList_SelectionChanged">
                     <ListView.View>
@@ -70,12 +67,9 @@
                 <Button x:Name="cmdRefresh" Content="Refresh Sources" Margin="144,0,0,35" VerticalAlignment="Bottom" Click="Refresh_Click" HorizontalAlignment="Left" Width="90" Height="20" Grid.Column="1" ToolTip="Refresh the mod list."/>
                 <TextBox x:Name="TxtSearchMods" Margin="0,15,44,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" HorizontalAlignment="Right" Width="135" AutomationProperties.HelpText="Search 🔍" HorizontalContentAlignment="Right" TextChanged="TxtSearchMods_TextChanged"/>
                 <Label Content="🔍" Margin="0,9,152,0" VerticalAlignment="Top" Height="28" HorizontalAlignment="Right" Width="32" FontSize="14"/>
-                <CheckBox x:Name="CheckActive" Content="" HorizontalAlignment="Left" Margin="21,18,0,0" VerticalAlignment="Top" Unchecked="CheckActive_Toggle" Checked="CheckActive_Toggle"/>
-                <Button x:Name="CmdOnline" Content="" HorizontalAlignment="Right" Margin="0,5,11,0" VerticalAlignment="Top" Height="28" FontWeight="UltraBold" Width="28
-                        " BorderBrush="White" Click="CmdOnline_Click">
-                    <Button.Background>
-                        <ImageBrush ImageSource="/github-mark-black.png"/>
-                    </Button.Background>
+                <CheckBox x:Name="CheckActive" Content="Active" HorizontalAlignment="Left" Margin="21,18,0,0" VerticalAlignment="Top" Unchecked="CheckActive_Toggle" Checked="CheckActive_Toggle"/>
+                <Button x:Name="CmdOnline" Content="☁️" HorizontalAlignment="Right" Margin="0,15,11,0" VerticalAlignment="Top" Height="18" FontWeight="UltraBold" Width="28
+                        " BorderBrush="#FF707070" Click="CmdOnline_Click" ToolTip="View online catalog of Greedy mods.">
                 </Button>
             </Grid>
         </TabItem>
