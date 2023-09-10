@@ -135,7 +135,7 @@ To make a mod compatible with Greed, you need only add a `greed.json` file to yo
     "description": "Blurb goes here.",
     "version": "1.0.0",
     "sinsVersion": "1.15.1.0",
-    "greedVersion": "1.6.0",
+    "greedVersion": "1.7.2",
     "dependencies": [
         {
             "id": "other-mod",
