@@ -86,7 +86,8 @@ To make a mod compatible with Greed, you need only add a `greed.json` file to yo
             "version": "1.0.0"
         }
     ],
-    "conflicts": ["conflicting-mod"]
+    "conflicts": ["conflicting-mod"],
+    "isTotalConversion": false
 }
 ```
 
