@@ -117,7 +117,7 @@ You should write your localized text files as if they were truncated to just the
 
 [Here's](https://github.com/VoltCruelerz/krosov-prova-guns/blob/main/localized_text/core_en.localized_text) another example.
 
-#### Greed Compatibility
+### Greed Compatibility
 
 To make a mod compatible with Greed, you need only add a `greed.json` file to your mod's folder, as seen below.
 
