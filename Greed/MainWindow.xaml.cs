@@ -64,20 +64,12 @@ namespace Greed
             TxtLocalModInfo.Document.Blocks.Clear();
             TxtLocalModInfo.AppendText("Select a mod to view details about it.");
 
-            string? modDir = ConfigurationManager.AppSettings["modDir"];
-            txtModsDir.Text = modDir ?? "";
-            if (modDir == null || !Directory.Exists(modDir))
-            {
-                txtModsDir.Background = Invalid;
-                Tabs.SelectedIndex = SettingsPageIndex;
-            }
-            string? sinsDir = ConfigurationManager.AppSettings["sinsDir"];
-            txtSinsDir.Text = sinsDir ?? "";
-            if (sinsDir == null || !Directory.Exists(sinsDir))
-            {
-                txtSinsDir.Background = Invalid;
-                Tabs.SelectedIndex = SettingsPageIndex;
-            }
+            // Populate the config fields.
+            PopulateConfigField(txtModsDir, "modDir", Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "AppData", "Local", "sins2", "mods"));
+            PopulateConfigField(txtSinsDir, "sinsDir", "C:\\Program Files\\Epic Games\\SinsII");
+            PopulateConfigField(txtDownloadDir, "downDir", Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),  "Downloads"));
             PrintSync("Directories Explored");
 
             // Only load mods if there's something to load.
@@ -87,11 +79,6 @@ namespace Greed
             }
 
             pgbProgress.Value = 0;// Ranges [0, 100].
-        }
-
-        public void ReloadModListFromDiskAsync()
-        {
-            Dispatcher.Invoke(() => ReloadModListFromDisk());
         }
 
         private void SetTitle()
@@ -106,11 +93,10 @@ namespace Greed
                 var updateStr = greedVersion.CompareTo(Catalog.LatestGreed) < 0
                     ? $" - ⚠ Greed v{Catalog.LatestGreed} is now available! ⚠"
                     : "";
-                this.Title = $"Greed Mod Loader v{greedVersion} (Detected Sins II v{FileVersionInfo.GetVersionInfo(sinsDir + "\\sins2.exe").FileVersion}){updateStr}";
+                Title = $"Greed Mod Loader v{greedVersion} (Detected Sins II v{FileVersionInfo.GetVersionInfo(sinsDir + "\\sins2.exe").FileVersion}){updateStr}";
             }
             catch (Exception)
             {
-                CriticalAlertPopup("No SinsII", "sins2.exe could not be found at the specified location. Please double check that it is within the place indicated by the App.config.");
                 viewModList.Items.Clear();
                 Tabs.SelectedIndex = SettingsPageIndex;
                 return;
@@ -122,6 +108,7 @@ namespace Greed
             Dispatcher.Invoke(() => SetTitle());
         }
 
+        #region Reload Mods
         /// <summary>
         /// Reloads the list of installed mods
         /// </summary>
@@ -145,6 +132,11 @@ namespace Greed
             RefreshModListUI();
             ReloadSourceFileList();
             PrintSync("Refresh Complete");
+        }
+
+        public void ReloadModListFromDiskAsync()
+        {
+            Dispatcher.Invoke(() => ReloadModListFromDisk());
         }
 
         /// <summary>
@@ -186,6 +178,7 @@ namespace Greed
                 SetTitleAsync();
             }).ConfigureAwait(false);
         }
+        #endregion
 
         private void ModList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -293,6 +286,7 @@ namespace Greed
             DestMod = null;
         }
 
+        #region Center Pane
         private void Toggle_Click(object sender, RoutedEventArgs e)
         {
             PrintSync("Toggle_Click()");
@@ -390,6 +384,7 @@ namespace Greed
                 viewModList.SelectedIndex = index;
             }
         }
+        #endregion
 
         public void CriticalAlertPopup(string title, Exception ex)
         {
@@ -402,6 +397,7 @@ namespace Greed
             MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
+        #region Right Pane
         private void ReloadSourceFileList()
         {
             SelectedSource = null;
@@ -446,7 +442,6 @@ namespace Greed
                 }
             }
         }
-
         private void FileList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (e.AddedItems.Count == 0)
@@ -472,36 +467,58 @@ namespace Greed
                 CriticalAlertPopup("Failed to Load Diff", ex.Message + "\n" + ex.StackTrace);
             }
         }
+        #endregion
+
+        #region App Config Settings
+        /// <summary>
+        /// Prepopulate a config setting field.
+        /// </summary>
+        /// <param name="txt"></param>
+        /// <param name="key"></param>
+        private void PopulateConfigField(TextBox txt, string key, string defaultStr)
+        {
+            string? dir = ConfigurationManager.AppSettings[key];
+            if (string.IsNullOrEmpty(dir))
+            {
+                dir = defaultStr;
+            }
+            txt.Text = dir;
+            if (!Directory.Exists(dir))
+            {
+                txt.Background = Invalid;
+                Tabs.SelectedIndex = SettingsPageIndex;
+            }
+        }
 
         private void TxtSinsDir_TextChanged(object sender, TextChangedEventArgs e)
         {
-            var txt = (TextBox)sender;
-            string newVal = txt.Text.Replace("/", "\\");
-            var exists = Directory.Exists(newVal);
-            txt.Background = exists ? Valid : Invalid;
-            if (exists && newVal != ConfigurationManager.AppSettings["sinsDir"])
-            {
-                Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-                config.AppSettings.Settings["sinsDir"].Value = newVal;
-                config.Save(ConfigurationSaveMode.Modified);
-                ConfigurationManager.RefreshSection("appSettings");
-            }
+            SetConfigOption("sinsDir", (TextBox)sender);
         }
 
         private void TxtModDir_TextChanged(object sender, TextChangedEventArgs e)
         {
-            var txt = (TextBox)sender;
+            SetConfigOption("modDir", (TextBox)sender);
+        }
+
+        private void TxtDownloadDir_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            SetConfigOption("downDir", (TextBox)sender);
+        }
+
+        private void SetConfigOption(string key, TextBox txt)
+        {
             string newVal = txt.Text.Replace("/", "\\");
             var exists = Directory.Exists(newVal);
             txt.Background = exists ? Valid : Invalid;
-            if (exists && newVal != ConfigurationManager.AppSettings["modDir"])
+            if (exists && newVal != ConfigurationManager.AppSettings[key])
             {
                 Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-                config.AppSettings.Settings["modDir"].Value = newVal;
+                config.AppSettings.Settings[key].Value = newVal;
                 config.Save(ConfigurationSaveMode.Modified);
                 ConfigurationManager.RefreshSection("appSettings");
             }
         }
+        #endregion
 
         private void Tabs_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -524,6 +541,7 @@ namespace Greed
             }
         }
 
+        #region Play
         private void Play_Click(object sender, RoutedEventArgs e)
         {
             Play();
@@ -541,6 +559,7 @@ namespace Greed
                 WorkingDirectory = ConfigurationManager.AppSettings["sinsDir"]!
             });
         }
+        #endregion
 
         /// <summary>
         /// Print synchronously.

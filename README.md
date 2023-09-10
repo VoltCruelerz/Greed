@@ -16,29 +16,35 @@ _A mod loader for [Sins of a Solar Empire II](https://www.sinsofasolarempire2.co
 2. Extract the file wherever you please on your machine.
 3. Run `Greed.exe`
 4. Set the directories on the Settings tab. They will autosave if the paths exist.
-    1. **Sins Directory** should be the location of Sins II's exe. (eg `C:\Epic Games\SinsII`)
+    1. **Sins Directory** should be the location of Sins II's exe. (eg `C:\Program Files\Epic Games\SinsII`)
     2. **Mods Directory** should be the location of the mod folder. (eg `C:\Users\YOUR_USER\AppData\Local\sins2\mods`)
+    3. **Downloads Directory** should be the location where Greed is free to download mods to temporarily before extracting them to your mods directory. (eg `C:\Users\YOUR_USER\Downloads`)
 5. In the main tab, you'll find a list of installed Greed-compatible mods to the left (see below for instructions to install mods), which you can activate or deactivate as you wish either with the button or double-clicking.
 6. When you have the mods activated that you want, click `[Export Greedy Selections]`.
 
 ### Mod Installation
 
+#### Automated Install
+
+1. Press the `[☁️]` button to view the online catalog.
+2. Right click on whatever mod you want to install.
+3. Click `Install`.
+
+#### Manual Install
+
 1. Download the mod from GitHub, ModDB, or wherever else.
     1. If needed, unzip it.
 2. Deposit it in `C:\Users\YOUR_USER\AppData\Local\sins2\mods` (change the path to use your Windows username).
     1. If the mod's name is `example-mod`, you should be able to find `greed.json` at `C:\Users\YOUR_USER\AppData\Local\sins2\mods\example-mod\greed.json`
-3. Open Greed or press the Refresh button to see the new mod appear.
+3. Press the Refresh button to see the new mod appear in the list.
 
 ## Advantages for Users
 
 - **No More Manual Deconfliction**: Deconfliction of commonly modified files happens automatically for you.
-- **Easy Activation**: Enable/disable mods with a click.
+- **Automated Installation**: You can automatically mods and their dependencies from a curated list.
 - **Easy Viewing**: Easily view the metadata, readme, and source files for any mod you download.
-- **Simple Load Order Control**: Drag-and-drop elements in the order of your choice.
 - **Conflict Detection**: You are warned if you try to enable mods with a known conflict between them.
 - **Dependency Management**: You are be warned if you attempt to enable a mod without its dependencies active.
-- **Online Mod List**: View an online listing of available Greedy mods.
-- **Automated Installation**: You can automatically mods and their dependencies from a curated list.
 
 ## Greedy Mod Development
 

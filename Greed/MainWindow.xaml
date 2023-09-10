@@ -75,10 +75,12 @@
         </TabItem>
         <TabItem Header="Settings">
             <Grid>
-                <TextBox x:Name="txtSinsDir" HorizontalAlignment="Left" Margin="113,6,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="304" TextChanged="TxtSinsDir_TextChanged" ToolTip="Autosaves if directory exists."/>
+                <TextBox x:Name="txtSinsDir" HorizontalAlignment="Left" Margin="131,6,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="438" TextChanged="TxtSinsDir_TextChanged" ToolTip="Autosaves if directory exists."/>
                 <Label Content="Sins Directory" HorizontalAlignment="Left" Margin="10,2,0,0" VerticalAlignment="Top"/>
-                <TextBox x:Name="txtModsDir" HorizontalAlignment="Left" Margin="113,37,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="304" TextChanged="TxtModDir_TextChanged" ToolTip="Autosaves if directory exists."/>
+                <TextBox x:Name="txtModsDir" HorizontalAlignment="Left" Margin="131,37,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="438" TextChanged="TxtModDir_TextChanged" ToolTip="Autosaves if directory exists."/>
                 <Label Content="Mods Directory" HorizontalAlignment="Left" Margin="10,33,0,0" VerticalAlignment="Top"/>
+                <Label Content="Download Directory" HorizontalAlignment="Left" Margin="10,64,0,0" VerticalAlignment="Top"/>
+                <TextBox x:Name="txtDownloadDir" HorizontalAlignment="Left" Margin="131,68,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="438" TextChanged="TxtDownloadDir_TextChanged" ToolTip="Autosaves if directory exists."/>
             </Grid>
         </TabItem>
     </TabControl>

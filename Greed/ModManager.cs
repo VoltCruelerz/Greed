@@ -409,7 +409,10 @@ namespace Greed
                 {
                     File.Delete(zipPath);
                 }
-                await DownloadZipFile(window, url, zipPath);
+                if (!await DownloadZipFile(window, url, zipPath))
+                {
+                    return false;
+                }
                 window.PrintAsync($"Download of {modToDownload.Name} to {zipPath} complete.");
 
                 // Extract the mod.
@@ -475,7 +478,7 @@ namespace Greed
             return true;
         }
 
-        public static async Task DownloadZipFile(MainWindow window, string releaseUrl, string outputPath)
+        public static async Task<bool> DownloadZipFile(MainWindow window, string releaseUrl, string outputPath)
         {
             using HttpClient httpClient = new();
             try
@@ -500,10 +503,12 @@ namespace Greed
                 {
                     window.PrintAsync($"Failed to download. HTTP status code: {response.StatusCode}");
                 }
+                return true;
             }
             catch (Exception ex)
             {
-                window.PrintAsync($"An error occurred: {ex.Message}");
+                window.PrintAsync($"A download error occurred: {ex.Message}\n{ex.StackTrace}");
+                return false;
             }
         }
     }
