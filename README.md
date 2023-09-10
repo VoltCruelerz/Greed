@@ -67,32 +67,6 @@ First, some definitions:
 
 ![screenshot](assets/DiffScreenshot.png)
 
-### Greed Compatibility
-
-To make a mod compatible with Greed, you need only add a `greed.json` file to your mod's folder, as seen below.
-
-```json
-{
-    "name": "Your Mod",
-    "author": "Your Name",
-    "url": "https://github.com/YourName/your-mod",
-    "description": "Blurb goes here.",
-    "version": "1.0.0",
-    "sinsVersion": "1.15.1.0",
-    "greedVersion": "1.6.0",
-    "dependencies": [
-        {
-            "id": "other-mod",
-            "version": "1.0.0"
-        }
-    ],
-    "conflicts": ["conflicting-mod"],
-    "isTotalConversion": false
-}
-```
-
-While I recommend you take advantage of Greed's more powerful features like merge file extensions, merely adding the above will make any mod interactible for Greed.
-
 ### Merge Types
 
 The ultimate goal of Greed is to allow multiple mods to gracefully integrate together so that we can release smaller, more targeted mods, rather than these massive bundles that nobody really knows what's inside them. To facilitate this, Greed acts as an arbiter, compiling greedy mods into a single "mod" in the mods directory which is then listed as active for Sins II to read from.
@@ -148,6 +122,45 @@ You should write your localized text files as if they were truncated to just the
 ```
 
 [Here's](https://github.com/VoltCruelerz/krosov-prova-guns/blob/main/localized_text/core_en.localized_text) another example.
+
+#### Greed Compatibility
+
+To make a mod compatible with Greed, you need only add a `greed.json` file to your mod's folder, as seen below.
+
+```json
+{
+    "name": "Your Mod",
+    "author": "Your Name",
+    "url": "https://github.com/YourName/your-mod",
+    "description": "Blurb goes here.",
+    "version": "1.0.0",
+    "sinsVersion": "1.15.1.0",
+    "greedVersion": "1.6.0",
+    "dependencies": [
+        {
+            "id": "other-mod",
+            "version": "1.0.0"
+        }
+    ],
+    "conflicts": ["conflicting-mod"],
+    "isTotalConversion": false
+}
+```
+
+While I recommend you take advantage of Greed's more powerful features like merge file extensions, merely adding the above will make any mod interactible for Greed.
+
+| Field | Type | Description |
+|:------|:-----|:------------|
+| `name`* | `string` | The human-readable name of your mod |
+| `author`* | `string` | Who you are. |
+| `description`* | `string` | A brief summary of your mod. Save details for the readme. |
+| `url`* | `url` | The URL to your thread or repo where you give greater details about your mod. Details beyond what is covered in the description should be covered here. |
+| `version`* | `version` | The version of the mod itself. |
+| `sinsVersion`* | `version` | The minimum compatible Sins version. |
+| `greedVersion`* | `version` | The minimum compatible Greed version. |
+| `dependencies`* | `dependency[]` | An array of dependencies. |
+| `conflicts`* | `string[]` | An array of mod ids with which this mod is incompatible. |
+| `isTotalConversion` | `bool` | Whether or not the mod should presume conflicts in the absence of dependencies. (default `false`) |
 
 ## Contributing to Greed
 
