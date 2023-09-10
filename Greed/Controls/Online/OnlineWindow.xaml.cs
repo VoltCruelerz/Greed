@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System;
 
 namespace Greed.Controls.Online
 {
@@ -58,7 +59,14 @@ namespace Greed.Controls.Online
             var meta = InstallChannel.Mods.First(m => m.Name == item.Name);
             SelectedMod = meta;
             MenuInstall.IsEnabled = !ModManager.IsModInstalled(SelectedMod.Id) && SelectedMod.Versions.Any() && !string.IsNullOrEmpty(SelectedMod.Live.Download);
-            TxtOnlineInfo.SetContent(meta, null);
+            try
+            {
+                TxtOnlineInfo.SetContent(meta, null);
+            }
+            catch (Exception ex)
+            {
+                ParentWindow.PrintAsync(ex);
+            }
         }
 
         private void MenuInstall_Click(object sender, RoutedEventArgs e)

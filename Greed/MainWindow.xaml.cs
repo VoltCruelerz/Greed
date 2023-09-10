@@ -213,7 +213,14 @@ namespace Greed
             }
 
             // Load the text field.
-            TxtLocalModInfo.SetContent(SelectedMod.Meta, SelectedMod);
+            try
+            {
+                TxtLocalModInfo.SetContent(SelectedMod.Meta, SelectedMod);
+            }
+            catch (Exception ex)
+            {
+                CriticalAlertPopup("Metadata Error", ex);
+            }
 
             UpdateRightClickMenuOptions();
 
@@ -574,6 +581,11 @@ namespace Greed
             File.AppendAllText(LogPath, str + "\r\n");
         }
 
+        public void PrintSync(Exception ex)
+        {
+            PrintSync(ex.Message + "\n" + ex.StackTrace);
+        }
+
         /// <summary>
         /// Invoke the print function when possible.
         /// </summary>
@@ -581,6 +593,15 @@ namespace Greed
         public void PrintAsync(string str)
         {
             Dispatcher.Invoke(() => PrintSync(str));
+        }
+
+        /// <summary>
+        /// Invoke the print function when possible.
+        /// </summary>
+        /// <param name="str"></param>
+        public void PrintAsync(Exception ex)
+        {
+            Dispatcher.Invoke(() => PrintSync(ex));
         }
 
         private void TxtSearchMods_TextChanged(object sender, TextChangedEventArgs e)

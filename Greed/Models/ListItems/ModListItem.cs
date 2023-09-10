@@ -33,15 +33,16 @@ namespace Greed.Models.ListItem
 
             // Handle violations
             var versionViolation = mod.Meta.IsLegalVersion();
-            if (versionViolation.Contains("Mod"))
+            var violationStr = string.Join("\n", versionViolation);
+            if (violationStr.Contains("Mod"))
             {
                 Version = "⚠ " + Version;
             }
-            if (versionViolation.Contains("Greed"))
+            if (violationStr.Contains("Greed"))
             {
                 GreedVersion = "⚠ " + GreedVersion;
             }
-            if (versionViolation.Contains("Sins"))
+            if (violationStr.Contains("Sins"))
             {
                 SinsVersion = "⚠ " + SinsVersion;
             }

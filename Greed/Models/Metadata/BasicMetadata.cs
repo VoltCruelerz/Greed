@@ -23,6 +23,9 @@ namespace Greed.Models.Metadata
         [JsonProperty(PropertyName = "url")]
         public string Url { get; set; } = string.Empty;
 
+        [JsonProperty(PropertyName = "isTotalConversion")]
+        public bool IsTotalConversion { get; set; } = false;
+
         public abstract Version GetVersion();
 
         public abstract Version GetGreedVersion();

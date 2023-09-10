@@ -15,27 +15,53 @@ namespace Greed.Controls
         {
             IsDocumentEnabled = true;
 
+            // Basic
             var doc = new FlowDocument(new Paragraph(new Run($"{meta.Name} v{meta.GetVersion()} (Sins {meta.GetSinsVersion()})")
             {
                 FontWeight = FontWeights.Bold
             }));
-            doc.Blocks.Add(new Paragraph(new Run($"by {meta.Author}")
-            {
-                FontStyle = FontStyles.Italic
-            }));
 
-            var hyperParagraph = new Paragraph();
-            var hyper = new Hyperlink
+            // Total Conversion
+            if (meta.IsTotalConversion)
             {
-                IsEnabled = true,
-                NavigateUri = new Uri(meta.Url)
-            };
-            hyper.Inlines.Add(meta.Url);
-            hyper.RequestNavigate += (sender, args) => GoToUrl(meta.Url);
-            hyperParagraph.Inlines.Add(hyper);
-            doc.Blocks.Add(hyperParagraph);
+                doc.Blocks.Add(new Paragraph(new Run("Total Conversion")
+                {
+                    FontStyle = FontStyles.Italic,
+                    FontWeight = FontWeights.Bold
+                }));
+            }
 
-            doc.Blocks.Add(new Paragraph(new Run(meta.Description)));
+            // Author
+            if (!string.IsNullOrEmpty(meta.Author))
+            {
+                doc.Blocks.Add(new Paragraph(new Run($"by {meta.Author}")
+                {
+                    FontStyle = FontStyles.Italic
+                }));
+            }
+
+            // Url
+            if (!string.IsNullOrEmpty(meta.Url))
+            {
+                var hyperParagraph = new Paragraph();
+                var hyper = new Hyperlink
+                {
+                    IsEnabled = true,
+                    NavigateUri = new Uri(meta.Url)
+                };
+                hyper.Inlines.Add(meta.Url);
+                hyper.RequestNavigate += (sender, args) => GoToUrl(meta.Url);
+                hyperParagraph.Inlines.Add(hyper);
+                doc.Blocks.Add(hyperParagraph);
+            }
+
+            // Description
+            if (!string.IsNullOrEmpty(meta.Description))
+            {
+                doc.Blocks.Add(new Paragraph(new Run(meta.Description)));
+            }
+
+            // Dependencies
             if (meta.GetDependencies().Any())
             {
                 var p = new Paragraph(new Run("Dependencies")
@@ -45,6 +71,8 @@ namespace Greed.Controls
                 meta.GetDependencies().ForEach(c => p.Inlines.Add(new Run("\r\n- " + c)));
                 doc.Blocks.Add(p);
             }
+
+            // Conflicts
             if (meta.GetConflicts().Any())
             {
                 var p = new Paragraph(new Run("Conflicts")
@@ -60,7 +88,7 @@ namespace Greed.Controls
             Document = doc;
         }
 
-        private void GoToUrl(string url)
+        private static void GoToUrl(string url)
         {
             Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
         }

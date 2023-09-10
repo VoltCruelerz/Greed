@@ -1,6 +1,7 @@
 ﻿using Greed.Interfaces;
 using Greed.Models.Json;
 using Greed.Models.Json.Text;
+using Greed.Models.Metadata;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -422,7 +423,7 @@ namespace Greed.Models
             }
 
             // If we're turning a mod on, we need to check for conflicts in both directions because one mod might not know about the other.
-            var conflicts = activeMods.Where(am => Meta.Conflicts.Contains(am.Id) || am.Meta.Conflicts.Contains(Id));
+            var conflicts = activeMods.Where(IsConflict);
 
             if (!conflicts.Any())
             {
@@ -460,6 +461,30 @@ namespace Greed.Models
         public bool HasDirectDependency(Mod potentialDependency)
         {
             return potentialDependency.HasDirectDependent(this);
+        }
+
+        public bool IsConflict(Mod other)
+        {
+            if (other == null) return false;
+
+            // Check basic conflicts first.
+            if (other.Meta.Conflicts.Contains(Id) || Meta.Conflicts.Contains(other.Id))
+            {
+                return true;
+            }
+
+            // Check total conversion
+            if (Meta.IsTotalConversion && !other.Meta.Dependencies.Select(d => d.Id).Contains(Id))
+            {
+                return true;
+            }
+            if (other.Meta.IsTotalConversion && !Meta.Dependencies.Select(d => d.Id).Contains(other.Id))
+            {
+                return true;
+            }
+
+            // Default to false.
+            return false;
         }
     }
 }
