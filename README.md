@@ -48,22 +48,16 @@ _A mod loader for [Sins of a Solar Empire II](https://www.sinsofasolarempire2.co
 
 ## Greedy Mod Development
 
-First, some definitions:
-
-- **Gold Files**: the gold copy, which is the original Sins II data files. These are _never_ changed by Greed.
-- **Source Files**: the files from the individual greedy mods.
-- **Greed Files**: the files that are going into the greed mod folder. When Greed activates a list of mods, it initializes any relevant greed files from gold copies and then sequentially applies the edits of each mod in the list, ultimately producing an execution product.
-
 ### Why Develop Greedy Mods?
 
-- **Comments**: You can add C-style comments to your source files.
 - **Selective Inclusion**: Your mod only needs to include what you changed about a particular source file (eg add a new property, delete a property, or add an array element), _drastically_ reducing the risk of collisions between mods.
-- **Intelligent Merge**: Intelligent merging of localization files.
-- **File Diff**: Greed ships with a diff tool specifically for Sins II data files, allowing you to readily see exactly what you've done.
+- **Patch Merge**: Intelligent merging of localization files.
+- **Dependency Autoinstall**: Users can automatically install your mod's dependencies.
+- **Automated Updates**: Users can update to the latest version of your mod automatically.
+- **Comments**: You can add C-style comments to your source files.
 - **Reduced Boilerplate**: Fractional files reduces the effort required to make small mods
 - **Improved Exposure**: Greed ships with a viewer of curated Greedy mods. By getting added to that list, your mods can reach more users.
-- **Automated Updates**: Users can update to the latest version of your mod.
-- **Dependency Autoinstall**: Users can automatically install your mod's dependencies.
+- **File Diff**: Greed ships with a diff tool specifically for Sins II data files, allowing you to readily see exactly what you've done.
 
 ![screenshot](assets/DiffScreenshot.png)
 
