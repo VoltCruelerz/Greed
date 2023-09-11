@@ -70,6 +70,7 @@ namespace Greed
             PopulateConfigField(txtSinsDir, "sinsDir", "C:\\Program Files\\Epic Games\\SinsII");
             PopulateConfigField(txtDownloadDir, "downDir", Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),  "Downloads"));
+            PopulateCbx(CbxChannel, "channel");
             PrintSync("Directories Explored");
 
             // Only load mods if there's something to load.
@@ -256,7 +257,7 @@ namespace Greed
                 versions.ForEach(v =>
                 {
                     var update = new MenuItem();
-                    update.Header = "Set to v" + v;
+                    update.Header = "Install v" + v;
                     update.Click += (sender, e) => UpdateMod(SelectedMod!, catalogEntry.Versions[v]);
                     update.IsEnabled = SelectedMod!.Meta.GetVersion().ToString() != v;
                     CtxRight.Items.Add(update);
@@ -264,6 +265,7 @@ namespace Greed
             }
         }
 
+        #region Drag Elements
         private void ModList_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             if (DestMod == null || DragMod == DestMod)
@@ -292,6 +294,7 @@ namespace Greed
             DragMod = null;
             DestMod = null;
         }
+        #endregion
 
         #region Center Pane
         private void Toggle_Click(object sender, RoutedEventArgs e)
@@ -393,6 +396,7 @@ namespace Greed
         }
         #endregion
 
+        #region Alert
         public void CriticalAlertPopup(string title, Exception ex)
         {
             CriticalAlertPopup(title, ex.Message + "\n" + ex.StackTrace);
@@ -403,6 +407,7 @@ namespace Greed
             PrintAsync(message);
             MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Error);
         }
+        #endregion
 
         #region Right Pane
         private void ReloadSourceFileList()
@@ -497,33 +502,64 @@ namespace Greed
             }
         }
 
+        /// <summary>
+        /// Prepopulates a combobox from the config.
+        /// </summary>
+        /// <param name="cbx"></param>
+        /// <param name="key"></param>
+        private void PopulateCbx(ComboBox cbx, string key)
+        {
+            var val = ConfigurationManager.AppSettings[key]!;
+            foreach (var item in cbx.Items)
+            {
+                var optVal = ((ComboBoxItem)item).Content.ToString()!.ToLower();
+                if (val == optVal)
+                {
+                    cbx.SelectedItem = item;
+                    return;
+                }
+            }
+        }
+
         private void TxtSinsDir_TextChanged(object sender, TextChangedEventArgs e)
         {
-            SetConfigOption("sinsDir", (TextBox)sender);
+            SetTxtConfigOption("sinsDir", (TextBox)sender);
         }
 
         private void TxtModDir_TextChanged(object sender, TextChangedEventArgs e)
         {
-            SetConfigOption("modDir", (TextBox)sender);
+            SetTxtConfigOption("modDir", (TextBox)sender);
         }
 
         private void TxtDownloadDir_TextChanged(object sender, TextChangedEventArgs e)
         {
-            SetConfigOption("downDir", (TextBox)sender);
+            SetTxtConfigOption("downDir", (TextBox)sender);
         }
 
-        private void SetConfigOption(string key, TextBox txt)
+        private void SetTxtConfigOption(string key, TextBox txt)
         {
             string newVal = txt.Text.Replace("/", "\\");
             var exists = Directory.Exists(newVal);
             txt.Background = exists ? Valid : Invalid;
             if (exists && newVal != ConfigurationManager.AppSettings[key])
             {
-                Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-                config.AppSettings.Settings[key].Value = newVal;
-                config.Save(ConfigurationSaveMode.Modified);
-                ConfigurationManager.RefreshSection("appSettings");
+                SetConfigOptions(key, newVal);
             }
+        }
+
+        private void CbxChannel_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var item = (ComboBoxItem)((ComboBox)sender).SelectedItem;
+            SetConfigOptions("channel", item.Content.ToString()!.ToLower());
+            ReloadCatalog();
+        }
+
+        private void SetConfigOptions(string key, string value)
+        {
+            Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            config.AppSettings.Settings[key].Value = value;
+            config.Save(ConfigurationSaveMode.Modified);
+            ConfigurationManager.RefreshSection("appSettings");
         }
         #endregion
 
@@ -632,6 +668,16 @@ namespace Greed
         public bool IsModInstalled(string id)
         {
             return Mods.Any(m => m.Id == id);
+        }
+
+        public Dictionary<string, Version> GetModVersions()
+        {
+            var dict = new Dictionary<string, Version>();
+            foreach (var mod in Mods)
+            {
+                dict.Add(mod.Id, mod.Meta.Version);
+            }
+            return dict;
         }
 
         private void UpdateMod(Mod modToUpdate, VersionEntry targetVersion)

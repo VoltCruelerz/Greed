@@ -9,8 +9,8 @@
         Title="Online Catalog of Greedy Mods" Height="425" Width="955" Icon="../../icon.png" Background="#FFEDEDED" WindowStyle="ToolWindow">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="108*"/>
-            <ColumnDefinition Width="83*"/>
+            <ColumnDefinition Width="109*"/>
+            <ColumnDefinition Width="82*"/>
         </Grid.ColumnDefinitions>
         <TextBox x:Name="TxtSearchOnline" Margin="0,10,5,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" HorizontalAlignment="Right" Width="158" AutomationProperties.HelpText="Search 🔍" HorizontalContentAlignment="Right" TextChanged="TxtSearchOnline_TextChanged" Height="18"/>
         <Label Content="🔍" Margin="0,4,136,0" VerticalAlignment="Top" Height="28" HorizontalAlignment="Right" Width="32" FontSize="14"/>
@@ -27,7 +27,7 @@
                     <GridViewColumn Header="Mod Name" Width="160" DisplayMemberBinding="{Binding Name}" />
                     <GridViewColumn Header="Author" Width="100" DisplayMemberBinding="{Binding Author}" />
                     <GridViewColumn Header="Version" Width="60" DisplayMemberBinding="{Binding Version}" />
-                    <GridViewColumn Header="Greed" Width="50" DisplayMemberBinding="{Binding GreedVersion}" />
+                    <GridViewColumn Header="Greed" Width="60" DisplayMemberBinding="{Binding GreedVersion}" />
                     <GridViewColumn Header="Sins" Width="60" DisplayMemberBinding="{Binding SinsVersion}" />
                     <GridViewColumn Header="Modified" Width="60" DisplayMemberBinding="{Binding LastUpdated}" />
                 </GridView>

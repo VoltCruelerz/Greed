@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System;
+using System.Text.Json;
 using static System.Text.Json.JsonSerializer;
 
 namespace Greed.Extensions
@@ -20,5 +21,15 @@ namespace Greed.Extensions
                 AllowTrailingCommas = true,
                 WriteIndented = true
             });
+
+        public static bool IsOlderThan(this Version version, Version other)
+        {
+            return version.CompareTo(other) < 0;
+        }
+
+        public static bool IsNewerThan(this Version version, Version other)
+        {
+            return version.CompareTo(other) > 0;
+        }
     }
 }

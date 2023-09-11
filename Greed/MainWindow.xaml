@@ -81,6 +81,14 @@
                 <Label Content="Mods Directory" HorizontalAlignment="Left" Margin="10,33,0,0" VerticalAlignment="Top"/>
                 <Label Content="Download Directory" HorizontalAlignment="Left" Margin="10,64,0,0" VerticalAlignment="Top"/>
                 <TextBox x:Name="txtDownloadDir" HorizontalAlignment="Left" Margin="131,68,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="438" TextChanged="TxtDownloadDir_TextChanged" ToolTip="Autosaves if directory exists."/>
+                <Label Content="Catalog Channel" HorizontalAlignment="Left" Margin="10,95,0,0" VerticalAlignment="Top"/>
+                <ComboBox x:Name="CbxChannel" HorizontalAlignment="Left" Margin="131,97,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="CbxChannel_SelectionChanged">
+                    <ComboBox.Items>
+                        <ComboBoxItem Content="Live"/>
+                        <ComboBoxItem Content="Beta"/>
+                        <ComboBoxItem Content="Alpha"/>
+                    </ComboBox.Items>
+                </ComboBox>
             </Grid>
         </TabItem>
     </TabControl>

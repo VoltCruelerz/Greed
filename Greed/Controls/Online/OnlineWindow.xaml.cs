@@ -36,6 +36,7 @@ namespace Greed.Controls.Online
         private void RefreshOnlineModListUI()
         {
             ParentWindow.PrintAsync($"RefreshOnlineModListUI for {InstallChannel.Mods.Count} mods.");
+            var modVersions = ParentWindow.GetModVersions();
             ViewOnlineModList.Items.Clear();
             InstallChannel.Mods
                 .Where(m => string.IsNullOrWhiteSpace(SearchQuery)
@@ -45,7 +46,7 @@ namespace Greed.Controls.Online
                     || m.Description.Contains(SearchQuery))
                 .Where(m => !SearchUninstalled || !ParentWindow.IsModInstalled(m.Id))
                 .ToList()
-                .ForEach(m => ViewOnlineModList.Items.Add(new CatalogListItem(m)));
+                .ForEach(m => ViewOnlineModList.Items.Add(new CatalogListItem(m, modVersions)));
         }
 
         private void OnlineModList_SelectionChanged(object sender, SelectionChangedEventArgs e)

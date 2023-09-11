@@ -13,6 +13,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Documents;
+using System.Windows.Media;
 using FontFamily = System.Windows.Media.FontFamily;
 
 namespace Greed.Models
@@ -283,6 +284,44 @@ namespace Greed.Models
                     }
                     blocks.Add(p);
                 }
+                else if (trimmed.StartsWith("|") && trimmed.EndsWith("|"))
+                {
+                    Table table = new()
+                    {
+                        Background = new SolidColorBrush(Color.FromRgb(255,255,255))
+                    };
+                    table.RowGroups.Add(new TableRowGroup());
+                    var offset = 0;
+                    while (i < lines.Count)
+                    {
+                        // Skip the row that is just the horizontal bars
+                        if (offset != 1)
+                        {
+                            line = lines[i];
+                            trimmed = line.Trim();
+                            var isTableLine = trimmed.StartsWith("|") && trimmed.EndsWith("|");
+                            TableRow row = new();
+                            if (offset % 2 == 1 || offset == 0)
+                            {
+                                row.Background = new SolidColorBrush(Color.FromRgb(200, 200, 255));
+                            }
+                            var cells = trimmed.Split("|");
+
+                            // Ignore the 0th and last term because those are the border.
+                            for (var j = 1; j < cells.Length - 1; j++)
+                            {
+                                var cellTrimmed = cells[j].Trim();
+                                var cellP = new Paragraph();
+                                FormatLine(cellP.Inlines, cellTrimmed, 10, offset == 0);
+                                row.Cells.Add(new TableCell(cellP));
+                            }
+                            table.RowGroups[0].Rows.Add(row);
+                        }
+                        i++;
+                        offset++;
+                    }
+                    blocks.Add(table);
+                }
                 else
                 {
                     var p = new Paragraph();
@@ -296,7 +335,7 @@ namespace Greed.Models
         {
             var consolas = new FontFamily("Consolas");
             var segoe = new FontFamily("Segoe UI");
-            var pattern = @"\[([^\]]+)\]\(([^)]+)\)";
+            var pattern = @"!?\[([^\]]+)\]\(([^)]+)\)";
 
             // The below works because consider the string "**Foo:** this is _my_ sentence."
             // it would get split into bold terms "", "Foo:", ...

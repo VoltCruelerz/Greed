@@ -5,7 +5,7 @@
     <TargetFramework>net7.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
-    <Version>1.7.2</Version>
+    <Version>1.7.3</Version>
     <Title>Greed Mod Manager</Title>
     <Authors>Volt Cruelerz</Authors>
     <Description>A mod loader for Sins of a Solar Empire II.</Description>

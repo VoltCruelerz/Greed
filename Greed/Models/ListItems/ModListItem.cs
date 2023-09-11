@@ -24,7 +24,7 @@ namespace Greed.Models.ListItem
         public ModListItem(Mod mod, MainWindow window, OnlineCatalog catalog)
         {
             Id = mod.Id;
-            Active = mod.IsActive ? "✓" : " ";
+            Active = mod.IsActive ? "✅" : " ";
             Name = mod.Meta.Name;
             Version = mod.Meta.Version.ToString();
             Latest = Version;
@@ -59,7 +59,7 @@ namespace Greed.Models.ListItem
                 Latest = onlineMod.Latest.ToString();
                 if (mod.Meta.Version.CompareTo(onlineMod.Latest) < 0)
                 {
-                    Version = "[⭳] " + Version;
+                    Version = "[＋] " + Version;
                 }
             }
         }
