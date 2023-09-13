@@ -25,9 +25,6 @@ namespace Greed
     {
         private static readonly string LogPath = Directory.GetCurrentDirectory() + "\\log.txt";
         private static readonly string LogPrevPath = Directory.GetCurrentDirectory() + "\\log_prev.txt";
-        private const int ModPageIndex = 0;
-        private const int SettingsPageIndex = 1;
-        private int SelectedTabIndex = 0;
 
         private readonly ModManager Manager = new();
         private List<Mod> Mods = new();
@@ -43,6 +40,8 @@ namespace Greed
         private string SearchQuery = string.Empty;
         private bool SearchActive = false;
         private OnlineCatalog Catalog = new();
+        private TabItem? SelectedTab = null;
+        private readonly HashSet<string> InvalidSettings = new();
 
         public MainWindow()
         {
@@ -74,7 +73,7 @@ namespace Greed
             PrintSync("Directories Explored");
 
             // Only load mods if there's something to load.
-            if (Tabs.SelectedIndex != SettingsPageIndex)
+            if (SelectedTab != TabSettings)
             {
                 ReloadModListFromDisk();
             }
@@ -99,7 +98,7 @@ namespace Greed
             catch (Exception)
             {
                 viewModList.Items.Clear();
-                Tabs.SelectedIndex = SettingsPageIndex;
+                Tabs.SelectedItem = TabSettings;
                 return;
             }
         }
@@ -125,7 +124,7 @@ namespace Greed
             {
                 CriticalAlertPopup("Mod Load Error", "Unable to locate all files.\n" + e.Message + "\n" + e.StackTrace);
                 viewModList.Items.Clear();
-                Tabs.SelectedIndex = SettingsPageIndex;
+                Tabs.SelectedItem = TabSettings;
                 return;
             }
             PrintSync("Load succeeded.");
@@ -498,7 +497,7 @@ namespace Greed
             if (!Directory.Exists(dir))
             {
                 txt.Background = Invalid;
-                Tabs.SelectedIndex = SettingsPageIndex;
+                Tabs.SelectedItem = TabSettings;
             }
         }
 
@@ -541,6 +540,17 @@ namespace Greed
             string newVal = txt.Text.Replace("/", "\\");
             var exists = Directory.Exists(newVal);
             txt.Background = exists ? Valid : Invalid;
+
+            if (!exists)
+            {
+                InvalidSettings.Add(key);
+            }
+            else
+            {
+                InvalidSettings.Remove(key);
+            }
+            TabMods.IsEnabled = !InvalidSettings.Any();
+
             if (exists && newVal != ConfigurationManager.AppSettings[key])
             {
                 SetConfigOptions(key, newVal);
@@ -566,20 +576,21 @@ namespace Greed
         private void Tabs_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var control = ((TabControl)sender);
-            var i = control.SelectedIndex;
-            if (i != SelectedTabIndex)
+            var selection = (TabItem)control.SelectedItem;
+
+            if (selection != SelectedTab)
             {
-                PrintSync($"Tabs_SelectionChanged(): {i}");
-                if (i == ModPageIndex && SelectedTabIndex != ModPageIndex)
+                PrintSync($"Tabs_SelectionChanged()");
+                if (selection == TabMods)
                 {
                     // We have to set this BEFORE the file I/O so we don't start trying to load a second time while still in the first one.
                     // (This can happen if we focus an element and then switch tabs twice.)
-                    SelectedTabIndex = i;
+                    SelectedTab = selection;
                     ReloadModListFromDisk();
                 }
                 else
                 {
-                    SelectedTabIndex = i;
+                    SelectedTab = selection;
                 }
             }
         }

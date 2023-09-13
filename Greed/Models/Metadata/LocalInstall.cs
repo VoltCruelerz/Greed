@@ -50,7 +50,9 @@ namespace Greed.Models
         public List<string> IsLegalVersion()
         {
             var sinsDir = ConfigurationManager.AppSettings["sinsDir"]!;
-            var sinsVersion = new Version(FileVersionInfo.GetVersionInfo(sinsDir + "\\sins2.exe").FileVersion!);
+            var sinsPath = sinsDir + "\\sins2.exe";
+            var versionStr = File.Exists(sinsPath) ? FileVersionInfo.GetVersionInfo(sinsPath).FileVersion! : "0.0.0";
+            var sinsVersion = new Version(versionStr);
             return IsLegalVersion(sinsVersion);
         }
 

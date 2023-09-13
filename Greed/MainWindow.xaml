@@ -73,7 +73,7 @@
                 </Button>
             </Grid>
         </TabItem>
-        <TabItem Header="Settings">
+        <TabItem x:Name="TabSettings" Header="Settings">
             <Grid>
                 <TextBox x:Name="txtSinsDir" HorizontalAlignment="Left" Margin="131,6,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="438" TextChanged="TxtSinsDir_TextChanged" ToolTip="Autosaves if directory exists."/>
                 <Label Content="Sins Directory" HorizontalAlignment="Left" Margin="10,2,0,0" VerticalAlignment="Top"/>
