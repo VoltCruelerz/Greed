@@ -19,7 +19,7 @@
                     <ColumnDefinition Width="409*"/>
                     <ColumnDefinition Width="432*"/>
                 </Grid.ColumnDefinitions>
-                <ListView x:Name="viewModList" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="10,33,11,10"
+                <ListView x:Name="viewModList" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="10,60,11,10"
                           SelectionChanged="ModList_SelectionChanged"
                           MouseDoubleClick="Toggle_Click"
                           MouseUp="ModList_MouseUp"
@@ -39,14 +39,13 @@
                         </GridView>
                     </ListView.View>
                 </ListView>
-                <localControls:TxtModBox x:Name="TxtLocalModInfo" AutomationProperties.HelpText="Select a mod to see its details." IsReadOnly="True" Grid.Column="1" Margin="10,33,10,60" Background="#FFBDBDBD">
+                <localControls:TxtModBox x:Name="TxtLocalModInfo" AutomationProperties.HelpText="Select a mod to see its details." IsReadOnly="True" Grid.Column="1" Margin="10,33,10,35" Background="#FFBDBDBD">
                     <FlowDocument>
                         <Paragraph>
                             <Run Text=""/>
                         </Paragraph>
                     </FlowDocument>
                 </localControls:TxtModBox>
-                <Button x:Name="cmdToggle" Content="Toggle" Margin="10,0,0,35" Click="Toggle_Click" IsEnabled="False" HorizontalAlignment="Left" Width="62" Grid.Column="1" ToolTip="Toggle whether a mod is active or not." Height="20" VerticalAlignment="Bottom"/>
                 <Button x:Name="cmdExport" Content="Export Greedy Selections" Click="Export_Click" Margin="10,0,0,10" Grid.Column="1" ToolTip="Imports the active mods and exports them to mods/greed and turns greed on." Height="20" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="152"/>
                 <ListView x:Name="viewFileList" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="10,33,10,35" MouseDoubleClick="Diff_Click" Grid.Column="2" SelectionChanged="FileList_SelectionChanged">
                     <ListView.View>
@@ -60,18 +59,20 @@
                 <Button x:Name="cmdDiff" Content="View Difference Report" Margin="10,0,0,10" VerticalAlignment="Bottom" Click="Diff_Click" IsEnabled="False" HorizontalAlignment="Left" Width="133" Height="20" Grid.Column="2" ToolTip="Display a difference report between the gold copy and the execution product."/>
                 <Label Content="JSON Files" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="26" Width="265" Grid.Column="2"/>
                 <Button x:Name="cmdPlay" Grid.Column="1" Content="▶" Margin="168,0,0,10" RenderTransformOrigin="-0.059,-0.389" Height="20" VerticalAlignment="Bottom" Background="#FF759E66" Click="Play_Click" ToolTip="Launch Sins II" HorizontalAlignment="Left" Width="50"/>
-                <Button x:Name="cmdToggleAll" Content="Toggle All" Margin="77,0,0,35" VerticalAlignment="Bottom" Click="ToggleAll_Click" HorizontalAlignment="Left" Width="62" Height="20" Grid.Column="1" ToolTip="Toggle all mods on or off."/>
+                <Button x:Name="cmdToggleAll" Content="!∀" Margin="10,10,0,0" VerticalAlignment="Top" Click="ToggleAll_Click" Height="22" ToolTip="Toggle all mods on or off." HorizontalAlignment="Left" Width="28"/>
                 <ProgressBar x:Name="pgbProgress" Margin="10,5,10,117" Grid.ColumnSpan="3" Foreground="#FF06B025" Background="#FFAAAAAA" BorderBrush="#FF747474" Value="0" Grid.Row="1" />
                 <TextBox x:Name="txtLog" Margin="10,30,10,10" Grid.Row="1" TextWrapping="Wrap" Text="" Grid.ColumnSpan="3" Background="#FFBDBDBD" IsReadOnly="True"/>
                 <Label Content="Details" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="26" Width="265" Grid.Column="1"/>
-                <Button x:Name="cmdRefresh" Content="Refresh Sources" Margin="144,0,0,35" VerticalAlignment="Bottom" Click="Refresh_Click" HorizontalAlignment="Left" Width="90" Height="20" Grid.Column="1" ToolTip="Refresh the mod list."/>
-                <TextBox x:Name="TxtSearchMods" Margin="0,15,44,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" HorizontalAlignment="Right" Width="135" AutomationProperties.HelpText="Search 🔍" HorizontalContentAlignment="Right" TextChanged="TxtSearchMods_TextChanged"/>
-                <Label Content="🔍" Margin="0,9,152,0" VerticalAlignment="Top" Height="28" HorizontalAlignment="Right" Width="32" FontSize="14"/>
-                <CheckBox x:Name="CheckActive" Content="Active" HorizontalAlignment="Left" Margin="21,18,0,0" VerticalAlignment="Top" Unchecked="CheckActive_Toggle" Checked="CheckActive_Toggle"/>
-                <Button x:Name="CmdOnline" Content="☁️" HorizontalAlignment="Right" Margin="0,15,11,0" VerticalAlignment="Top" Height="18" FontWeight="UltraBold" Width="28
-                        " BorderBrush="#FF707070" Click="CmdOnline_Click" ToolTip="View online catalog of Greedy mods.">
+                <Button x:Name="cmdRefresh" Content="↻" Padding="0,-4,1,1" Margin="43,10,0,0" VerticalAlignment="Top" Click="Refresh_Click" HorizontalAlignment="Left" Width="28" Height="22" ToolTip="Refresh the mod list." FontSize="16"/>
+                <TextBox x:Name="TxtSearchMods" Margin="0,37,44,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" HorizontalAlignment="Right" Width="150" AutomationProperties.HelpText="Search 🔍" HorizontalContentAlignment="Right" TextChanged="TxtSearchMods_TextChanged"/>
+                <Label Content="🔍" Margin="0,31,167,0" VerticalAlignment="Top" Height="28" HorizontalAlignment="Right" Width="32" FontSize="14" Foreground="#FFCDCDCD"/>
+                <CheckBox x:Name="CheckActive" Content="Filter to Active" HorizontalAlignment="Left" Margin="21,40,0,0" VerticalAlignment="Top" Unchecked="CheckActive_Toggle" Checked="CheckActive_Toggle"/>
+                <Button x:Name="CmdOnline" Content="☁️" HorizontalAlignment="Right" Margin="0,37,11,0" VerticalAlignment="Top" Height="18" FontWeight="UltraBold" Width="28
+                        " BorderBrush="#FF707070" Click="CmdOnline_Click" ToolTip="View online catalog of Greedy mods." RenderTransformOrigin="0.379,0.19">
                 </Button>
-                <Button x:Name="CmdSaveBundle" Content="Save Bundle" Margin="239,0,0,35" VerticalAlignment="Bottom" Click="CmdSaveBundle_Click" HorizontalAlignment="Left" Width="77" Height="20" Grid.Column="1" ToolTip="Saves the current list of active mods as a bundle."/>
+                <ComboBox x:Name="CbxBundles" Margin="0,9,77,0" VerticalAlignment="Top" HorizontalAlignment="Right" Width="150" SelectionChanged="CbxBundles_SelectionChanged"/>
+                <Button x:Name="CmdSaveBundle" Content="💾" Margin="0,9,44,0" Click="CmdSaveBundle_Click" VerticalAlignment="Top" ToolTip="Saves the current list of active mods as a bundle." Height="22" HorizontalAlignment="Right" Width="28"/>
+                <Button x:Name="CmdDeleteBundle" Content="⌫" Margin="0,9,11,0" Click="CmdDeleteBundle_Click" VerticalAlignment="Top" ToolTip="Delete the selected bundle." Height="22" HorizontalAlignment="Right" Width="28"/>
             </Grid>
         </TabItem>
         <TabItem x:Name="TabSettings" Header="Settings">

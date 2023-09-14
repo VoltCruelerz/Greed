@@ -4,6 +4,7 @@ using Greed.Models;
 using Greed.Models.Json;
 using Greed.Models.ListItem;
 using Greed.Models.Online;
+using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -15,6 +16,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Xml.Linq;
 
 namespace Greed
 {
@@ -49,6 +51,7 @@ namespace Greed
             InitializeComponent();
             SetTitle();
             ReloadCatalog();
+            RefreshVaultPackUI();
             PrintSync("Components Loaded");
 
             // Shift the log history.
@@ -70,7 +73,7 @@ namespace Greed
             PopulateConfigField(txtSinsDir, "sinsDir", "C:\\Program Files\\Epic Games\\SinsII");
             PopulateConfigField(txtDownloadDir, "downDir", Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),  "Downloads"));
-            PopulateCbx(CbxChannel, "channel");
+            PopulateConfigCbx(CbxChannel, "channel");
             PrintSync("Directories Explored");
 
             // Only load mods if there's something to load.
@@ -186,8 +189,6 @@ namespace Greed
             // This gets hit when refreshing the display.
             if (e.AddedItems.Count == 0)
             {
-                cmdToggle.IsEnabled = false;
-                cmdToggle.Content = "Toggle";
                 return;
             }
             var item = (ModListItem)e.AddedItems[0]!;
@@ -196,9 +197,6 @@ namespace Greed
             // Ignore the user re-clicking.
             if (newSelection == SelectedMod)
             {
-                // Cleanup the button text and return.
-                cmdToggle.IsEnabled = true;
-                cmdToggle.Content = SelectedMod.IsActive ? "Deactivate" : "Activate";
                 return;
             }
             SelectedMod = newSelection;
@@ -226,8 +224,6 @@ namespace Greed
             UpdateRightClickMenuOptions();
 
             // It starts disabled since nothing is selected.
-            cmdToggle.IsEnabled = true;
-            cmdToggle.Content = SelectedMod.IsActive ? "Deactivate" : "Activate";
             cmdDiff.IsEnabled = false;
 
             ReloadSourceFileList();
@@ -313,6 +309,7 @@ namespace Greed
             }
             RefreshModListUI();
             ReselectSelection();
+            ClearCbxBundlesIfMismatch();
         }
 
         private void ToggleAll_Click(object sender, RoutedEventArgs e)
@@ -333,6 +330,7 @@ namespace Greed
             }
             RefreshModListUI();
             ReselectSelection();
+            ClearCbxBundlesIfMismatch();
         }
 
         private void Refresh_Click(object sender, RoutedEventArgs e)
@@ -506,7 +504,7 @@ namespace Greed
         /// </summary>
         /// <param name="cbx"></param>
         /// <param name="key"></param>
-        private static void PopulateCbx(ComboBox cbx, string key)
+        private static void PopulateConfigCbx(ComboBox cbx, string key)
         {
             var val = ConfigurationManager.AppSettings[key]!;
             foreach (var item in cbx.Items)
@@ -734,9 +732,67 @@ namespace Greed
             ReloadModListFromDiskAsync();
         }
 
+        #region Bundles
+        private void RefreshVaultPackUI()
+        {
+            CbxBundles.Items.Clear();
+            foreach (var pack in Vault.Packs)
+            {
+                CbxBundles.Items.Add(pack.Key);
+            }
+        }
+
         private void CmdSaveBundle_Click(object sender, RoutedEventArgs e)
         {
+            var name = Interaction.InputBox("Please name the pack. Reusing a name will overwrite the old pack.", "Create Mod Pack");
 
+            if (string.IsNullOrEmpty(name))
+            {
+                return;
+            }
+
+            if (name.Contains('"') || name.Contains('\\'))
+            {
+                CriticalAlertPopup("Pack Creation Error", "You cannot create a mod pack with a name containing quotes or escape characters.");
+                return;
+            }
+
+            Vault.UpsertPack(name, Mods);
+            RefreshVaultPackUI();
         }
+
+        private void CmdDeleteBundle_Click(object sender, RoutedEventArgs e)
+        {
+            if (CbxBundles.SelectedItem == null) return;
+
+            Vault.DeletePack((string)CbxBundles.SelectedItem);
+            RefreshVaultPackUI();
+            CbxBundles.SelectedItem = null;
+        }
+
+        private void CbxBundles_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (CbxBundles.SelectedItem == null) return;
+
+            var activePack = Vault.Packs[(string)CbxBundles.SelectedItem];
+            Mods.ForEach(m => m.SetModActivity(Mods, activePack.Contains(m.Id), true));
+            Vault.ExportActiveOnly(Mods);
+            RefreshModListUI();
+        }
+
+        private void ClearCbxBundlesIfMismatch()
+        {
+            if (CbxBundles.SelectedItem == null) return;
+
+            var activePack = Vault.Packs[(string)CbxBundles.SelectedItem];
+
+            var actualActive = Mods.Where(m => m.IsActive).Select(m => m.Id).ToList();
+
+            if (activePack.Count != actualActive.Count || activePack.Any(ap => !actualActive.Contains(ap)) || actualActive.Any(aa => !activePack.Contains(aa)))
+            {
+                CbxBundles.SelectedItem = null;
+            }
+        }
+        #endregion
     }
 }

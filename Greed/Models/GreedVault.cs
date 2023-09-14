@@ -61,5 +61,18 @@ namespace Greed.Models
             Active = allMods.Where(m => m.IsActive).Select(m => m.Id).ToList();
             Export();
         }
+
+        public void UpsertPack(string name, List<Mod> allMods)
+        {
+            var active = allMods.Where(m => m.IsActive).Select(m => m.Id).ToList();
+            Packs[name] = active;
+            Export();
+        }
+
+        public void DeletePack(string name)
+        {
+            Packs.Remove(name);
+            Export();
+        }
     }
 }

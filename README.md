@@ -24,7 +24,7 @@ _A mod loader for [Sins of a Solar Empire II](https://www.sinsofasolarempire2.co
 
 ### Mod Installation
 
-#### Automated Install
+#### Automated Install (Recommended)
 
 1. Press the `[☁️]` button to view the online catalog.
 2. Right click on whatever mod you want to install.
@@ -41,22 +41,22 @@ _A mod loader for [Sins of a Solar Empire II](https://www.sinsofasolarempire2.co
 ## Advantages for Users
 
 - **No More Manual Deconfliction**: Deconfliction of commonly modified files happens automatically for you.
-- **Automated Installation**: You can automatically mods and their dependencies from a curated list.
-- **Easy Viewing**: Easily view the metadata, readme, and source files for any mod you download.
+- **Automated Installation**: You can automatically install mods and their dependencies from an online catalog.
 - **Conflict Detection**: You are warned if you try to enable mods with a known conflict between them.
 - **Dependency Management**: You are be warned if you attempt to enable a mod without its dependencies active.
+- **Mod Packs**: Easily create bundles of your favorite mods that you can quickly enable together.
 
 ## Greedy Mod Development
 
 ### Why Develop Greedy Mods?
 
 - **Selective Inclusion**: Your mod only needs to include what you changed about a particular source file (eg add a new property, delete a property, or add an array element), _drastically_ reducing the risk of collisions between mods.
-- **Patch Merge**: Intelligent merging of localization files.
+- **Patch Merge**: Intelligent merging of files, allowing automated merge even within the same file.
 - **Dependency Autoinstall**: Users can automatically install your mod's dependencies.
 - **Automated Updates**: Users can update to the latest version of your mod automatically.
 - **Comments**: You can add C-style comments to your source files.
 - **Reduced Boilerplate**: Fractional files reduces the effort required to make small mods
-- **Improved Exposure**: Greed ships with a viewer of curated Greedy mods. By getting added to that list, your mods can reach more users.
+- **Improved Exposure**: Greed comes with a catalog of online mods that can be automatically installed.
 - **File Diff**: Greed ships with a diff tool specifically for Sins II data files, allowing you to readily see exactly what you've done.
 
 ![screenshot](assets/DiffScreenshot.png)

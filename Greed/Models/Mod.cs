@@ -396,6 +396,19 @@ namespace Greed.Models
             return Id;
         }
 
+
+        public void SetModActivity(List<Mod> allMods, bool willBeActive, bool force)
+        {
+            if (force)
+            {
+                IsActive = willBeActive;
+            }
+            else
+            {
+                SetModActivity(allMods, willBeActive);
+            }
+        }
+
         public void SetModActivity(List<Mod> allMods, bool willBeActive)
         {
             var activeMods = allMods.Where(mod => mod.IsActive);
