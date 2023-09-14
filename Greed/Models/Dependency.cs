@@ -5,7 +5,6 @@ namespace Greed.Models
 {
     public class Dependency
     {
-
         [JsonRequired]
         [JsonProperty(PropertyName = "id")]
         public string Id { get; set; } = string.Empty;

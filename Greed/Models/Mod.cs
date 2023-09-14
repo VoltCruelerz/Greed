@@ -21,6 +21,7 @@ namespace Greed.Models
     public partial class Mod
     {
         private LocalInstall? Metadata { get; set; }
+        private readonly IVault Vault;
         private readonly IModManager Manager;
         private readonly IWarningPopup Warning;
 
@@ -59,9 +60,10 @@ namespace Greed.Models
         public List<Source> Textures { get; set; } = new List<Source>();
         #endregion
 
-        public Mod(IModManager manager, IWarningPopup warning, List<string> enabledModIds, string path, ref int modIndex)
+        public Mod(IVault vault, IModManager manager, IWarningPopup warning, List<string> enabledModIds, string path, ref int modIndex)
         {
             Debug.WriteLine("Loading " + path);
+            Vault = vault;
             Manager = manager;
             Warning = warning;
             var contents = Directory.GetFiles(path);
@@ -421,7 +423,7 @@ namespace Greed.Models
                 }
 
                 IsActive = false;
-                Manager.SetGreedyMods(allMods.Where(m => m.IsActive).ToList());
+                Vault.ExportActiveOnly(allMods);
                 return;
             }
 
@@ -467,7 +469,7 @@ namespace Greed.Models
             if (!conflicts.Any())
             {
                 IsActive = true;
-                Manager.SetGreedyMods(allMods.Where(m => m.IsActive).ToList());
+                Vault.ExportActiveOnly(allMods);
                 return;
             }
 
@@ -489,7 +491,7 @@ namespace Greed.Models
             {
                 // Abort. Do nothing.
             }
-            Manager.SetGreedyMods(allMods.Where(m => m.IsActive).ToList());
+            Vault.ExportActiveOnly(allMods);
         }
 
         public bool HasDirectDependent(Mod potentialDependent)

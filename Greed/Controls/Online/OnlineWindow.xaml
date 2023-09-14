@@ -17,8 +17,7 @@
         <CheckBox x:Name="CheckUninstalled" Content="Uninstalled Only" HorizontalAlignment="Left" Margin="10,12,0,0" VerticalAlignment="Top" Unchecked="CheckUninstalled_Toggle" Checked="CheckUninstalled_Toggle" RenderTransformOrigin="0.017,-0.019" Height="15" Width="107"/>
         <ListView x:Name="ViewOnlineModList" Margin="5,30,5,5" SelectionChanged="OnlineModList_SelectionChanged">
             <ListView.ContextMenu>
-                <ContextMenu>
-                    <MenuItem x:Name="MenuInstall" Header="Install" Click="MenuInstall_Click"/>
+                <ContextMenu x:Name="CtxRight">
                 </ContextMenu>
             </ListView.ContextMenu>
             <ListView.View>

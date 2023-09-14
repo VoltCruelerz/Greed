@@ -55,7 +55,7 @@ namespace Greed.Models.ListItem
                 ? m.Live.DateAdded
                 : DateTime.Today.ToString();
             IsInstalled = ModManager.IsModInstalled(Id)
-                ? "✅"
+                ? "💾"
                 : string.IsNullOrEmpty(m.Live.Download)
                     ? "🚫"
                     : "[🡇]";

@@ -8,6 +8,7 @@ namespace Greed.UnitTest.Models
     {
         private readonly Mock<IModManager> MockManager = new();
         private readonly Mock<IWarningPopup> MockWarning = new();
+        private readonly Mock<IVault> MockVault = new();
 
         [TestMethod]
         public void Import_Basic()
@@ -16,7 +17,7 @@ namespace Greed.UnitTest.Models
             var index = 0;
 
             // Act
-            var mod = Helper.GetBasicMod(MockManager.Object, MockWarning.Object, ref index);
+            var mod = Helper.GetBasicMod(MockVault.Object, MockManager.Object, MockWarning.Object, ref index);
 
             // Assert
             Assert.AreEqual(2, mod.Entities.Count);
@@ -30,8 +31,8 @@ namespace Greed.UnitTest.Models
         {
             // Arrange
             var index = 0;
-            var mod = Helper.GetBasicMod(MockManager.Object, MockWarning.Object, ref index);
-            var conflict = Helper.GetConflictMod(MockManager.Object, MockWarning.Object, ref index);
+            var mod = Helper.GetBasicMod(MockVault.Object, MockManager.Object, MockWarning.Object, ref index);
+            var conflict = Helper.GetConflictMod(MockVault.Object, MockManager.Object, MockWarning.Object, ref index);
             var mods = new List<Mod>
             {
                 mod,
@@ -48,7 +49,7 @@ namespace Greed.UnitTest.Models
             // Assert
             Assert.IsTrue(mod.IsActive);
             Assert.IsFalse(conflict.IsActive);
-            MockManager.Verify(m => m.SetGreedyMods(It.IsAny<List<Mod>>()), Times.Exactly(2));
+            MockVault.Verify(m => m.ExportActiveOnly(It.IsAny<List<Mod>>()), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -56,8 +57,8 @@ namespace Greed.UnitTest.Models
         {
             // Arrange
             var index = 0;
-            var mod = Helper.GetBasicMod(MockManager.Object, MockWarning.Object, ref index);
-            var conflict = Helper.GetConflictMod(MockManager.Object, MockWarning.Object, ref index);
+            var mod = Helper.GetBasicMod(MockVault.Object, MockManager.Object, MockWarning.Object, ref index);
+            var conflict = Helper.GetConflictMod(MockVault.Object, MockManager.Object, MockWarning.Object, ref index);
             var mods = new List<Mod>
             {
                 mod,
@@ -74,7 +75,7 @@ namespace Greed.UnitTest.Models
             // Assert
             Assert.IsFalse(mod.IsActive);
             Assert.IsTrue(conflict.IsActive);
-            MockManager.Verify(m => m.SetGreedyMods(It.IsAny<List<Mod>>()), Times.Exactly(2));
+            MockVault.Verify(m => m.ExportActiveOnly(It.IsAny<List<Mod>>()), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -82,8 +83,8 @@ namespace Greed.UnitTest.Models
         {
             // Arrange
             var index = 0;
-            var mod = Helper.GetBasicMod(MockManager.Object, MockWarning.Object, ref index);
-            var conflict = Helper.GetConflictMod(MockManager.Object, MockWarning.Object, ref index);
+            var mod = Helper.GetBasicMod(MockVault.Object, MockManager.Object, MockWarning.Object, ref index);
+            var conflict = Helper.GetConflictMod(MockVault.Object, MockManager.Object, MockWarning.Object, ref index);
             var mods = new List<Mod>
             {
                 mod,
@@ -100,7 +101,7 @@ namespace Greed.UnitTest.Models
             // Assert
             Assert.IsTrue(mod.IsActive);
             Assert.IsTrue(conflict.IsActive);
-            MockManager.Verify(m => m.SetGreedyMods(It.IsAny<List<Mod>>()), Times.Exactly(2));
+            MockVault.Verify(m => m.ExportActiveOnly(It.IsAny<List<Mod>>()), Times.Exactly(2));
         }
         #endregion
 
@@ -110,8 +111,8 @@ namespace Greed.UnitTest.Models
         {
             // Arrange
             var index = 0;
-            var mod = Helper.GetBasicMod(MockManager.Object, MockWarning.Object, ref index);
-            var dep = Helper.GetDependentMod(MockManager.Object, MockWarning.Object, ref index);
+            var mod = Helper.GetBasicMod(MockVault.Object, MockManager.Object, MockWarning.Object, ref index);
+            var dep = Helper.GetDependentMod(MockVault.Object, MockManager.Object, MockWarning.Object, ref index);
             var mods = new List<Mod>
             {
                 mod,
@@ -127,7 +128,7 @@ namespace Greed.UnitTest.Models
             // Assert
             Assert.IsFalse(mod.IsActive);
             Assert.IsFalse(dep.IsActive);
-            MockManager.Verify(m => m.SetGreedyMods(It.IsAny<List<Mod>>()), Times.Never);
+            MockVault.Verify(m => m.ExportActiveOnly(It.IsAny<List<Mod>>()), Times.Never);
         }
 
         [TestMethod]
@@ -135,8 +136,8 @@ namespace Greed.UnitTest.Models
         {
             // Arrange
             var index = 0;
-            var mod = Helper.GetBasicMod(MockManager.Object, MockWarning.Object, ref index);
-            var dep = Helper.GetDependentMod(MockManager.Object, MockWarning.Object, ref index);
+            var mod = Helper.GetBasicMod(MockVault.Object, MockManager.Object, MockWarning.Object, ref index);
+            var dep = Helper.GetDependentMod(MockVault.Object, MockManager.Object, MockWarning.Object, ref index);
             var mods = new List<Mod>
             {
                 mod,
@@ -152,7 +153,7 @@ namespace Greed.UnitTest.Models
             // Assert
             Assert.IsTrue(mod.IsActive);
             Assert.IsTrue(dep.IsActive);
-            MockManager.Verify(m => m.SetGreedyMods(It.IsAny<List<Mod>>()), Times.Exactly(2));
+            MockVault.Verify(m => m.ExportActiveOnly(It.IsAny<List<Mod>>()), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -160,8 +161,8 @@ namespace Greed.UnitTest.Models
         {
             // Arrange
             var index = 0;
-            var mod = Helper.GetBasicMod(MockManager.Object, MockWarning.Object, ref index);
-            var dep = Helper.GetDependentMod(MockManager.Object, MockWarning.Object, ref index);
+            var mod = Helper.GetBasicMod(MockVault.Object, MockManager.Object, MockWarning.Object, ref index);
+            var dep = Helper.GetDependentMod(MockVault.Object, MockManager.Object, MockWarning.Object, ref index);
             var mods = new List<Mod>
             {
                 mod,
@@ -177,7 +178,7 @@ namespace Greed.UnitTest.Models
             // Assert
             Assert.IsFalse(mod.IsActive);
             Assert.IsTrue(dep.IsActive);
-            MockManager.Verify(m => m.SetGreedyMods(It.IsAny<List<Mod>>()), Times.Exactly(1));
+            MockVault.Verify(m => m.ExportActiveOnly(It.IsAny<List<Mod>>()), Times.Exactly(1));
         }
         #endregion
 
@@ -187,8 +188,8 @@ namespace Greed.UnitTest.Models
         {
             // Arrange
             var index = 0;
-            var mod = Helper.GetBasicMod(MockManager.Object, MockWarning.Object, ref index);
-            var dep = Helper.GetDependentMod(MockManager.Object, MockWarning.Object, ref index);
+            var mod = Helper.GetBasicMod(MockVault.Object, MockManager.Object, MockWarning.Object, ref index);
+            var dep = Helper.GetDependentMod(MockVault.Object, MockManager.Object, MockWarning.Object, ref index);
             var mods = new List<Mod>
             {
                 mod,
@@ -206,7 +207,7 @@ namespace Greed.UnitTest.Models
             // Assert
             Assert.IsTrue(mod.IsActive);
             Assert.IsTrue(dep.IsActive);
-            MockManager.Verify(m => m.SetGreedyMods(It.IsAny<List<Mod>>()), Times.Exactly(2));
+            MockVault.Verify(m => m.ExportActiveOnly(It.IsAny<List<Mod>>()), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -214,8 +215,8 @@ namespace Greed.UnitTest.Models
         {
             // Arrange
             var index = 0;
-            var mod = Helper.GetBasicMod(MockManager.Object, MockWarning.Object, ref index);
-            var dep = Helper.GetDependentMod(MockManager.Object, MockWarning.Object, ref index);
+            var mod = Helper.GetBasicMod(MockVault.Object, MockManager.Object, MockWarning.Object, ref index);
+            var dep = Helper.GetDependentMod(MockVault.Object, MockManager.Object, MockWarning.Object, ref index);
             var mods = new List<Mod>
             {
                 mod,
@@ -233,7 +234,7 @@ namespace Greed.UnitTest.Models
             // Assert
             Assert.IsFalse(mod.IsActive);
             Assert.IsFalse(dep.IsActive);
-            MockManager.Verify(m => m.SetGreedyMods(It.IsAny<List<Mod>>()), Times.Exactly(4));
+            MockVault.Verify(m => m.ExportActiveOnly(It.IsAny<List<Mod>>()), Times.Exactly(4));
         }
 
         [TestMethod]
@@ -241,8 +242,8 @@ namespace Greed.UnitTest.Models
         {
             // Arrange
             var index = 0;
-            var mod = Helper.GetBasicMod(MockManager.Object, MockWarning.Object, ref index);
-            var dep = Helper.GetDependentMod(MockManager.Object, MockWarning.Object, ref index);
+            var mod = Helper.GetBasicMod(MockVault.Object, MockManager.Object, MockWarning.Object, ref index);
+            var dep = Helper.GetDependentMod(MockVault.Object, MockManager.Object, MockWarning.Object, ref index);
             var mods = new List<Mod>
             {
                 mod,
@@ -260,7 +261,7 @@ namespace Greed.UnitTest.Models
             // Assert
             Assert.IsFalse(mod.IsActive);
             Assert.IsTrue(dep.IsActive);
-            MockManager.Verify(m => m.SetGreedyMods(It.IsAny<List<Mod>>()), Times.Exactly(3));
+            MockVault.Verify(m => m.ExportActiveOnly(It.IsAny<List<Mod>>()), Times.Exactly(3));
         }
         #endregion
 
@@ -270,8 +271,8 @@ namespace Greed.UnitTest.Models
         {
             // Arrange
             var index = 0;
-            var mod = Helper.GetBasicMod(MockManager.Object, MockWarning.Object, ref index);
-            var dep = Helper.GetDependentFutureMod(MockManager.Object, MockWarning.Object, ref index);
+            var mod = Helper.GetBasicMod(MockVault.Object, MockManager.Object, MockWarning.Object, ref index);
+            var dep = Helper.GetDependentFutureMod(MockVault.Object, MockManager.Object, MockWarning.Object, ref index);
             var mods = new List<Mod>
             {
                 mod,
@@ -287,7 +288,7 @@ namespace Greed.UnitTest.Models
             // Assert
             Assert.IsFalse(mod.IsActive);
             Assert.IsFalse(dep.IsActive);
-            MockManager.Verify(m => m.SetGreedyMods(It.IsAny<List<Mod>>()), Times.Never);
+            MockVault.Verify(m => m.ExportActiveOnly(It.IsAny<List<Mod>>()), Times.Never);
             MockWarning.Verify(m => m.FailedToResolveDependencies(It.IsAny<List<string>>()), Times.Once);
         }
         #endregion

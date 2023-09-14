@@ -8,6 +8,7 @@ namespace Greed.UnitTest
     public class ModManagerTests
     {
         private readonly Mock<IWarningPopup> MockWarning = new();
+        private readonly Mock<IVault> MockVault = new();
         private readonly ModManager Manager;
 
         public ModManagerTests()
@@ -33,10 +34,10 @@ namespace Greed.UnitTest
         {
             // Arrange
             var index = 0;
-            var dependency = Helper.GetBasicMod(Manager, MockWarning.Object, ref index);
-            var filler = Helper.GetFillerMod(Manager, MockWarning.Object, ref index);
-            var dependent = Helper.GetDependentMod(Manager, MockWarning.Object, ref index);
-            var grandependent = Helper.GetGrandependentMod(Manager, MockWarning.Object, ref index);
+            var dependency = Helper.GetBasicMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var filler = Helper.GetFillerMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var dependent = Helper.GetDependentMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var grandependent = Helper.GetGrandependentMod(MockVault.Object, Manager, MockWarning.Object, ref index);
 
             var mods = ActivateAndSync(new List<Mod>()
             {
@@ -47,7 +48,7 @@ namespace Greed.UnitTest
             });
 
             // Act
-            Manager.MoveMod(mods, filler, 0);
+            Manager.MoveMod(MockVault.Object, mods, filler, 0);
 
             // Assert
             int pos = 0;
@@ -65,10 +66,10 @@ namespace Greed.UnitTest
         {
             // Arrange
             var index = 0;
-            var dependency = Helper.GetBasicMod(Manager, MockWarning.Object, ref index);
-            var filler = Helper.GetFillerMod(Manager, MockWarning.Object, ref index);
-            var dependent = Helper.GetDependentMod(Manager, MockWarning.Object, ref index);
-            var grandependent = Helper.GetGrandependentMod(Manager, MockWarning.Object, ref index);
+            var dependency = Helper.GetBasicMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var filler = Helper.GetFillerMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var dependent = Helper.GetDependentMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var grandependent = Helper.GetGrandependentMod(MockVault.Object, Manager, MockWarning.Object, ref index);
 
             var mods = ActivateAndSync(new List<Mod>()
             {
@@ -79,7 +80,7 @@ namespace Greed.UnitTest
             });
 
             // Act
-            Manager.MoveMod(mods, filler, 2);
+            Manager.MoveMod(MockVault.Object, mods, filler, 2);
 
             // Assert
             int pos = 0;
@@ -99,10 +100,10 @@ namespace Greed.UnitTest
         {
             // Arrange
             var index = 0;
-            var dependency = Helper.GetBasicMod(Manager, MockWarning.Object, ref index);
-            var filler = Helper.GetFillerMod(Manager, MockWarning.Object, ref index);
-            var dependent = Helper.GetDependentMod(Manager, MockWarning.Object, ref index);
-            var grandependent = Helper.GetGrandependentMod(Manager, MockWarning.Object, ref index);
+            var dependency = Helper.GetBasicMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var filler = Helper.GetFillerMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var dependent = Helper.GetDependentMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var grandependent = Helper.GetGrandependentMod(MockVault.Object, Manager, MockWarning.Object, ref index);
 
             var mods = ActivateAndSync(new List<Mod>()
             {
@@ -113,7 +114,7 @@ namespace Greed.UnitTest
             });
 
             // Act
-            Manager.MoveMod(mods, dependent, 1);
+            Manager.MoveMod(MockVault.Object, mods, dependent, 1);
 
             // Assert
             int pos = 0;
@@ -130,10 +131,10 @@ namespace Greed.UnitTest
         {
             // Arrange
             var index = 0;
-            var dependency = Helper.GetBasicMod(Manager, MockWarning.Object, ref index);
-            var filler = Helper.GetFillerMod(Manager, MockWarning.Object, ref index);
-            var dependent = Helper.GetDependentMod(Manager, MockWarning.Object, ref index);
-            var grandependent = Helper.GetGrandependentMod(Manager, MockWarning.Object, ref index);
+            var dependency = Helper.GetBasicMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var filler = Helper.GetFillerMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var dependent = Helper.GetDependentMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var grandependent = Helper.GetGrandependentMod(MockVault.Object, Manager, MockWarning.Object, ref index);
 
             var mods = ActivateAndSync(new List<Mod>()
             {
@@ -148,7 +149,7 @@ namespace Greed.UnitTest
                 .Returns(System.Windows.MessageBoxResult.Yes);
 
             // Act
-            Manager.MoveMod(mods, dependent, 3);
+            Manager.MoveMod(MockVault.Object, mods, dependent, 3);
 
             // Assert
             int pos = 0;
@@ -168,10 +169,10 @@ namespace Greed.UnitTest
         {
             // Arrange
             var index = 0;
-            var dependency = Helper.GetBasicMod(Manager, MockWarning.Object, ref index);
-            var filler = Helper.GetFillerMod(Manager, MockWarning.Object, ref index);
-            var dependent = Helper.GetDependentMod(Manager, MockWarning.Object, ref index);
-            var grandependent = Helper.GetGrandependentMod(Manager, MockWarning.Object, ref index);
+            var dependency = Helper.GetBasicMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var filler = Helper.GetFillerMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var dependent = Helper.GetDependentMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var grandependent = Helper.GetGrandependentMod(MockVault.Object, Manager, MockWarning.Object, ref index);
 
             var mods = ActivateAndSync(new List<Mod>()
             {
@@ -186,7 +187,7 @@ namespace Greed.UnitTest
                 .Returns(System.Windows.MessageBoxResult.Yes);
 
             // Act
-            Manager.MoveMod(mods, dependent, 0);
+            Manager.MoveMod(MockVault.Object, mods, dependent, 0);
 
             // Assert
             int pos = 0;
@@ -204,10 +205,10 @@ namespace Greed.UnitTest
         {
             // Arrange
             var index = 0;
-            var dependency = Helper.GetBasicMod(Manager, MockWarning.Object, ref index);
-            var filler = Helper.GetFillerMod(Manager, MockWarning.Object, ref index);
-            var dependent = Helper.GetDependentMod(Manager, MockWarning.Object, ref index);
-            var grandependent = Helper.GetGrandependentMod(Manager, MockWarning.Object, ref index);
+            var dependency = Helper.GetBasicMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var filler = Helper.GetFillerMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var dependent = Helper.GetDependentMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var grandependent = Helper.GetGrandependentMod(MockVault.Object, Manager, MockWarning.Object, ref index);
 
             var mods = ActivateAndSync(new List<Mod>()
             {
@@ -222,7 +223,7 @@ namespace Greed.UnitTest
                 .Returns(System.Windows.MessageBoxResult.Cancel);
 
             // Act
-            Manager.MoveMod(mods, dependent, 0);
+            Manager.MoveMod(MockVault.Object, mods, dependent, 0);
 
             // Assert
             int pos = 0;
@@ -240,10 +241,10 @@ namespace Greed.UnitTest
         {
             // Arrange
             var index = 0;
-            var dependency = Helper.GetBasicMod(Manager, MockWarning.Object, ref index);
-            var filler = Helper.GetFillerMod(Manager, MockWarning.Object, ref index);
-            var dependent = Helper.GetDependentMod(Manager, MockWarning.Object, ref index);
-            var grandependent = Helper.GetGrandependentMod(Manager, MockWarning.Object, ref index);
+            var dependency = Helper.GetBasicMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var filler = Helper.GetFillerMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var dependent = Helper.GetDependentMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var grandependent = Helper.GetGrandependentMod(MockVault.Object, Manager, MockWarning.Object, ref index);
 
             var mods = ActivateAndSync(new List<Mod>()
             {
@@ -258,7 +259,7 @@ namespace Greed.UnitTest
                 .Returns(System.Windows.MessageBoxResult.No);
 
             // Act
-            Manager.MoveMod(mods, dependent, 0);
+            Manager.MoveMod(MockVault.Object, mods, dependent, 0);
 
             // Assert
             int pos = 0;
@@ -278,10 +279,10 @@ namespace Greed.UnitTest
         {
             // Arrange
             var index = 0;
-            var dependency = Helper.GetBasicMod(Manager, MockWarning.Object, ref index);
-            var filler = Helper.GetFillerMod(Manager, MockWarning.Object, ref index);
-            var dependent = Helper.GetDependentMod(Manager, MockWarning.Object, ref index);
-            var grandependent = Helper.GetGrandependentMod(Manager, MockWarning.Object, ref index);
+            var dependency = Helper.GetBasicMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var filler = Helper.GetFillerMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var dependent = Helper.GetDependentMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var grandependent = Helper.GetGrandependentMod(MockVault.Object, Manager, MockWarning.Object, ref index);
 
             var mods = ActivateAndSync(new List<Mod>()
             {
@@ -296,7 +297,7 @@ namespace Greed.UnitTest
                 .Returns(System.Windows.MessageBoxResult.Yes);
 
             // Act
-            Manager.MoveMod(mods, grandependent, 0);
+            Manager.MoveMod(MockVault.Object, mods, grandependent, 0);
 
             // Assert
             int pos = 0;
@@ -314,10 +315,10 @@ namespace Greed.UnitTest
         {
             // Arrange
             var index = 0;
-            var dependency = Helper.GetBasicMod(Manager, MockWarning.Object, ref index);
-            var filler = Helper.GetFillerMod(Manager, MockWarning.Object, ref index);
-            var dependent = Helper.GetDependentMod(Manager, MockWarning.Object, ref index);
-            var grandependent = Helper.GetGrandependentMod(Manager, MockWarning.Object, ref index);
+            var dependency = Helper.GetBasicMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var filler = Helper.GetFillerMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var dependent = Helper.GetDependentMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var grandependent = Helper.GetGrandependentMod(MockVault.Object, Manager, MockWarning.Object, ref index);
 
             var mods = ActivateAndSync(new List<Mod>()
             {
@@ -332,7 +333,7 @@ namespace Greed.UnitTest
                 .Returns(System.Windows.MessageBoxResult.Cancel);
 
             // Act
-            Manager.MoveMod(mods, grandependent, 0);
+            Manager.MoveMod(MockVault.Object, mods, grandependent, 0);
 
             // Assert
             int pos = 0;
@@ -350,10 +351,10 @@ namespace Greed.UnitTest
         {
             // Arrange
             var index = 0;
-            var dependency = Helper.GetBasicMod(Manager, MockWarning.Object, ref index);
-            var filler = Helper.GetFillerMod(Manager, MockWarning.Object, ref index);
-            var dependent = Helper.GetDependentMod(Manager, MockWarning.Object, ref index);
-            var grandependent = Helper.GetGrandependentMod(Manager, MockWarning.Object, ref index);
+            var dependency = Helper.GetBasicMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var filler = Helper.GetFillerMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var dependent = Helper.GetDependentMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var grandependent = Helper.GetGrandependentMod(MockVault.Object, Manager, MockWarning.Object, ref index);
 
             var mods = ActivateAndSync(new List<Mod>()
             {
@@ -368,7 +369,7 @@ namespace Greed.UnitTest
                 .Returns(System.Windows.MessageBoxResult.No);
 
             // Act
-            Manager.MoveMod(mods, grandependent, 0);
+            Manager.MoveMod(MockVault.Object, mods, grandependent, 0);
 
             // Assert
             int pos = 0;
@@ -388,10 +389,10 @@ namespace Greed.UnitTest
         {
             // Arrange
             var index = 0;
-            var dependency = Helper.GetBasicMod(Manager, MockWarning.Object, ref index);
-            var filler = Helper.GetFillerMod(Manager, MockWarning.Object, ref index);
-            var dependent = Helper.GetDependentMod(Manager, MockWarning.Object, ref index);
-            var grandependent = Helper.GetGrandependentMod(Manager, MockWarning.Object, ref index);
+            var dependency = Helper.GetBasicMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var filler = Helper.GetFillerMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var dependent = Helper.GetDependentMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var grandependent = Helper.GetGrandependentMod(MockVault.Object, Manager, MockWarning.Object, ref index);
 
             var mods = ActivateAndSync(new List<Mod>()
             {
@@ -406,7 +407,7 @@ namespace Greed.UnitTest
                 .Returns(System.Windows.MessageBoxResult.Yes);
 
             // Act
-            Manager.MoveMod(mods, dependency, 2);
+            Manager.MoveMod(MockVault.Object, mods, dependency, 2);
 
             // Assert
             int pos = 0;
@@ -426,10 +427,10 @@ namespace Greed.UnitTest
         {
             // Arrange
             var index = 0;
-            var dependency = Helper.GetBasicMod(Manager, MockWarning.Object, ref index);
-            var filler = Helper.GetFillerMod(Manager, MockWarning.Object, ref index);
-            var dependent = Helper.GetDependentMod(Manager, MockWarning.Object, ref index);
-            var grandependent = Helper.GetGrandependentMod(Manager, MockWarning.Object, ref index);
+            var dependency = Helper.GetBasicMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var filler = Helper.GetFillerMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var dependent = Helper.GetDependentMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var grandependent = Helper.GetGrandependentMod(MockVault.Object, Manager, MockWarning.Object, ref index);
 
             var mods = ActivateAndSync(new List<Mod>()
             {
@@ -444,7 +445,7 @@ namespace Greed.UnitTest
                 .Returns(System.Windows.MessageBoxResult.Yes);
 
             // Act
-            Manager.MoveMod(mods, dependency, 3);
+            Manager.MoveMod(MockVault.Object, mods, dependency, 3);
 
             // Assert
             int pos = 0;
@@ -462,10 +463,10 @@ namespace Greed.UnitTest
         {
             // Arrange
             var index = 0;
-            var dependency = Helper.GetBasicMod(Manager, MockWarning.Object, ref index);
-            var filler = Helper.GetFillerMod(Manager, MockWarning.Object, ref index);
-            var dependent = Helper.GetDependentMod(Manager, MockWarning.Object, ref index);
-            var grandependent = Helper.GetGrandependentMod(Manager, MockWarning.Object, ref index);
+            var dependency = Helper.GetBasicMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var filler = Helper.GetFillerMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var dependent = Helper.GetDependentMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var grandependent = Helper.GetGrandependentMod(MockVault.Object, Manager, MockWarning.Object, ref index);
 
             var mods = ActivateAndSync(new List<Mod>()
             {
@@ -480,7 +481,7 @@ namespace Greed.UnitTest
                 .Returns(System.Windows.MessageBoxResult.Cancel);
 
             // Act
-            Manager.MoveMod(mods, dependency, 3);
+            Manager.MoveMod(MockVault.Object, mods, dependency, 3);
 
             // Assert
             int pos = 0;
@@ -498,10 +499,10 @@ namespace Greed.UnitTest
         {
             // Arrange
             var index = 0;
-            var dependency = Helper.GetBasicMod(Manager, MockWarning.Object, ref index);
-            var filler = Helper.GetFillerMod(Manager, MockWarning.Object, ref index);
-            var dependent = Helper.GetDependentMod(Manager, MockWarning.Object, ref index);
-            var grandependent = Helper.GetGrandependentMod(Manager, MockWarning.Object, ref index);
+            var dependency = Helper.GetBasicMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var filler = Helper.GetFillerMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var dependent = Helper.GetDependentMod(MockVault.Object, Manager, MockWarning.Object, ref index);
+            var grandependent = Helper.GetGrandependentMod(MockVault.Object, Manager, MockWarning.Object, ref index);
 
             var mods = ActivateAndSync(new List<Mod>()
             {
@@ -516,7 +517,7 @@ namespace Greed.UnitTest
                 .Returns(System.Windows.MessageBoxResult.No);
 
             // Act
-            Manager.MoveMod(mods, dependency, 3);
+            Manager.MoveMod(MockVault.Object, mods, dependency, 3);
 
             // Assert
             int pos = 0;
@@ -533,7 +534,7 @@ namespace Greed.UnitTest
         {
             // Arrange
             int index = 0;
-            var mod = Helper.GetBasicMod(Manager, MockWarning.Object, ref index);
+            var mod = Helper.GetBasicMod(MockVault.Object, Manager, MockWarning.Object, ref index);
             var srcPath = Helper.ModsFolder + "\\modA";
             var destPath = ConfigurationManager.AppSettings["modDir"] + "\\modA";
             if (Directory.Exists(destPath))
@@ -568,7 +569,7 @@ namespace Greed.UnitTest
             {
                 m.SetModActivity(mods, true);
             });
-            Manager.SyncLoadOrder(mods);
+            ModManager.SyncLoadOrder(MockVault.Object, mods);
             return mods;
         }
 

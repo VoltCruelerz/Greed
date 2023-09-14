@@ -71,6 +71,7 @@
                 <Button x:Name="CmdOnline" Content="☁️" HorizontalAlignment="Right" Margin="0,15,11,0" VerticalAlignment="Top" Height="18" FontWeight="UltraBold" Width="28
                         " BorderBrush="#FF707070" Click="CmdOnline_Click" ToolTip="View online catalog of Greedy mods.">
                 </Button>
+                <Button x:Name="CmdSaveBundle" Content="Save Bundle" Margin="239,0,0,35" VerticalAlignment="Bottom" Click="CmdSaveBundle_Click" HorizontalAlignment="Left" Width="77" Height="20" Grid.Column="1" ToolTip="Saves the current list of active mods as a bundle."/>
             </Grid>
         </TabItem>
         <TabItem x:Name="TabSettings" Header="Settings">

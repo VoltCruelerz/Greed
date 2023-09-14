@@ -26,6 +26,11 @@ namespace Greed.Models.Online
             return Latest;
         }
 
+        public VersionEntry GetVersionEntry(string version)
+        {
+            return Versions[version]!;
+        }
+
         public override Version GetGreedVersion()
         {
             return Live.GreedVersion;

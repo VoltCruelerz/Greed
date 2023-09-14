@@ -42,6 +42,7 @@ namespace Greed
         private OnlineCatalog Catalog = new();
         private TabItem? SelectedTab = null;
         private readonly HashSet<string> InvalidSettings = new();
+        private readonly GreedVault Vault = GreedVault.Load();
 
         public MainWindow()
         {
@@ -118,7 +119,7 @@ namespace Greed
             PrintSync("Loading mods...");
             try
             {
-                Mods = Manager.LoadGreedyMods();
+                Mods = Manager.LoadGreedyMods(Vault);
             }
             catch (Exception e)
             {
@@ -281,10 +282,10 @@ namespace Greed
             }
 
             // We *are* actually reordering now.
-            Manager.MoveMod(Mods, DragMod, Mods.IndexOf(DestMod));
+            Manager.MoveMod(Vault, Mods, DragMod, Mods.IndexOf(DestMod));
             DragMod = null;
             DestMod = null;
-            Manager.SetGreedyMods(Mods.Where(m => m.IsActive).ToList());
+            Vault.ExportActiveOnly(Mods);
             RefreshModListUI();
         }
 
@@ -301,10 +302,9 @@ namespace Greed
             PrintSync("Toggle_Click()");
             SelectedMod!.SetModActivity(Mods, !SelectedMod.IsActive);
 
-            string modDir = ConfigurationManager.AppSettings["modDir"]!;
             try
             {
-                Manager.SetGreedyMods(Mods.Where(m => m.IsActive).ToList());
+                Vault.ExportActiveOnly(Mods);
             }
             catch (Exception ex)
             {
@@ -324,7 +324,7 @@ namespace Greed
             string modDir = ConfigurationManager.AppSettings["modDir"]!;
             try
             {
-                Manager.SetGreedyMods(Mods.Where(m => m.IsActive).ToList());
+                Vault.ExportActiveOnly(Mods);
             }
             catch (Exception ex)
             {
@@ -506,7 +506,7 @@ namespace Greed
         /// </summary>
         /// <param name="cbx"></param>
         /// <param name="key"></param>
-        private void PopulateCbx(ComboBox cbx, string key)
+        private static void PopulateCbx(ComboBox cbx, string key)
         {
             var val = ConfigurationManager.AppSettings[key]!;
             foreach (var item in cbx.Items)
@@ -564,7 +564,7 @@ namespace Greed
             ReloadCatalog();
         }
 
-        private void SetConfigOptions(string key, string value)
+        private static void SetConfigOptions(string key, string value)
         {
             Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
             config.AppSettings.Settings[key].Value = value;
@@ -625,7 +625,8 @@ namespace Greed
                 ? txtLog.Text + '\n' + str
                 : str;
             txtLog.ScrollToEnd();
-            File.AppendAllText(LogPath, str + "\r\n");
+            File.AppendAllText(LogPath, DateTime.Now.ToUniversalTime().ToString("u") + ": " + str + "\r\n");
+            Debug.WriteLine(str);
         }
 
         public void PrintSync(Exception ex)
@@ -671,6 +672,11 @@ namespace Greed
             onlinePopup.ShowDialog();
         }
 
+        public void Uninstall(string id)
+        {
+            ModManager.Uninstall(this, new Controls.WarningPopup(), Mods, id);
+        }
+
         private void MenuUninstall_Click(object sender, RoutedEventArgs e)
         {
             ModManager.Uninstall(this, new Controls.WarningPopup(), Mods, SelectedMod!.Id);
@@ -691,6 +697,23 @@ namespace Greed
             return dict;
         }
 
+        public void UpdateModAsync(Mod modToUpdate, VersionEntry targetVersion)
+        {
+            Dispatcher.Invoke(() => UpdateModInternal(modToUpdate, targetVersion));
+        }
+
+        public async Task UpdateModAsync(OnlineMod onlineModToUpdate, VersionEntry targetVersion)
+        {
+            var localMod = Mods.Find(m => m.Id == onlineModToUpdate.Id);
+            if (localMod == null)
+            {
+                PrintSync("UpdateModAsync() Abort: unable to update missing local mod " + onlineModToUpdate.Id);
+                return;
+            }
+            await UpdateModInternal(localMod!, targetVersion);
+            PrintSync("UpdateModAsync() Complete");
+        }
+
         private void UpdateMod(Mod modToUpdate, VersionEntry targetVersion)
         {
             _ = UpdateModInternal(modToUpdate, targetVersion);
@@ -704,11 +727,16 @@ namespace Greed
             ModManager.Uninstall(this, new Controls.WarningPopup(), Mods, modToUpdate.Id, true);
 
             // Redownload
-            var catalogEntry = Catalog.Mods.Find(m => m.Id == SelectedMod!.Id)!;
+            var catalogEntry = Catalog.Mods.Find(m => m.Id == modToUpdate.Id)!;
             await ModManager.InstallModFromGitHub(this, new Controls.WarningPopup(), Catalog, catalogEntry, targetVersion);
 
             // Reload Mods
             ReloadModListFromDiskAsync();
+        }
+
+        private void CmdSaveBundle_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

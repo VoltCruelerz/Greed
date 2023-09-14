@@ -13,6 +13,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -44,42 +45,17 @@ namespace Greed
         /// Loads all Greedy mods from the mods directory.
         /// </summary>
         /// <returns></returns>
-        public List<Mod> LoadGreedyMods()
+        public List<Mod> LoadGreedyMods(GreedVault vault)
         {
             string modDir = ConfigurationManager.AppSettings["modDir"]!;
             var modDirs = Directory.GetDirectories(modDir);
 
-            // If enabled path doesn't exist yet, make it.
-            var enabledPath = modDir + "\\enabled_greed.json";
-            List<string> enabledModFolders;
-            if (File.Exists(enabledPath))
-            {
-                enabledModFolders = JArray.Parse(File.ReadAllText(enabledPath)).Select(p => p.ToString()).ToList();
-            }
-            else
-            {
-                enabledModFolders = new List<string>();
-                File.WriteAllText(enabledPath, "[]");
-            }
-
             var modIndex = 0;
             return modDirs
-                .Select(d => new Mod(this, Warning, enabledModFolders, d, ref modIndex))
+                .Select(d => new Mod(vault, this, Warning, vault.Active, d, ref modIndex))
                 .Where(m => m.IsGreedy)
                 .OrderBy(m => m.LoadOrder)
                 .ToList();
-        }
-
-        /// <summary>
-        /// Saves the list of greedy mods to enabled_greed.json
-        /// </summary>
-        /// <param name="active"></param>
-        public void SetGreedyMods(List<Mod> active)
-        {
-            string modDir = ConfigurationManager.AppSettings["modDir"]!;
-            var arr = JArray.FromObject(active.Select(p => p.Id));
-            var enabledPath = modDir + "\\enabled_greed.json";
-            File.WriteAllText(enabledPath, arr.ToString());
         }
 
         /// <summary>
@@ -144,10 +120,10 @@ namespace Greed
         /// <param name="mods">all mods</param>
         /// <param name="mover">the mod to move</param>
         /// <param name="destination">the destination index in the list</param>
-        public void MoveMod(List<Mod> mods, Mod mover, int destination)
+        public void MoveMod(IVault vault, List<Mod> mods, Mod mover, int destination)
         {
             MoveModRecursive(mods, mover, destination);
-            SyncLoadOrder(mods);
+            SyncLoadOrder(vault, mods);
         }
 
         /// <summary>
@@ -238,7 +214,7 @@ namespace Greed
         /// Based on the order the mods are in the list, sets their load order index.
         /// </summary>
         /// <param name="mods"></param>
-        public void SyncLoadOrder(List<Mod> mods)
+        public static void SyncLoadOrder(IVault vault, List<Mod> mods)
         {
             var active = mods.Where(m => m.IsActive).ToList();
             for (int i = 0; i < active.Count; i++)
@@ -246,7 +222,7 @@ namespace Greed
                 var mod = active[i];
                 mod.LoadOrder = i;
             }
-            SetGreedyMods(active);
+            vault.ExportActiveOnly(active);
         }
 
         /// <summary>
@@ -431,8 +407,14 @@ namespace Greed
                 if (Directory.Exists(modPath))
                 {
                     Directory.Delete(modPath, true);
+                    window.PrintAsync($"Deleted old install to make way for new one.");
                 }
-                Directory.Move(internalDir, modPath);
+                if (!Directory.Exists(internalDir))
+                {
+                    window.PrintAsync($"Folder doesn't exist yet!");
+                }
+                window.PrintAsync($"Starting move from {internalDir}...");
+                MoveWithRetries(window, internalDir, modPath, 3);
                 window.PrintAsync($"Move complete.");
                 window.PrintAsync($"Install complete.");
 
@@ -443,7 +425,7 @@ namespace Greed
             }
             catch (Exception ex)
             {
-                window.PrintAsync(ex.Message + "\n" + ex.StackTrace);
+                window.CriticalAlertPopup("Failed to Download Mod", ex);
                 return false;
             }
         }
@@ -509,6 +491,39 @@ namespace Greed
             {
                 window.PrintAsync($"A download error occurred: {ex.Message}\n{ex.StackTrace}");
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// Repeatedly attempts to move a directory that may or may not be locked down by ZipFile.ExtractToDirectory()
+        /// </summary>
+        /// <param name="window"></param>
+        /// <param name="src"></param>
+        /// <param name="dest"></param>
+        /// <param name="maxRetries"></param>
+        /// <exception cref="InvalidOperationException"></exception>
+        private static void MoveWithRetries(MainWindow window, string src, string dest, int maxRetries = 5)
+        {
+            for (var retry = 0; retry <= maxRetries; retry++)
+            {
+                if (Directory.Exists(src))
+                {
+                    try
+                    {
+                        Directory.Move(src, dest);
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        window.PrintAsync(ex);
+                        Thread.Sleep(retry * 100);
+                        window.PrintAsync($"Retrying move (r={retry})");
+                    }
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Internal extracted directory does not exist!");
+                }
             }
         }
     }
