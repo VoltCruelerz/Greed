@@ -49,7 +49,7 @@ namespace Greed.UnitTest.Models
             // Assert
             Assert.IsTrue(mod.IsActive);
             Assert.IsFalse(conflict.IsActive);
-            MockVault.Verify(m => m.ExportActiveOnly(It.IsAny<List<Mod>>()), Times.Exactly(2));
+            MockVault.Verify(m => m.ArchiveActiveOnly(It.IsAny<List<Mod>>()), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -75,7 +75,7 @@ namespace Greed.UnitTest.Models
             // Assert
             Assert.IsFalse(mod.IsActive);
             Assert.IsTrue(conflict.IsActive);
-            MockVault.Verify(m => m.ExportActiveOnly(It.IsAny<List<Mod>>()), Times.Exactly(2));
+            MockVault.Verify(m => m.ArchiveActiveOnly(It.IsAny<List<Mod>>()), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -101,7 +101,7 @@ namespace Greed.UnitTest.Models
             // Assert
             Assert.IsTrue(mod.IsActive);
             Assert.IsTrue(conflict.IsActive);
-            MockVault.Verify(m => m.ExportActiveOnly(It.IsAny<List<Mod>>()), Times.Exactly(2));
+            MockVault.Verify(m => m.ArchiveActiveOnly(It.IsAny<List<Mod>>()), Times.Exactly(2));
         }
         #endregion
 
@@ -128,7 +128,7 @@ namespace Greed.UnitTest.Models
             // Assert
             Assert.IsFalse(mod.IsActive);
             Assert.IsFalse(dep.IsActive);
-            MockVault.Verify(m => m.ExportActiveOnly(It.IsAny<List<Mod>>()), Times.Never);
+            MockVault.Verify(m => m.ArchiveActiveOnly(It.IsAny<List<Mod>>()), Times.Never);
         }
 
         [TestMethod]
@@ -153,7 +153,7 @@ namespace Greed.UnitTest.Models
             // Assert
             Assert.IsTrue(mod.IsActive);
             Assert.IsTrue(dep.IsActive);
-            MockVault.Verify(m => m.ExportActiveOnly(It.IsAny<List<Mod>>()), Times.Exactly(2));
+            MockVault.Verify(m => m.ArchiveActiveOnly(It.IsAny<List<Mod>>()), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -178,7 +178,7 @@ namespace Greed.UnitTest.Models
             // Assert
             Assert.IsFalse(mod.IsActive);
             Assert.IsTrue(dep.IsActive);
-            MockVault.Verify(m => m.ExportActiveOnly(It.IsAny<List<Mod>>()), Times.Exactly(1));
+            MockVault.Verify(m => m.ArchiveActiveOnly(It.IsAny<List<Mod>>()), Times.Exactly(1));
         }
         #endregion
 
@@ -207,7 +207,7 @@ namespace Greed.UnitTest.Models
             // Assert
             Assert.IsTrue(mod.IsActive);
             Assert.IsTrue(dep.IsActive);
-            MockVault.Verify(m => m.ExportActiveOnly(It.IsAny<List<Mod>>()), Times.Exactly(2));
+            MockVault.Verify(m => m.ArchiveActiveOnly(It.IsAny<List<Mod>>()), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -234,7 +234,7 @@ namespace Greed.UnitTest.Models
             // Assert
             Assert.IsFalse(mod.IsActive);
             Assert.IsFalse(dep.IsActive);
-            MockVault.Verify(m => m.ExportActiveOnly(It.IsAny<List<Mod>>()), Times.Exactly(4));
+            MockVault.Verify(m => m.ArchiveActiveOnly(It.IsAny<List<Mod>>()), Times.Exactly(4));
         }
 
         [TestMethod]
@@ -261,7 +261,7 @@ namespace Greed.UnitTest.Models
             // Assert
             Assert.IsFalse(mod.IsActive);
             Assert.IsTrue(dep.IsActive);
-            MockVault.Verify(m => m.ExportActiveOnly(It.IsAny<List<Mod>>()), Times.Exactly(3));
+            MockVault.Verify(m => m.ArchiveActiveOnly(It.IsAny<List<Mod>>()), Times.Exactly(3));
         }
         #endregion
 
@@ -288,7 +288,7 @@ namespace Greed.UnitTest.Models
             // Assert
             Assert.IsFalse(mod.IsActive);
             Assert.IsFalse(dep.IsActive);
-            MockVault.Verify(m => m.ExportActiveOnly(It.IsAny<List<Mod>>()), Times.Never);
+            MockVault.Verify(m => m.ArchiveActiveOnly(It.IsAny<List<Mod>>()), Times.Never);
             MockWarning.Verify(m => m.FailedToResolveDependencies(It.IsAny<List<string>>()), Times.Once);
         }
         #endregion

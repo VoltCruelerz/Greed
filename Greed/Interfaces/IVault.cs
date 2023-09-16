@@ -1,4 +1,5 @@
 ﻿using Greed.Models;
+using Greed.Models.Vault;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,7 @@ namespace Greed.Interfaces
 {
     public interface IVault
     {
-        public void ExportActiveOnly(List<Mod> allMods);
+        public void ArchiveActiveOnly(List<Mod> allMods);
+        public string ExportPortable(string name, List<Mod> allMods);
     }
 }

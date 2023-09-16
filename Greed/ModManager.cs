@@ -3,6 +3,7 @@ using Greed.Interfaces;
 using Greed.Models;
 using Greed.Models.EnabledMods;
 using Greed.Models.Online;
+using Greed.Models.Vault;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -222,7 +223,7 @@ namespace Greed
                 var mod = active[i];
                 mod.LoadOrder = i;
             }
-            vault.ExportActiveOnly(active);
+            vault.ArchiveActiveOnly(active);
         }
 
         /// <summary>
@@ -361,14 +362,29 @@ namespace Greed
             }
         }
 
-        public static async Task<bool> InstallModFromGitHub(MainWindow window, WarningPopup warning, OnlineCatalog channel, OnlineMod modToDownload, VersionEntry versionToDownload)
+        /// <summary>
+        /// Installs a mod from github.
+        /// 1. Validates presence of dependencies (unless forced).
+        /// 2. Download file.
+        /// 3. Unzip file.
+        /// 4. Move file.
+        /// 5. Cleanup temp files.
+        /// </summary>
+        /// <param name="window"></param>
+        /// <param name="warning"></param>
+        /// <param name="channel"></param>
+        /// <param name="modToDownload"></param>
+        /// <param name="versionToDownload"></param>
+        /// <param name="force">If TRUE, ignore dependencies.</param>
+        /// <returns>TRUE if success, FALSE if did not install.</returns>
+        public static async Task<bool> InstallModFromGitHub(MainWindow window, WarningPopup warning, OnlineCatalog channel, OnlineMod modToDownload, VersionEntry versionToDownload, bool force = false)
         {
             try
             {
                 window.PrintAsync($"Installing {modToDownload.Name}...");
                 var url = versionToDownload.Download;
 
-                if (!await DependenciesReady(window, warning, channel, modToDownload, versionToDownload))
+                if (!force && !await DependenciesReady(window, warning, channel, modToDownload, versionToDownload))
                 {
                     window.PrintAsync($"Download of {modToDownload.Name} aborted.");
                     return false;

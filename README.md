@@ -2,35 +2,81 @@
 
 _A mod loader for [Sins of a Solar Empire II](https://www.sinsofasolarempire2.com/)_
 
-- [Github](https://github.com/VoltCruelerz/Greed)
-- [Forum](https://forums.sinsofasolarempire2.com/522050/page/1)
-- [Discord](https://discord.com/channels/266693357093257216/1146234939315069008/1146234939315069008)
+| [GitHub](https://github.com/VoltCruelerz/Greed) | [Forum](https://forums.sinsofasolarempire2.com/522050/page/1) | [Discord](https://discord.com/channels/266693357093257216/1146234939315069008/1146234939315069008) |
+|:------:|:-----:|:-------:|
 
-![screenshot](assets/Screenshot.png)
+![Screenshot](assets/ExportSuccess.png)
 
-## Installation
+## Table of Contents
 
-### Greed Installation
+- [The Greed Mod Manager](#the-greed-mod-manager)
+    - [Table of Contents](#table-of-contents)
+    - [Why Use Greed?](#why-use-greed)
+    - [User Guide](#user-guide)
+        - [Greed Setup](#greed-setup)
+            - [Greed Installation](#greed-installation)
+            - [Greed Configuration](#greed-configuration)
+        - [Basic Use](#basic-use)
+            - [Install a Mod](#install-a-mod)
+                - [Automated (Recommended)](#automated-recommended)
+                - [Manual Install](#manual-install)
+            - [Activate a Mod](#activate-a-mod)
+        - [Left Pane - Mods](#left-pane---mods)
+        - [Center Pane - Details \& Execution](#center-pane---details--execution)
+        - [Right Pane - Difference](#right-pane---difference)
+    - [Greedy Mod Development](#greedy-mod-development)
+        - [Why Develop Greedy Mods?](#why-develop-greedy-mods)
+        - [Merge Types](#merge-types)
+            - [Greed Merge Extensions](#greed-merge-extensions)
+            - [Null Removal](#null-removal)
+            - [Localized Text](#localized-text)
+        - [Greed Compatibility](#greed-compatibility)
+    - [Contributing to Greed](#contributing-to-greed)
+        - [Bug Reports](#bug-reports)
+    - [Contributing Mods](#contributing-mods)
 
-1. Download `Greed.zip` from the [latest github release](https://github.com/VoltCruelerz/Greed/releases)
+## Why Use Greed?
+
+- **No More Manual Deconfliction**: File deconfliction happens automatically for you.
+- **Automated Installation**: You can automatically install mods and their dependencies from an online catalog.
+- **Conflict Detection**: You are warned if you try to enable mods with a known conflict between them.
+- **Dependency Management**: You are warned if you attempt to enable a mod without its dependencies active.
+- **Mod Packs**: Easily create bundles of your favorite mods that you can quickly enable together.
+
+## User Guide
+
+### Greed Setup
+
+#### Greed Installation
+
+1. Download the `Greed.X.Y.Z.zip` from the [latest github release](https://github.com/VoltCruelerz/Greed/releases)
 2. Extract the file wherever you please on your machine.
 3. Run `Greed.exe`
-4. Set the directories on the Settings tab. They will autosave if the paths exist.
-    1. **Sins Directory** should be the location of Sins II's exe. (eg `C:\Program Files\Epic Games\SinsII`)
-    2. **Mods Directory** should be the location of the mod folder. (eg `C:\Users\YOUR_USER\AppData\Local\sins2\mods`)
-    3. **Downloads Directory** should be the location where Greed is free to download mods to temporarily before extracting them to your mods directory. (eg `C:\Users\YOUR_USER\Downloads`)
-5. In the main tab, you'll find a list of installed Greed-compatible mods to the left (see below for instructions to install mods), which you can activate or deactivate as you wish either with the button or double-clicking.
-6. When you have the mods activated that you want, click `[Export Greedy Selections]`.
 
-### Mod Installation
+#### Greed Configuration
 
-#### Automated Install (Recommended)
+![Settings](assets/Settings.png)
+
+Set the directories on the Settings tab. They will autosave if the paths exist.
+
+- **Sins Directory** should be the location of Sins II's exe. (eg `C:\Program Files\Epic Games\SinsII`)
+- **Mods Directory** should be the location of the mod folder. (eg `C:\Users\YOUR_USER\AppData\Local\sins2\mods`)
+- **Downloads Directory** should be the location where Greed is free to download mods to temporarily before extracting them to your mods directory. (eg `C:\Users\YOUR_USER\Downloads`)\
+- **Channel Catalog** this allows you to download mods from other installation channels. For users, this should be left on `Live`.
+
+### Basic Use
+
+#### Install a Mod
+
+##### Automated (Recommended)
+
+![Online Catalog](assets/OnlineCatalog.png)
 
 1. Press the `[☁️]` button to view the online catalog.
 2. Right click on whatever mod you want to install.
-3. Click `Install`.
+3. Install the version of your choice.
 
-#### Manual Install
+##### Manual Install
 
 1. Download the mod from GitHub, ModDB, or wherever else.
     1. If needed, unzip it.
@@ -38,13 +84,59 @@ _A mod loader for [Sins of a Solar Empire II](https://www.sinsofasolarempire2.co
     1. If the mod's name is `example-mod`, you should be able to find `greed.json` at `C:\Users\YOUR_USER\AppData\Local\sins2\mods\example-mod\greed.json`
 3. Press the Refresh button to see the new mod appear in the list.
 
-## Advantages for Users
+#### Activate a Mod
 
-- **No More Manual Deconfliction**: Deconfliction of commonly modified files happens automatically for you.
-- **Automated Installation**: You can automatically install mods and their dependencies from an online catalog.
-- **Conflict Detection**: You are warned if you try to enable mods with a known conflict between them.
-- **Dependency Management**: You are be warned if you attempt to enable a mod without its dependencies active.
-- **Mod Packs**: Easily create bundles of your favorite mods that you can quickly enable together.
+1. In the left pane, double click any desired installed mods to activate them.
+2. In the center pane, press `[Export Greedy Mods]` to export the selected mods.
+    1. After export completes, you will be prompted to start the game.
+
+### Left Pane - Mods
+
+> _The left pane shows the list of mods and allows you to modify them._
+
+![Left Pane](assets/LeftPaneButtons.png)
+
+1. Select an existing mod pack to activate.
+2. Save the current list of active mods as a mod pack.
+3. Delete the current mod pack.
+4. Copy the configuration of the active mod pack to the clipboard.
+5. Open the online mod catalog.
+6. Refresh the list of mods from disk. (F5)
+7. Import a mod pack configuration from the clipboard and install any missing mods.
+8. Search field to filter installed mods.
+9. Toggle _all_ mods.
+10. Filter to active mods
+11. List of mods. Drag and drop to change load order.
+    1. Double-click to toggle a mod.
+    2. Right-click to install alternate versions or uninstall a mod.
+12. The installed version of the mod. If the online catalog contains an update, it will be denoted here.
+13. The minimum required version of Greed to use this mod. If your Greed version is insufficient or if Greed is not backwards compatible with the mod, it will be marked here.
+14. The minimum required verison of Sins to use this mod. If a mod requires a newer version of Sins than you have, it will be marked here.
+
+### Center Pane - Details & Execution
+
+> _The center pane contains details about a mod selected in the left pane, as well as execution tools._
+
+![Center Pane](assets/CenterPane.png)
+
+1. The mod name, version, and required Sins version.
+2. Author
+3. The repository location for the mod.
+4. A short description of the mod.
+5. Greed automatically parses the README.md file of any mod you have and displays it here.
+6. Exports the list of active mods for execution. (F6)
+7. Run the game.
+
+### Right Pane - Difference
+
+> _The right pane shows the json file details of the selected mod, so you can see exactly what the mod does. This is mostly for developers._
+
+![Right Pane](assets/RightPane.png)
+
+1. Whether a mod is new or changed.
+2. The folder of the modified file (eg `entities` or `uniforms`).
+3. The name of the file.
+4. View a comparison between what this file's contents and the original Sins version.
 
 ## Greedy Mod Development
 
@@ -81,7 +173,7 @@ To that end, Greed introduces several json file extensions that allow targeted e
     - eg `[1, 2]` + `[2, 3]` = `[1, 2, 3]`
     - [Example](https://github.com/VoltCruelerz/constituent-components/blob/master/entities/trader_antimatter_engine_unit_item.ability.gmu) of adding autocast
 
-In all of these cases, if you leave an object's field undefined, it will not be edited. So, if you wanted to edit just one of the many arrays in a `.player` file to add a new ship type, you'd only declare the one array you want to edit, and you'd probably do it in a `.gmc` file so you can concatenate what you want to what's already there without redeclaring everything.
+In all of these cases, if you leave an object's field undefined, it will not be edited. So, if you wanted to edit just one of the many arrays in a `.player` file to add a new ship type, you'd only declare the one array you want to edit, and you'd probably do it in a `.gmu` file so you can add what you want to what's already there without redeclaring everything or worrying about another mod colliding with yours.
 
 #### Null Removal
 
@@ -92,7 +184,7 @@ In all of these cases, if you leave an object's field undefined, it will not be 
 
 [Example](https://github.com/VoltCruelerz/constituent-components/blob/master/entities/trader_reserve_squadron_hangar.unit_item.gmr) removing a field from an item
 
-> _**Note**: be very careful when removing elements by index that you know _exactly_ what is there already._
+> _**Note**: be very careful when removing elements by index that you know **_exactly_** what is there already._
 
 #### Localized Text
 
@@ -172,4 +264,4 @@ In the event of an error, consult the log (viewable both in the textbox at the b
 
 ## Contributing Mods
 
-To contribute a mod to the curated list, open a merge request [here](https://github.com/League-of-Greedy-Modders/Greedy-Mods).
+To contribute a mod to the online catalog, open a merge request [here](https://github.com/League-of-Greedy-Modders/Greedy-Mods).

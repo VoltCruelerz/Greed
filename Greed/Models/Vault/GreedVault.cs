@@ -8,11 +8,15 @@ using Newtonsoft.Json.Linq;
 using Greed.Interfaces;
 using static System.Text.Json.JsonSerializer;
 
-namespace Greed.Models
+namespace Greed.Models.Vault
 {
     public class GreedVault : IVault
     {
         private const string VaultName = "greed_vault.json";
+        private static readonly JsonSerializerOptions SeriOptions = new()
+        {
+            WriteIndented = true
+        };
 
         [JsonRequired]
         [JsonProperty(PropertyName = "active")]
@@ -36,43 +40,54 @@ namespace Greed.Models
             else
             {
                 pack = new();
-                pack.Export();
+                pack.Archive();
             }
             return pack;
         }
 
-        public void Export()
+        private void Archive()
         {
             string modDir = ConfigurationManager.AppSettings["modDir"]!;
             var vaultPath = modDir + "\\" + VaultName;
 
-            File.WriteAllText(vaultPath, Serialize(this, new JsonSerializerOptions
-            {
-                WriteIndented = true
-            }));
+            File.WriteAllText(vaultPath, Serialize(this, SeriOptions));
         }
 
         /// <summary>
         /// Saves the list of greedy mods to enabled_greed.json
         /// </summary>
         /// <param name="active"></param>
-        public void ExportActiveOnly(List<Mod> allMods)
+        public void ArchiveActiveOnly(List<Mod> allMods)
         {
             Active = allMods.Where(m => m.IsActive).Select(m => m.Id).ToList();
-            Export();
+            Archive();
         }
 
         public void UpsertPack(string name, List<Mod> allMods)
         {
             var active = allMods.Where(m => m.IsActive).Select(m => m.Id).ToList();
             Packs[name] = active;
-            Export();
+            Archive();
         }
 
         public void DeletePack(string name)
         {
             Packs.Remove(name);
-            Export();
+            Archive();
+        }
+
+        public string ExportPortable(string name, List<Mod> allMods)
+        {
+            var portableMods = allMods.Where(m => Packs[name].Contains(m.Id)).ToList();
+            var portableVault = PortableVault.Build(portableMods, name);
+            return Serialize(portableVault, SeriOptions);
+        }
+
+        public void ImportPortable(PortableVault portable)
+        {
+            var ids = portable.Mods.Select(m  => m.Id).ToList();
+            Packs[portable.Name] = ids;
+            Archive();
         }
     }
 }

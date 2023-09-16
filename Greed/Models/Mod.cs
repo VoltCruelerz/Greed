@@ -436,7 +436,7 @@ namespace Greed.Models
                 }
 
                 IsActive = false;
-                Vault.ExportActiveOnly(allMods);
+                Vault.ArchiveActiveOnly(allMods);
                 return;
             }
 
@@ -482,7 +482,7 @@ namespace Greed.Models
             if (!conflicts.Any())
             {
                 IsActive = true;
-                Vault.ExportActiveOnly(allMods);
+                Vault.ArchiveActiveOnly(allMods);
                 return;
             }
 
@@ -504,7 +504,7 @@ namespace Greed.Models
             {
                 // Abort. Do nothing.
             }
-            Vault.ExportActiveOnly(allMods);
+            Vault.ArchiveActiveOnly(allMods);
         }
 
         public bool HasDirectDependent(Mod potentialDependent)

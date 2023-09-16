@@ -4,6 +4,7 @@ using Greed.Models;
 using Greed.Models.Json;
 using Greed.Models.ListItem;
 using Greed.Models.Online;
+using Greed.Models.Vault;
 using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
@@ -15,8 +16,12 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media;
+using System.Windows.Threading;
 using System.Xml.Linq;
+using Greed.Extensions;
+using Greed.Controls;
 
 namespace Greed
 {
@@ -27,6 +32,7 @@ namespace Greed
     {
         private static readonly string LogPath = Directory.GetCurrentDirectory() + "\\log.txt";
         private static readonly string LogPrevPath = Directory.GetCurrentDirectory() + "\\log_prev.txt";
+        private static readonly WarningPopup Warning = new WarningPopup();
 
         private readonly ModManager Manager = new();
         private List<Mod> Mods = new();
@@ -281,7 +287,7 @@ namespace Greed
             Manager.MoveMod(Vault, Mods, DragMod, Mods.IndexOf(DestMod));
             DragMod = null;
             DestMod = null;
-            Vault.ExportActiveOnly(Mods);
+            Vault.ArchiveActiveOnly(Mods);
             RefreshModListUI();
         }
 
@@ -295,12 +301,19 @@ namespace Greed
         #region Center Pane
         private void Toggle_Click(object sender, RoutedEventArgs e)
         {
-            PrintSync("Toggle_Click()");
-            SelectedMod!.SetModActivity(Mods, !SelectedMod.IsActive);
+            ToggleSingleMod(SelectedMod);
+        }
+
+        private void ToggleSingleMod(Mod? mod)
+        {
+            PrintSync($"ToggleSingleMod({mod?.Id})");
+            if (mod == null) return;
+
+            mod!.SetModActivity(Mods, !mod.IsActive);
 
             try
             {
-                Vault.ExportActiveOnly(Mods);
+                Vault.ArchiveActiveOnly(Mods);
             }
             catch (Exception ex)
             {
@@ -321,7 +334,7 @@ namespace Greed
             string modDir = ConfigurationManager.AppSettings["modDir"]!;
             try
             {
-                Vault.ExportActiveOnly(Mods);
+                Vault.ArchiveActiveOnly(Mods);
             }
             catch (Exception ex)
             {
@@ -338,9 +351,15 @@ namespace Greed
             PrintSync("Refresh_Click()");
             ReloadModListFromDisk();
             ReloadCatalog();
+            PopRefresh.SetPopDuration(2000);
         }
 
         private void Export_Click(object sender, RoutedEventArgs e)
+        {
+            ExportSelections();
+        }
+
+        private void ExportSelections()
         {
             cmdExport.IsEnabled = false;
             ReselectSelection();
@@ -378,6 +397,22 @@ namespace Greed
                 {
                     cmdExport.IsEnabled = true;
                 });
+            }
+        }
+
+        private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.F5)
+            {
+                ReloadModListFromDisk();
+            }
+            else if (e.Key == System.Windows.Input.Key.F6)
+            {
+                ExportSelections();
+            }
+            else if (e.Key == System.Windows.Input.Key.Space)
+            {
+                ToggleSingleMod(SelectedMod);
             }
         }
 
@@ -617,28 +652,30 @@ namespace Greed
         /// Print synchronously.
         /// </summary>
         /// <param name="str"></param>
-        public void PrintSync(string str)
+        public void PrintSync(string str, string type = "[INFO]")
         {
-            txtLog.Text = txtLog.Text.Any()
-                ? txtLog.Text + '\n' + str
-                : str;
-            txtLog.ScrollToEnd();
-            File.AppendAllText(LogPath, DateTime.Now.ToUniversalTime().ToString("u") + ": " + str + "\r\n");
-            Debug.WriteLine(str);
+            var timePrefix = DateTime.Now.ToString("[yyyy/MM/dd | hh:mm:ss.fff] ");
+            var prefixed = timePrefix + type + " " + str;
+            TxtLog.Text = TxtLog.Text.Any()
+                ? TxtLog.Text + '\n' + prefixed
+                : prefixed;
+            TxtLog.ScrollToEnd();
+            File.AppendAllText(LogPath, prefixed + "\r\n");
+            Debug.WriteLine(prefixed);
         }
 
         public void PrintSync(Exception ex)
         {
-            PrintSync(ex.Message + "\n" + ex.StackTrace);
+            PrintSync(ex.Message + "\n" + ex.StackTrace, "[ERROR]");
         }
 
         /// <summary>
         /// Invoke the print function when possible.
         /// </summary>
         /// <param name="str"></param>
-        public void PrintAsync(string str)
+        public void PrintAsync(string str, string type = "[INFO]")
         {
-            Dispatcher.Invoke(() => PrintSync(str));
+            Dispatcher.Invoke(() => PrintSync(str, type));
         }
 
         /// <summary>
@@ -672,12 +709,12 @@ namespace Greed
 
         public void Uninstall(string id)
         {
-            ModManager.Uninstall(this, new Controls.WarningPopup(), Mods, id);
+            ModManager.Uninstall(this, Warning, Mods, id);
         }
 
         private void MenuUninstall_Click(object sender, RoutedEventArgs e)
         {
-            ModManager.Uninstall(this, new Controls.WarningPopup(), Mods, SelectedMod!.Id);
+            ModManager.Uninstall(this, Warning, Mods, SelectedMod!.Id);
         }
 
         public bool IsModInstalled(string id)
@@ -722,17 +759,17 @@ namespace Greed
             PrintSync("MenuUpdate_Click()");
 
             // Delete existing
-            ModManager.Uninstall(this, new Controls.WarningPopup(), Mods, modToUpdate.Id, true);
+            ModManager.Uninstall(this, Warning, Mods, modToUpdate.Id, true);
 
             // Redownload
             var catalogEntry = Catalog.Mods.Find(m => m.Id == modToUpdate.Id)!;
-            await ModManager.InstallModFromGitHub(this, new Controls.WarningPopup(), Catalog, catalogEntry, targetVersion);
+            await ModManager.InstallModFromGitHub(this, Warning, Catalog, catalogEntry, targetVersion);
 
             // Reload Mods
             ReloadModListFromDiskAsync();
         }
 
-        #region Bundles
+        #region Mod Packs
         private void RefreshVaultPackUI()
         {
             CbxBundles.Items.Clear();
@@ -744,6 +781,7 @@ namespace Greed
 
         private void CmdSaveBundle_Click(object sender, RoutedEventArgs e)
         {
+            PrintSync("CmdSaveBundle_Click()");
             var name = Interaction.InputBox("Please name the pack. Reusing a name will overwrite the old pack.", "Create Mod Pack");
 
             if (string.IsNullOrEmpty(name))
@@ -758,28 +796,40 @@ namespace Greed
             }
 
             Vault.UpsertPack(name, Mods);
+            PrintSync("Vault upsert complete.");
             RefreshVaultPackUI();
         }
 
         private void CmdDeleteBundle_Click(object sender, RoutedEventArgs e)
         {
-            if (CbxBundles.SelectedItem == null) return;
+            PrintSync("CmdDeleteBundle_Click()");
+            if (CbxBundles.SelectedItem == null)
+            {
+                PrintSync("Please select a mod pack.");
+                return;
+            }
 
             Vault.DeletePack((string)CbxBundles.SelectedItem);
+            PrintSync("Pack deleted.");
             RefreshVaultPackUI();
             CbxBundles.SelectedItem = null;
         }
 
         private void CbxBundles_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            PrintSync("CbxBundles_SelectionChanged()");
             if (CbxBundles.SelectedItem == null) return;
 
             var activePack = Vault.Packs[(string)CbxBundles.SelectedItem];
             Mods.ForEach(m => m.SetModActivity(Mods, activePack.Contains(m.Id), true));
-            Vault.ExportActiveOnly(Mods);
+            Vault.ArchiveActiveOnly(Mods);
+            PrintSync("Vault archive of active complete.");
             RefreshModListUI();
         }
 
+        /// <summary>
+        /// If the selected mods no longer match what was chosen from the dropdown, clear the dropdown.
+        /// </summary>
         private void ClearCbxBundlesIfMismatch()
         {
             if (CbxBundles.SelectedItem == null) return;
@@ -791,8 +841,72 @@ namespace Greed
             if (activePack.Count != actualActive.Count || activePack.Any(ap => !actualActive.Contains(ap)) || actualActive.Any(aa => !activePack.Contains(aa)))
             {
                 CbxBundles.SelectedItem = null;
+                PrintSync("Cleared CbxBundles selection.");
             }
         }
+
+        private void CmdCopyBundle_Click(object sender, RoutedEventArgs e)
+        {
+            PrintSync("CmdCopyBundle_Click()");
+            if (CbxBundles.SelectedItem == null)
+            {
+                PrintSync("Please select a mod pack.");
+                return;
+            }
+
+            var json = Vault.ExportPortable((string)CbxBundles.SelectedItem, Mods);
+            Clipboard.SetText(json);
+            PopClipboard.SetPopDuration(2000);
+            PrintSync("Copied json to clipboard.");
+        }
+
+        private async void CmdImportBundle_Click(object sender, RoutedEventArgs e)
+        {
+            PrintSync("CmdImportBundle_Click()");
+            var json = Clipboard.GetText();
+            if (string.IsNullOrEmpty(json))
+            {
+                PrintSync("Clipboard was empty.", "[WARN]");
+                return;
+            }
+
+            var portable = PortableVault.Load(json);
+            var portableModsToInstall = portable.Mods
+                .Where(p => !Mods.Any(m => m.Id == p.Id))
+                .ToList();
+            var allSuccess = true;
+            await portableModsToInstall.ForEachAsync(async portableMod =>
+            {
+                var modToInstall = Catalog.Mods.Find(m => m.Id == portableMod.Id);
+                if (modToInstall == null)
+                {
+                    CriticalAlertPopup("Missing Mod", $"The mod {portableMod.Id} could not be located in the online catalog.");
+                    allSuccess = false;
+                    return;
+                }
+                var versionToInstall = modToInstall.Versions[portableMod.Version.ToString()];
+                var isSuccess = await ModManager.InstallModFromGitHub(this, Warning, Catalog, modToInstall, versionToInstall, true);
+                if (!isSuccess)
+                {
+                    allSuccess = false;
+                }
+            });
+
+            if (!allSuccess)
+            {
+                PrintAsync("Failed to install all mods in the mod pack.", "[ERROR]");
+                return;
+            }
+
+            // Update the Vault
+            Vault.ImportPortable(portable);
+
+            // Update the UI and report success.
+            if (portableModsToInstall.Any()) ReloadModListFromDisk();
+            RefreshVaultPackUI();
+            PopImportPack.SetPopDuration(2000);
+        }
+
         #endregion
     }
 }
