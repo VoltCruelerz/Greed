@@ -136,7 +136,7 @@ Set the directories on the Settings tab. They will autosave if the paths exist.
 1. Whether a mod is new or changed.
 2. The folder of the modified file (eg `entities` or `uniforms`).
 3. The name of the file.
-4. View a comparison between what this file's contents and the original Sins version.
+4. View a comparison between what this file's contents and the original Sins version. You can also double click on a file to see its diff.
 
 ## Greedy Mod Development
 
