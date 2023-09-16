@@ -59,10 +59,10 @@ _A mod loader for [Sins of a Solar Empire II](https://www.sinsofasolarempire2.co
 
 Set the directories on the Settings tab. They will autosave if the paths exist.
 
-- **Sins Directory** should be the location of Sins II's exe. (eg `C:\Program Files\Epic Games\SinsII`)
-- **Mods Directory** should be the location of the mod folder. (eg `C:\Users\YOUR_USER\AppData\Local\sins2\mods`)
-- **Downloads Directory** should be the location where Greed is free to download mods to temporarily before extracting them to your mods directory. (eg `C:\Users\YOUR_USER\Downloads`)\
-- **Channel Catalog** this allows you to download mods from other installation channels. For users, this should be left on `Live`.
+- **Sins Directory**: the location of Sins II's exe. (eg `C:\Program Files\Epic Games\SinsII`)
+- **Mods Directory**: the location of the mod folder. (eg `C:\Users\YOUR_USER\AppData\Local\sins2\mods`)
+- **Downloads Directory**: the location where Greed is free to download mods to temporarily before extracting them to your mods directory. (eg `C:\Users\YOUR_USER\Downloads`)\
+- **Channel Catalog**: allows you to download mods from other installation channels. For users, this should be left on `Live`.
 
 ### Basic Use
 
