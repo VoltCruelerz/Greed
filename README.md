@@ -92,7 +92,7 @@ Set the directories on the Settings tab. They will autosave if the paths exist.
 
 ### Left Pane - Mods
 
-> _The left pane shows the list of mods and allows you to modify them._
+> _The left pane shows the list of mods and allows you to modify how they are loaded._
 
 ![Left Pane](assets/LeftPaneButtons.png)
 
