@@ -29,7 +29,6 @@ _A mod loader for [Sins of a Solar Empire II](https://www.sinsofasolarempire2.co
         - [Merge Types](#merge-types)
             - [Greed Merge Extensions](#greed-merge-extensions)
             - [Null Removal](#null-removal)
-            - [Localized Text](#localized-text)
         - [Greed Compatibility](#greed-compatibility)
     - [Contributing to Greed](#contributing-to-greed)
         - [Bug Reports](#bug-reports)
@@ -185,29 +184,6 @@ In all of these cases, if you leave an object's field undefined, it will not be 
 [Example](https://github.com/VoltCruelerz/constituent-components/blob/master/entities/trader_reserve_squadron_hangar.unit_item.gmr) removing a field from an item
 
 > _**Note**: be very careful when removing elements by index that you know **_exactly_** what is there already._
-
-#### Localized Text
-
-If `*.localized_text` files were actually key-value pairs like they _should_ be (and will be in a future update), you could just use `*.gmr`, but they're not. They're weird little arrays of size 2. Additionally, a mod must have the _full_ list of all strings for it to be legal. This complicates merging them, so I've created a custom solution for them:
-
-You should write your localized text files as if they were truncated to just the things you add or update. Greed will automatically upsert them for you when the greed files are generated.
-
-```json
-{
-    "text": [
-        [
-            "keyA",
-            "This is the first string added. Maybe this one's key already exists, and I'm overriding."
-        ],
-        [
-            "keyB",
-            "This is another string. Maybe this one's key doesn't exist yet, so it's new."
-        ]
-    ]
-}
-```
-
-[Here's](https://github.com/VoltCruelerz/krosov-prova-guns/blob/main/localized_text/core_en.localized_text) another example.
 
 ### Greed Compatibility
 
