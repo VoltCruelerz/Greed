@@ -5,7 +5,6 @@ using Greed.Models.EnabledMods;
 using Greed.Models.Online;
 using Greed.Models.Vault;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -482,6 +481,7 @@ namespace Greed
             try
             {
                 // Send an HTTP GET request to the GitHub release URL
+                window.PrintAsync("Downloading from " + releaseUrl);
                 HttpResponseMessage response = await httpClient.GetAsync(releaseUrl);
 
                 // Check if the request was successful (HTTP status code 200)
@@ -499,7 +499,7 @@ namespace Greed
                 }
                 else
                 {
-                    window.PrintAsync($"Failed to download. HTTP status code: {response.StatusCode}");
+                    throw new InvalidOperationException($"Failed to download. HTTP status code: {response.StatusCode}");
                 }
                 return true;
             }

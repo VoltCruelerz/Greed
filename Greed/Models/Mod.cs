@@ -1,7 +1,5 @@
 ﻿using Greed.Interfaces;
 using Greed.Models.Json;
-using Greed.Models.Json.Text;
-using Greed.Models.Metadata;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -121,7 +119,7 @@ namespace Greed.Models
             Skyboxes = ImportJsonFolder(subdirs, path, "skyboxes", (p) => new JsonSource(p));
             TextureAnimations = ImportJsonFolder(subdirs, path, "texture_animations", (p) => new JsonSource(p));
             Uniforms = ImportJsonFolder(subdirs, path, "uniforms", (p) => new JsonSource(p));
-            LocalizedTexts = ImportJsonFolder(subdirs, path, "localized_text", (p) => new LocalizedText(p));
+            LocalizedTexts = ImportJsonFolder(subdirs, path, "localized_text", (p) => new JsonSource(p));
 
             // Non-JSON
             Sounds = ImportFolder(subdirs, path, "sounds");
@@ -174,7 +172,7 @@ namespace Greed.Models
             ExportJsonFolder(Skyboxes, (greedPath, modSource) => new JsonSource(greedPath).Merge(modSource));
             ExportJsonFolder(TextureAnimations, (greedPath, modSource) => new JsonSource(greedPath).Merge(modSource));
             ExportJsonFolder(Uniforms, (greedPath, modSource) => new JsonSource(greedPath).Merge(modSource));
-            ExportJsonFolder(LocalizedTexts, (greedPath, modSource) => new LocalizedText(greedPath).Merge((LocalizedText)modSource));
+            ExportJsonFolder(LocalizedTexts, (greedPath, modSource) => new JsonSource(greedPath).Merge(modSource));
 
             // Overwrite binary types
             ExportSourceFolder(Meshes);
@@ -251,7 +249,7 @@ namespace Greed.Models
         {
             var listRegex = GetIsListRegex();
             var noSpace = new Thickness(0);
-            var lines = Readme.Split("\r\n")
+            var lines = Readme.Split(Environment.NewLine)
                 .Where(line => !string.IsNullOrWhiteSpace(line))
                 .ToList();
 
@@ -270,13 +268,13 @@ namespace Greed.Models
                 else if (trimmed.StartsWith("*") || trimmed.StartsWith("-"))
                 {
                     var p = new Paragraph();
-                    FormatLine(p.Inlines, line + "\r\n");
+                    FormatLine(p.Inlines, line + Environment.NewLine);
                     for (int j = i + 1; j < lines.Count; j++)
                     {
                         var trimJ = lines[j].Trim();
                         if (GetIsListRegex().IsMatch(trimJ))
                         {
-                            FormatLine(p.Inlines, lines[j] + "\r\n");
+                            FormatLine(p.Inlines, lines[j] + Environment.NewLine);
                             i++;
                         }
                         else
@@ -290,7 +288,7 @@ namespace Greed.Models
                 {
                     Table table = new()
                     {
-                        Background = new SolidColorBrush(Color.FromRgb(255,255,255))
+                        Background = new SolidColorBrush(Color.FromRgb(255, 255, 255))
                     };
                     table.RowGroups.Add(new TableRowGroup());
                     var offset = 0;

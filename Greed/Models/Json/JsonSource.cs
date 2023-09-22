@@ -47,8 +47,6 @@ namespace Greed.Models.Json
                 Mergename = Mergename[0..(Filename.Length - MergeConcatSuffix.Length)];
                 Type = SourceType.MergeConcat;
             }
-            ValidateFileExtension();
-
 
             GoldPath = $"{ConfigurationManager.AppSettings["sinsDir"]!}\\{Folder}\\{Mergename}";
             GreedPath = $"{ConfigurationManager.AppSettings["modDir"]!}\\greed\\{Folder}\\{Mergename}";
@@ -173,16 +171,6 @@ namespace Greed.Models.Json
                     PurgeNulls((JArray)realElement);
                 }
                 i++;
-            }
-        }
-
-        private void ValidateFileExtension()
-        {
-            var isBespoke = Mergename.EndsWith(".localized_text");
-
-            if (isBespoke && Type != SourceType.Overwrite)
-            {
-                throw new InvalidOperationException("You cannot use the greedy file extensions on " + Mergename);
             }
         }
 

@@ -1,4 +1,5 @@
-﻿using Greed.Models.Metadata;
+﻿using Greed.Extensions;
+using Greed.Models.Metadata;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -47,7 +48,7 @@ namespace Greed.Models
         /// Returns which file version is mismatched.
         /// </summary>
         /// <returns>"Greed" and/or/neither "Sins", as invalid</returns>
-        public List<string> IsLegalVersion()
+        public List<ViolationCauseEnum> IsLegalVersion()
         {
             var sinsDir = ConfigurationManager.AppSettings["sinsDir"]!;
             var sinsPath = sinsDir + "\\sins2.exe";
@@ -56,30 +57,32 @@ namespace Greed.Models
             return IsLegalVersion(sinsVersion);
         }
 
-        public List<string> IsLegalVersion(Version liveSinsVersion)
+        public List<ViolationCauseEnum> IsLegalVersion(Version liveSinsVersion)
         {
-            // This needs to be updated any time there's a breaking Greed change.
-            var minimumCompatibleVersion = new Version("1.4.0");
+            var causes = new List<ViolationCauseEnum>();
+            var liveGreedVersion = Assembly.GetExecutingAssembly().GetName().Version!;
 
-            var violations = new List<string>();
-            var liveVersion = Assembly.GetExecutingAssembly().GetName().Version!;
-            if (liveVersion.CompareTo(GreedVersion) < 0)
+            if (liveGreedVersion.IsOlderThan(GreedVersion))
             {
-                Debug.WriteLine("Deprecated greed version.");
-                violations.Add("A new version of Greed is required.");
-            }
-            else if (GreedVersion.CompareTo(minimumCompatibleVersion) < 0)
-            {
-                Debug.WriteLine("Greed no longer supports this version.");
-                violations.Add("Mod must be updated. Contact developer if none is available.");
+                causes.Add(ViolationCauseEnum.LiveGreedTooOld);
             }
 
-            if (liveSinsVersion.CompareTo(SinsVersion) < 0)
+            if (GreedVersion.IsOlderThan(Constants.MinimumGreedVersion))
             {
-                Debug.WriteLine("Deprecated sins version.");
-                violations.Add("This Sins version is no longer supported");
+                causes.Add(ViolationCauseEnum.ModGreedTooOld);
             }
-            return violations;
+
+            if (liveSinsVersion.IsOlderThan(SinsVersion))
+            {
+                causes.Add(ViolationCauseEnum.ModSinsTooOld);
+            }
+
+            if (SinsVersion.IsOlderThan(Constants.MinimumSinsVersion))
+            {
+                causes.Add(ViolationCauseEnum.LiveSinsTooOld);
+            }
+
+            return causes;
         }
 
         /// <summary>

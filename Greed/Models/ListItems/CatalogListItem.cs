@@ -1,10 +1,10 @@
-﻿using Greed.Models.Online;
+﻿using Greed.Extensions;
+using Greed.Models.Online;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
 using System.Reflection;
-using Greed.Extensions;
 
 namespace Greed.Models.ListItem
 {
@@ -33,14 +33,14 @@ namespace Greed.Models.ListItem
             Version = m.Latest.ToString();
             if (installedModVersions.ContainsKey(Id) && installedModVersions[Id].IsOlderThan(m.Latest))
             {
-                Version = "[＋] " + Version;
+                Version = Constants.UNI_READY_FOR_UPDATE + " " + Version;
             }
 
             GreedVersion = m.Live.GreedVersion.ToString();
             var installedGreedVersion = Assembly.GetExecutingAssembly().GetName().Version!;
             if (installedGreedVersion.IsOlderThan(m.Live.GreedVersion))
             {
-                GreedVersion = "⚠ " + GreedVersion;
+                GreedVersion = Constants.UNI_WARN + " " + GreedVersion;
             }
 
             SinsVersion = m.Live.SinsVersion.ToString();
@@ -48,17 +48,17 @@ namespace Greed.Models.ListItem
             var installedSinsVersion = new Version(FileVersionInfo.GetVersionInfo(sinsDir + "\\sins2.exe").FileVersion!);
             if (installedSinsVersion.IsOlderThan(m.Live.SinsVersion))
             {
-                SinsVersion = "⚠ " + SinsVersion;
+                SinsVersion = Constants.UNI_WARN + " " + SinsVersion;
             }
 
             LastUpdated = !string.IsNullOrEmpty(m.Live.DateAdded)
                 ? m.Live.DateAdded
                 : DateTime.Today.ToString();
             IsInstalled = ModManager.IsModInstalled(Id)
-                ? "💾"
+                ? Constants.UNI_INSTALLED
                 : string.IsNullOrEmpty(m.Live.Download)
-                    ? "🚫"
-                    : "[🡇]";
+                    ? Constants.UNI_NO_INSTALL
+                    : Constants.UNI_READY_FOR_INSTALL;
         }
     }
 }

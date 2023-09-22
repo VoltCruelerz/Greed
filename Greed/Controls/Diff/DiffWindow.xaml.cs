@@ -1,4 +1,5 @@
 ﻿using Greed.Models.Json;
+using System;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Documents;
@@ -31,7 +32,7 @@ namespace Greed.Controls.Diff
 
             // Need to colorize
             var p = new Paragraph();
-            var diffLines = diff.Diff.Split("\r\n");
+            var diffLines = diff.Diff.Split(Environment.NewLine);
 
 
             foreach (var line in diffLines)
@@ -61,7 +62,7 @@ namespace Greed.Controls.Diff
                     p.Inlines.Add(new Run("".PadLeft(padStart)));
                 }
 
-                var r = new Run(trimmed.PadLeft(trimmed.Length) + "\r\n")
+                var r = new Run(trimmed.PadLeft(trimmed.Length) + Environment.NewLine)
                 {
                     Background = brush
                 };

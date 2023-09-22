@@ -1,11 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using Greed.Interfaces;
+using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using Greed.Interfaces;
 using static System.Text.Json.JsonSerializer;
 
 namespace Greed.Models.Vault
@@ -85,7 +84,7 @@ namespace Greed.Models.Vault
 
         public void ImportPortable(PortableVault portable)
         {
-            var ids = portable.Mods.Select(m  => m.Id).ToList();
+            var ids = portable.Mods.Select(m => m.Id).ToList();
             Packs[portable.Name] = ids;
             Archive();
         }

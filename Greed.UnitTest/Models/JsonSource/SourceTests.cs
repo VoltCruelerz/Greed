@@ -1,4 +1,3 @@
-using Greed.Models.Json.Text;
 using Newtonsoft.Json.Linq;
 
 namespace Greed.UnitTest.Models.JsonSource
@@ -142,26 +141,6 @@ namespace Greed.UnitTest.Models.JsonSource
             var arrC = (JArray)JObject.Parse(c.ToString())["arr"]!;
             var str = string.Join("", arrC.Select(p => p.ToString()).ToList());
             Assert.AreEqual("abcad", str, "element a[0] should be the same");
-        }
-
-        [TestMethod]
-        public void Merge_Concat_Localization()
-        {
-            // Arrange
-            //var a = JObject.Parse(File.ReadAllText());
-            var a = new LocalizedText("..\\..\\..\\json\\localized_text\\localA.localized_text");
-            Console.WriteLine("\nA ===============\n" + a.ToString());
-            var b = new LocalizedText("..\\..\\..\\json\\localized_text\\localB.localized_text");
-            Console.WriteLine("\nB ===============\n" + b.ToString());
-            var expected = new LocalizedText("..\\..\\..\\json\\localized_text\\localMerged.localized_text");
-
-            // Act
-            var c = a.Clone();
-            c.Merge(b);
-            Console.WriteLine("\nRESULT C ===============\n" + c.ToString());
-
-            // Assert
-            Assert.AreEqual(expected.Minify(), c.Minify());
         }
 
         [TestMethod]

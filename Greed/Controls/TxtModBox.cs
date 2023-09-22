@@ -68,7 +68,7 @@ namespace Greed.Controls
                 {
                     FontWeight = FontWeights.Bold
                 });
-                meta.GetDependencies().ForEach(c => p.Inlines.Add(new Run("\r\n- " + c)));
+                meta.GetDependencies().ForEach(c => p.Inlines.Add(new Run(Environment.NewLine + Constants.UNI_BULLET + " " + c)));
                 doc.Blocks.Add(p);
             }
 
@@ -79,7 +79,7 @@ namespace Greed.Controls
                 {
                     FontWeight = FontWeights.Bold
                 });
-                meta.GetConflicts().ForEach(c => p.Inlines.Add(new Run("\r\n- " + c)));
+                meta.GetConflicts().ForEach(c => p.Inlines.Add(new Run(Environment.NewLine + Constants.UNI_BULLET + " " + c)));
                 doc.Blocks.Add(p);
             }
 

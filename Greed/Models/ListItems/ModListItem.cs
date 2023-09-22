@@ -1,4 +1,7 @@
-﻿using Greed.Models.Online;
+﻿using Greed.Extensions;
+using Greed.Models.Metadata;
+using Greed.Models.Online;
+using System;
 using System.Linq;
 
 namespace Greed.Models.ListItem
@@ -24,7 +27,7 @@ namespace Greed.Models.ListItem
         public ModListItem(Mod mod, MainWindow window, OnlineCatalog catalog)
         {
             Id = mod.Id;
-            Active = mod.IsActive ? "✅" : " ";
+            Active = mod.IsActive ? Constants.UNI_CHECK : " ";
             Name = mod.Meta.Name;
             Version = mod.Meta.Version.ToString();
             Latest = Version;
@@ -32,24 +35,23 @@ namespace Greed.Models.ListItem
             SinsVersion = mod.Meta.SinsVersion.ToString();
 
             // Handle violations
-            var versionViolation = mod.Meta.IsLegalVersion();
-            var violationStr = string.Join("\n", versionViolation);
-            if (violationStr.Contains("Mod"))
+            var versionViolations = mod.Meta.IsLegalVersion();
+            if (versionViolations.Contains(ViolationCauseEnum.ModGreedTooOld) || versionViolations.Contains(ViolationCauseEnum.ModSinsTooOld))
             {
-                Version = "⚠ " + Version;
+                Version = Constants.UNI_WARN + " " + Version;
             }
-            if (violationStr.Contains("Greed"))
+            if (versionViolations.Contains(ViolationCauseEnum.ModGreedTooOld) || versionViolations.Contains(ViolationCauseEnum.LiveGreedTooOld))
             {
-                GreedVersion = "⚠ " + GreedVersion;
+                GreedVersion = Constants.UNI_WARN + " " + GreedVersion;
             }
-            if (violationStr.Contains("Sins"))
+            if (versionViolations.Contains(ViolationCauseEnum.ModSinsTooOld) || versionViolations.Contains(ViolationCauseEnum.LiveSinsTooOld))
             {
-                SinsVersion = "⚠ " + SinsVersion;
+                SinsVersion = Constants.UNI_WARN + " " + SinsVersion;
             }
 
-            if (versionViolation.Any())
+            if (versionViolations.Any())
             {
-                window.PrintAsync("WARNING - Incompatible Version: " + mod.Meta.Name + "\r\n- " + string.Join("\r\n- ", versionViolation));
+                window.PrintAsync("WARNING - Incompatible Version: " + mod.Meta.Name + Environment.NewLine + versionViolations.Select(v => v.GetDescription()).ToBulletedList());
             }
 
             // Handle outdated
@@ -59,7 +61,7 @@ namespace Greed.Models.ListItem
                 Latest = onlineMod.Latest.ToString();
                 if (mod.Meta.Version.CompareTo(onlineMod.Latest) < 0)
                 {
-                    Version = "[＋] " + Version;
+                    Version = Constants.UNI_READY_FOR_UPDATE + " " + Version;
                 }
             }
         }

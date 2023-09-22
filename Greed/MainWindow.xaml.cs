@@ -1,5 +1,7 @@
-﻿using Greed.Controls.Diff;
+﻿using Greed.Controls;
+using Greed.Controls.Diff;
 using Greed.Controls.Online;
+using Greed.Extensions;
 using Greed.Models;
 using Greed.Models.Json;
 using Greed.Models.ListItem;
@@ -16,12 +18,8 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using System.Windows.Threading;
-using System.Xml.Linq;
-using Greed.Extensions;
-using Greed.Controls;
 
 namespace Greed
 {
@@ -78,7 +76,7 @@ namespace Greed
                     Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "AppData", "Local", "sins2", "mods"));
             PopulateConfigField(txtSinsDir, "sinsDir", "C:\\Program Files\\Epic Games\\SinsII");
             PopulateConfigField(txtDownloadDir, "downDir", Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),  "Downloads"));
+                    Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"));
             PopulateConfigCbx(CbxChannel, "channel");
             PrintSync("Directories Explored");
 
@@ -101,7 +99,7 @@ namespace Greed
             {
                 var greedVersion = Assembly.GetExecutingAssembly().GetName().Version!;
                 var updateStr = greedVersion.CompareTo(Catalog.LatestGreed) < 0
-                    ? $" - ⚠ Greed v{Catalog.LatestGreed} is now available! ⚠"
+                    ? $" - {Constants.UNI_WARN} Greed v{Catalog.LatestGreed} is now available! {Constants.UNI_WARN}"
                     : "";
                 Title = $"Greed Mod Loader v{greedVersion} (Detected Sins II v{FileVersionInfo.GetVersionInfo(sinsDir + "\\sins2.exe").FileVersion}){updateStr}";
             }
@@ -405,6 +403,7 @@ namespace Greed
             if (e.Key == System.Windows.Input.Key.F5)
             {
                 ReloadModListFromDisk();
+                ReloadCatalog();
             }
             else if (e.Key == System.Windows.Input.Key.F6)
             {
@@ -660,7 +659,7 @@ namespace Greed
                 ? TxtLog.Text + '\n' + prefixed
                 : prefixed;
             TxtLog.ScrollToEnd();
-            File.AppendAllText(LogPath, prefixed + "\r\n");
+            File.AppendAllText(LogPath, prefixed + Environment.NewLine);
             Debug.WriteLine(prefixed);
         }
 

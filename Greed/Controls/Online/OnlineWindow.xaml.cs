@@ -1,11 +1,11 @@
 ﻿using Greed.Models.ListItem;
 using Greed.Models.Online;
+using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System;
 
 namespace Greed.Controls.Online
 {
