@@ -47,6 +47,10 @@ namespace Greed.Models.Vault
         private void Archive()
         {
             string modDir = ConfigurationManager.AppSettings["modDir"]!;
+            if (!Directory.Exists(modDir))
+            {
+                return;
+            }
             var vaultPath = modDir + "\\" + VaultName;
 
             File.WriteAllText(vaultPath, Serialize(this, SeriOptions));
