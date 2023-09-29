@@ -390,7 +390,7 @@ namespace Greed
                 }
 
                 // Download the file to the Downloads directory
-                var filename = modToDownload.Id + "_" + url.Split('/')[^1];
+                var filename = (modToDownload.Id + "_" + url.Split('/')[^1]).Split("?")[0];
                 var zipPath = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                     "Downloads",
@@ -416,26 +416,35 @@ namespace Greed
                 ZipFile.ExtractToDirectory(zipPath, extractPath);
                 window.PrintAsync($"Extract complete.");
 
+                // Check if the mod is shallow or nested, and get the folder we'll want to copy.
+                var isShallow = File.Exists(extractPath + "\\greed.json");
+                var copyablePath = isShallow
+                    ? extractPath
+                    : Directory.GetDirectories(extractPath)[0];
+
+
                 // Shift to the mod directory
-                var internalDir = Directory.GetDirectories(extractPath)[0];
                 var modPath = ConfigurationManager.AppSettings["modDir"]! + "\\" + modToDownload!.Id;
                 if (Directory.Exists(modPath))
                 {
                     Directory.Delete(modPath, true);
                     window.PrintAsync($"Deleted old install to make way for new one.");
                 }
-                if (!Directory.Exists(internalDir))
+                if (!Directory.Exists(copyablePath))
                 {
                     window.PrintAsync($"Folder doesn't exist yet!");
                 }
-                window.PrintAsync($"Starting move from {internalDir}...");
-                MoveWithRetries(window, internalDir, modPath, 3);
+                window.PrintAsync($"Starting move from {copyablePath}...");
+                MoveWithRetries(window, copyablePath, modPath, 3);
                 window.PrintAsync($"Move complete.");
                 window.PrintAsync($"Install complete.");
 
                 // Cleanup
                 File.Delete(zipPath);
-                Directory.Delete(extractPath, true);
+                if (!isShallow)
+                {
+                    Directory.Delete(extractPath, true);
+                }
                 return true;
             }
             catch (Exception ex)
