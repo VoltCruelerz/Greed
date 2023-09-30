@@ -35,7 +35,7 @@ namespace Greed.Controls.Online
 
         private void RefreshOnlineModListUI()
         {
-            ParentWindow.PrintAsync($"RefreshOnlineModListUI for {Catalog.Mods.Count} mods.");
+            _ = ParentWindow.PrintAsync($"RefreshOnlineModListUI for {Catalog.Mods.Count} mods.");
             var modVersions = ParentWindow.GetModVersions();
             ViewOnlineModList.Items.Clear();
             Catalog.Mods
@@ -68,7 +68,7 @@ namespace Greed.Controls.Online
             }
             catch (Exception ex)
             {
-                ParentWindow.PrintAsync(ex);
+                _ = ParentWindow.PrintAsync(ex);
             }
         }
         private void UpdateRightClickMenuOptions()
@@ -140,7 +140,7 @@ namespace Greed.Controls.Online
 
         private async Task DownloadSelection(VersionEntry versionToInstall)
         {
-            _ = await ModManager.InstallModFromGitHub(ParentWindow, new WarningPopup(), Catalog, SelectedMod!, versionToInstall);
+            _ = await ModManager.InstallModFromInternet(ParentWindow, new WarningPopup(), Catalog, SelectedMod!, versionToInstall);
             ParentWindow.ReloadModListFromDiskAsync();
             RefreshOnlineModListUI();// Do this second because filtration checks what's been loaded by the previous method.
         }

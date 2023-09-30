@@ -51,7 +51,7 @@ namespace Greed.Models.ListItem
 
             if (versionViolations.Any())
             {
-                window.PrintAsync("WARNING - Incompatible Version: " + mod.Meta.Name + Environment.NewLine + versionViolations.Select(v => v.GetDescription()).ToBulletedList());
+                _ = window.PrintAsync("WARNING - Incompatible Version: " + mod.Meta.Name + Environment.NewLine + versionViolations.Select(v => v.GetDescription()).ToBulletedList());
             }
 
             // Handle outdated

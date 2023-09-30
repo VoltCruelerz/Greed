@@ -67,7 +67,7 @@ namespace Greed
         /// <param name="callback"></param>
         public void ExportGreedyMods(List<Mod> active, ProgressBar pgbProgress, MainWindow window, Action<bool> callback)
         {
-            window.PrintAsync($"Exporting {active.Count} Active Mods");
+            _ = window.PrintAsync($"Exporting {active.Count} Active Mods");
             string modDir = ConfigurationManager.AppSettings["modDir"]!;
             string sinsDir = ConfigurationManager.AppSettings["sinsDir"]!;
             var greedPath = modDir + "\\greed";
@@ -84,7 +84,7 @@ namespace Greed
             {
                 if (!active.Any())
                 {
-                    window.PrintAsync("No active mods.");
+                    _ = window.PrintAsync("No active mods.");
                     return;
                 }
                 try
@@ -94,7 +94,7 @@ namespace Greed
                     for (int i = 0; i < active.Count; i++)
                     {
                         var mod = active[i];
-                        window.PrintAsync($"[{i + 1}/{active.Count}]: Merging {mod.Meta.Name}...");
+                        _ = window.PrintAsync($"[{i + 1}/{active.Count}]: Merging {mod.Meta.Name}...");
                         mod.Export();
                         pgbProgress.Dispatcher.Invoke(() =>
                         {
@@ -108,7 +108,7 @@ namespace Greed
                 }
                 catch (Exception ex)
                 {
-                    window.PrintAsync("Error: " + ex.ToString());
+                    _ = window.PrintAsync("Error: " + ex.ToString());
                     callback(false);
                 }
             }).ConfigureAwait(false);
@@ -306,7 +306,7 @@ namespace Greed
 
         public static void Uninstall(MainWindow window, WarningPopup warning, List<Mod> installedMods, string id, bool force = false)
         {
-            window.PrintAsync($"Uninstalling {id}...");
+            _ = window.PrintAsync($"Uninstalling {id}...");
             var modToUninstall = installedMods.Find(m => m.Id == id)!;
 
             if (force)
@@ -376,18 +376,21 @@ namespace Greed
         /// <param name="versionToDownload"></param>
         /// <param name="force">If TRUE, ignore dependencies.</param>
         /// <returns>TRUE if success, FALSE if did not install.</returns>
-        public static async Task<bool> InstallModFromGitHub(MainWindow window, WarningPopup warning, OnlineCatalog channel, OnlineMod modToDownload, VersionEntry versionToDownload, bool force = false)
+        public static async Task<bool> InstallModFromInternet(MainWindow window, WarningPopup warning, OnlineCatalog channel, OnlineMod modToDownload, VersionEntry versionToDownload, bool force = false)
         {
             try
             {
-                window.PrintAsync($"Installing {modToDownload.Name}...");
+                await window.SetProgressAsync(0);
+                await window.PrintAsync($"Installing {modToDownload.Name}...");
                 var url = versionToDownload.Download;
 
                 if (!force && !await DependenciesReady(window, warning, channel, modToDownload, versionToDownload))
                 {
-                    window.PrintAsync($"Download of {modToDownload.Name} aborted.");
+                    await window.PrintAsync($"Download of {modToDownload.Name} aborted.");
+                    await window.SetProgressAsync(0);
                     return false;
                 }
+                await window.SetProgressAsync(0.1);
 
                 // Download the file to the Downloads directory
                 var filename = (modToDownload.Id + "_" + url.Split('/')[^1]).Split("?")[0];
@@ -396,15 +399,18 @@ namespace Greed
                     "Downloads",
                     filename
                 );
+                await window.SetProgressAsync(0.2);
                 if (File.Exists(zipPath))
                 {
                     File.Delete(zipPath);
                 }
                 if (!await DownloadZipFile(window, url, zipPath))
                 {
+                    await window.SetProgressAsync(0);
                     return false;
                 }
-                window.PrintAsync($"Download of {modToDownload.Name} to {zipPath} complete.");
+                await window.PrintAsync($"Download of {modToDownload.Name} to {zipPath} complete.");
+                await window.SetProgressAsync(0.5);
 
                 // Extract the mod.
                 var extractPath = zipPath.Split(".zip")[0];
@@ -412,9 +418,10 @@ namespace Greed
                 {
                     Directory.Delete(extractPath, true);
                 }
-                window.PrintAsync($"Extracting to {extractPath}...");
+                await window.PrintAsync($"Extracting to {extractPath}...");
                 ZipFile.ExtractToDirectory(zipPath, extractPath);
-                window.PrintAsync($"Extract complete.");
+                await window.SetProgressAsync(0.8);
+                await window.PrintAsync($"Extract complete.");
 
                 // Check if the mod is shallow or nested, and get the folder we'll want to copy.
                 var isShallow = File.Exists(extractPath + "\\greed.json");
@@ -428,16 +435,18 @@ namespace Greed
                 if (Directory.Exists(modPath))
                 {
                     Directory.Delete(modPath, true);
-                    window.PrintAsync($"Deleted old install to make way for new one.");
+                    _ = window.PrintAsync($"Deleted old install to make way for new one.");
                 }
                 if (!Directory.Exists(copyablePath))
                 {
-                    window.PrintAsync($"Folder doesn't exist yet!");
+                    _ = window.PrintAsync($"Folder doesn't exist yet!");
                 }
-                window.PrintAsync($"Starting move from {copyablePath}...");
-                MoveWithRetries(window, copyablePath, modPath, 3);
-                window.PrintAsync($"Move complete.");
-                window.PrintAsync($"Install complete.");
+                await window.SetProgressAsync(0.8);
+                await window.PrintAsync($"Starting move from {copyablePath}...");
+                await MoveWithRetries(window, copyablePath, modPath);
+                await window.PrintAsync($"Move complete.");
+                await window.PrintAsync($"Install complete.");
+                await window.SetProgressAsync(0.9);
 
                 // Cleanup
                 File.Delete(zipPath);
@@ -445,11 +454,13 @@ namespace Greed
                 {
                     Directory.Delete(extractPath, true);
                 }
+                await window.SetProgressAsync(1);
                 return true;
             }
             catch (Exception ex)
             {
                 window.CriticalAlertPopup("Failed to Download Mod", ex);
+                await window.SetProgressAsync(0);
                 return false;
             }
         }
@@ -469,7 +480,7 @@ namespace Greed
                     {
                         var dependencyMod = channel.Mods.Find(m => m.Id == dep.Id);
                         var versionToInstall = dependencyMod!.Versions[dep.Version.ToString()];
-                        var chainResult = await InstallModFromGitHub(window, warning, channel, dependencyMod, versionToInstall);
+                        var chainResult = await InstallModFromInternet(window, warning, channel, dependencyMod, versionToInstall);
                         if (!chainResult)
                         {
                             return false;
@@ -490,7 +501,7 @@ namespace Greed
             try
             {
                 // Send an HTTP GET request to the GitHub release URL
-                window.PrintAsync("Downloading from " + releaseUrl);
+                await window.PrintAsync("Downloading from " + releaseUrl);
                 HttpResponseMessage response = await httpClient.GetAsync(releaseUrl);
 
                 // Check if the request was successful (HTTP status code 200)
@@ -504,7 +515,7 @@ namespace Greed
                         await contentStream.CopyToAsync(fileStream);
                     }
 
-                    window.PrintAsync("Download completed successfully.");
+                    await window.PrintAsync("Download completed successfully.");
                 }
                 else
                 {
@@ -514,7 +525,7 @@ namespace Greed
             }
             catch (Exception ex)
             {
-                window.PrintAsync($"A download error occurred: {ex.Message}\n{ex.StackTrace}");
+                await window.PrintAsync($"A download error occurred: {ex.Message}\n{ex.StackTrace}");
                 return false;
             }
         }
@@ -527,7 +538,7 @@ namespace Greed
         /// <param name="dest"></param>
         /// <param name="maxRetries"></param>
         /// <exception cref="InvalidOperationException"></exception>
-        private static void MoveWithRetries(MainWindow window, string src, string dest, int maxRetries = 5)
+        private static async Task MoveWithRetries(MainWindow window, string src, string dest, int maxRetries = 60)
         {
             for (var retry = 0; retry <= maxRetries; retry++)
             {
@@ -536,13 +547,14 @@ namespace Greed
                     try
                     {
                         Directory.Move(src, dest);
-                        break;
+                        return;
                     }
                     catch (Exception ex)
                     {
-                        window.PrintAsync(ex);
-                        Thread.Sleep(retry * 100);
-                        window.PrintAsync($"Retrying move (r={retry})");
+                        await window.PrintAsync(ex, "[WARN]");
+                        //Thread.Sleep(retry * 100);
+                        await Task.Delay(Math.Min(retry * 100, 1000)).ConfigureAwait(false);
+                        await window.PrintAsync($"Retrying move due to ZipFile not being thread safe (r={retry})");
                     }
                 }
                 else

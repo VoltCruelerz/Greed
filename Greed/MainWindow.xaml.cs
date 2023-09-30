@@ -371,7 +371,7 @@ namespace Greed
                 {
                     if (exportSucceeded)
                     {
-                        PrintAsync("Export Complete");
+                        _ = PrintAsync("Export Complete");
                         var response = MessageBox.Show("Greedy mods are now active. Would you like to start sinning?", "Export Success", MessageBoxButton.YesNo, MessageBoxImage.Information);
 
                         if (response == MessageBoxResult.Yes)
@@ -435,7 +435,7 @@ namespace Greed
 
         private void CriticalAlertPopup(string title, string message)
         {
-            PrintAsync(message);
+            _ = PrintAsync(message);
             MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Error);
         }
         #endregion
@@ -639,13 +639,26 @@ namespace Greed
         private void Play()
         {
             var execPath = ConfigurationManager.AppSettings["sinsDir"]! + "\\sins2.exe";
-            PrintAsync("Executing: " + execPath);
+            _ = PrintAsync("Executing: " + execPath);
             Process.Start(new ProcessStartInfo(execPath)
             {
                 WorkingDirectory = ConfigurationManager.AppSettings["sinsDir"]!
             });
         }
         #endregion
+
+        /// <summary>
+        /// Sets the progress bar from any thread.
+        /// </summary>
+        /// <param name="value">[0,1]</param>
+        public async Task SetProgressAsync(double value)
+        {
+            pgbProgress.Dispatcher.Invoke(() =>
+            {
+                pgbProgress.Value = 100 * value;
+            });
+            await Task.Delay(0).ConfigureAwait(false);
+        }
 
         /// <summary>
         /// Print synchronously.
@@ -668,22 +681,39 @@ namespace Greed
             PrintSync(ex.Message + "\n" + ex.StackTrace, "[ERROR]");
         }
 
-        /// <summary>
-        /// Invoke the print function when possible.
-        /// </summary>
-        /// <param name="str"></param>
-        public void PrintAsync(string str, string type = "[INFO]")
+        public void PrintSync(Exception ex, string type = "[ERROR]")
         {
-            Dispatcher.Invoke(() => PrintSync(str, type));
+            PrintSync(ex.Message + "\n" + ex.StackTrace, type);
         }
 
         /// <summary>
         /// Invoke the print function when possible.
         /// </summary>
         /// <param name="str"></param>
-        public void PrintAsync(Exception ex)
+        public async Task PrintAsync(string str, string type = "[INFO]")
+        {
+            Dispatcher.Invoke(() => PrintSync(str, type));
+            await Task.Delay(0).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Invoke the print function when possible.
+        /// </summary>
+        /// <param name="str"></param>
+        public async Task PrintAsync(Exception ex)
         {
             Dispatcher.Invoke(() => PrintSync(ex));
+            await Task.Delay(0).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Invoke the print function when possible.
+        /// </summary>
+        /// <param name="str"></param>
+        public async Task PrintAsync(Exception ex, string type = "[ERROR]")
+        {
+            Dispatcher.Invoke(() => PrintSync(ex, type));
+            await Task.Delay(0).ConfigureAwait(false);
         }
 
         private void TxtSearchMods_TextChanged(object sender, TextChangedEventArgs e)
@@ -762,7 +792,7 @@ namespace Greed
 
             // Redownload
             var catalogEntry = Catalog.Mods.Find(m => m.Id == modToUpdate.Id)!;
-            await ModManager.InstallModFromGitHub(this, Warning, Catalog, catalogEntry, targetVersion);
+            await ModManager.InstallModFromInternet(this, Warning, Catalog, catalogEntry, targetVersion);
 
             // Reload Mods
             ReloadModListFromDiskAsync();
@@ -884,7 +914,7 @@ namespace Greed
                     return;
                 }
                 var versionToInstall = modToInstall.Versions[portableMod.Version.ToString()];
-                var isSuccess = await ModManager.InstallModFromGitHub(this, Warning, Catalog, modToInstall, versionToInstall, true);
+                var isSuccess = await ModManager.InstallModFromInternet(this, Warning, Catalog, modToInstall, versionToInstall, true);
                 if (!isSuccess)
                 {
                     allSuccess = false;
@@ -893,7 +923,7 @@ namespace Greed
 
             if (!allSuccess)
             {
-                PrintAsync("Failed to install all mods in the mod pack.", "[ERROR]");
+                await PrintAsync("Failed to install all mods in the mod pack.", "[ERROR]");
                 return;
             }
 
