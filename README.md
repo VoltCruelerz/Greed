@@ -79,7 +79,7 @@ Set the directories on the Settings tab. They will autosave if the paths exist.
 
 ##### Drag-and-Drop
 
-![Drag-and-Drop](assets/Drag%20and%20Drop%20Rar.mp4)
+https://github.com/VoltCruelerz/Greed/assets/4068550/a0d3662e-25e5-46c2-ba97-54bf3adcfc63
 
 ##### Manual Install
 
