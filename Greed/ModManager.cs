@@ -5,6 +5,9 @@ using Greed.Models.EnabledMods;
 using Greed.Models.Online;
 using Greed.Models.Vault;
 using Newtonsoft.Json;
+using SharpCompress.Archives;
+using SharpCompress.Archives.Rar;
+using SharpCompress.Common;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -412,48 +415,9 @@ namespace Greed
                 await window.PrintAsync($"Download of {modToDownload.Name} to {zipPath} complete.");
                 await window.SetProgressAsync(0.5);
 
-                // Extract the mod.
-                var extractPath = zipPath.Split(".zip")[0];
-                if (Directory.Exists(extractPath))
-                {
-                    Directory.Delete(extractPath, true);
-                }
-                await window.PrintAsync($"Extracting to {extractPath}...");
-                ZipFile.ExtractToDirectory(zipPath, extractPath);
-                await window.SetProgressAsync(0.8);
-                await window.PrintAsync($"Extract complete.");
+                await InstallMod(window, zipPath, modToDownload!.Id);
 
-                // Check if the mod is shallow or nested, and get the folder we'll want to copy.
-                var isShallow = File.Exists(extractPath + "\\greed.json");
-                var copyablePath = isShallow
-                    ? extractPath
-                    : Directory.GetDirectories(extractPath)[0];
-
-
-                // Shift to the mod directory
-                var modPath = ConfigurationManager.AppSettings["modDir"]! + "\\" + modToDownload!.Id;
-                if (Directory.Exists(modPath))
-                {
-                    Directory.Delete(modPath, true);
-                    _ = window.PrintAsync($"Deleted old install to make way for new one.");
-                }
-                if (!Directory.Exists(copyablePath))
-                {
-                    _ = window.PrintAsync($"Folder doesn't exist yet!");
-                }
-                await window.SetProgressAsync(0.8);
-                await window.PrintAsync($"Starting move from {copyablePath}...");
-                await MoveWithRetries(window, copyablePath, modPath);
-                await window.PrintAsync($"Move complete.");
-                await window.PrintAsync($"Install complete.");
-                await window.SetProgressAsync(0.9);
-
-                // Cleanup
                 File.Delete(zipPath);
-                if (!isShallow)
-                {
-                    Directory.Delete(extractPath, true);
-                }
                 await window.SetProgressAsync(1);
                 return true;
             }
@@ -527,6 +491,95 @@ namespace Greed
             {
                 await window.PrintAsync($"A download error occurred: {ex.Message}\n{ex.StackTrace}");
                 return false;
+            }
+        }
+
+        public static async Task InstallMod(MainWindow window, string archivePath, string modId = "")
+        {
+            var extension = Path.GetExtension(archivePath);
+
+            // Extract the mod.
+            var extractPath = archivePath.Split(extension)[0];
+            if (Directory.Exists(extractPath))
+            {
+                Directory.Delete(extractPath, true);
+            }
+            await window.PrintAsync($"Extracting to {extractPath}...");
+            try
+            {
+                ExtractArchive(archivePath, extractPath);
+            } catch (Exception ex) {
+                await window.PrintAsync(ex);
+                await window.SetProgressAsync(0.0);
+                return;
+            }
+            await window.SetProgressAsync(0.8);
+            await window.PrintAsync($"Extract complete.");
+
+            // Check if the mod is shallow or nested, and get the folder we'll want to copy.
+            var isShallow = File.Exists(extractPath + "\\greed.json");
+            var copyablePath = isShallow
+                ? extractPath
+                : Directory.GetDirectories(extractPath)[0];
+
+            // Check that greed.json actually exists. The mod might not be greedy, after all.
+            if (string.IsNullOrEmpty(modId))
+            {
+                var greedConfigPath = copyablePath + "\\greed.json";
+                var hypotheticalId = copyablePath.Split("\\")[^1];
+                await window.PrintAsync("Mod ID of auto-imported mod inferred as " + hypotheticalId, "[WARN]");
+                modId = hypotheticalId;
+            }
+
+
+            // Shift to the mod directory
+            var modPath = ConfigurationManager.AppSettings["modDir"]! + "\\" + modId;
+            if (Directory.Exists(modPath))
+            {
+                Directory.Delete(modPath, true);
+                await window.PrintAsync($"Deleted old install to make way for new one.");
+            }
+            if (!Directory.Exists(copyablePath))
+            {
+                await window.PrintAsync($"Folder doesn't exist yet!");
+            }
+            await window.SetProgressAsync(0.8);
+            await window.PrintAsync($"Starting move from {copyablePath}...");
+            await MoveWithRetries(window, copyablePath, modPath);
+            await window.PrintAsync($"Move complete.");
+            await window.PrintAsync($"Install complete.");
+            await window.SetProgressAsync(0.9);
+
+            // Cleanup
+            if (!isShallow)
+            {
+                Directory.Delete(extractPath, true);
+            }
+        }
+
+        private static void ExtractArchive(string archivePath, string extractPath)
+        {
+            var extension = Path.GetExtension(archivePath);
+            if (extension == ".zip")
+            {
+                ZipFile.ExtractToDirectory(archivePath, extractPath);
+            }
+            else if (extension == ".rar")
+            {
+                Directory.CreateDirectory(extractPath);
+                using var archive = RarArchive.Open(archivePath);
+                foreach (var entry in archive.Entries.Where(entry => !entry.IsDirectory))
+                {
+                    entry.WriteToDirectory(extractPath, new ExtractionOptions()
+                    {
+                        ExtractFullPath = true,
+                        Overwrite = true
+                    });
+                }
+            }
+            else
+            {
+                throw new InvalidDataException("Unrecognized archive type: " + extension);
             }
         }
 

@@ -10,6 +10,7 @@ namespace Greed
         public const string UNI_BULLET = "•";
         public const string UNI_CHECK = "✅";
         public const string UNI_WARN = "⚠";
+        public const string UNI_DELTA = "Δ";
         public const string UNI_INSTALLED = "💾";
         public const string UNI_NO_INSTALL = "🚫";
         public const string UNI_READY_FOR_UPDATE = "[＋]";

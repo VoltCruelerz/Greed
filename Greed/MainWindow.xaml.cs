@@ -435,7 +435,7 @@ namespace Greed
 
         private void CriticalAlertPopup(string title, string message)
         {
-            _ = PrintAsync(message);
+            _ = PrintAsync(title + "\r\n" + message, "[CRITICAL]");
             MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Error);
         }
         #endregion
@@ -477,7 +477,7 @@ namespace Greed
 
                 try
                 {
-                    AllSources.ForEach(p => viewFileList.Items.Add(new SourceListItem(p)));
+                    AllSources.ForEach(p => viewFileList.Items.Add(new SourceListItem(p, this)));
                 }
                 catch (Exception ex)
                 {
@@ -647,6 +647,7 @@ namespace Greed
         }
         #endregion
 
+        #region Printing
         /// <summary>
         /// Sets the progress bar from any thread.
         /// </summary>
@@ -715,6 +716,7 @@ namespace Greed
             Dispatcher.Invoke(() => PrintSync(ex, type));
             await Task.Delay(0).ConfigureAwait(false);
         }
+        #endregion
 
         private void TxtSearchMods_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -937,5 +939,77 @@ namespace Greed
         }
 
         #endregion
+
+        private void Window_DragEnter(object sender, DragEventArgs e)
+        {
+            PrintSync("Window_DragEnter()");
+            //if (e.Data.GetDataPresent(DataFormats.FileDrop)) e.Effects = DragDropEffects.Copy;
+
+            // Changes the icon of the mouse
+            e.Effects = DragDropEffects.All;
+        }
+
+        private void Window_Drop(object sender, DragEventArgs e)
+        {
+            PrintSync("Window_Drop()");
+            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+            foreach (string file in files) Console.WriteLine(file);
+        }
+
+        private void Window_DragLeave(object sender, DragEventArgs e)
+        {
+            PrintSync("Window_DragLeave()");
+        }
+
+        private void Window_DragOver(object sender, DragEventArgs e)
+        {
+            PrintSync("Window_DragOver()");
+        }
+
+        private void viewModList_DragEnter(object sender, DragEventArgs e)
+        {
+            PrintSync("viewModList_DragEnter()");
+        }
+
+        private void viewModList_DragLeave(object sender, DragEventArgs e)
+        {
+            PrintSync("viewModList_DragLeave()");
+        }
+
+        private void viewModList_DragOver(object sender, DragEventArgs e)
+        {
+            PrintSync("viewModList_DragOver()");
+        }
+
+        private void viewModList_Drop(object sender, DragEventArgs e)
+        {
+            PrintSync("viewModList_Drop()");
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+
+                // Process the dropped files here
+                _ = InstallDroppedMods(files);
+            }
+        }
+
+        /// <summary>
+        /// Installs the list of mods.
+        /// </summary>
+        /// <param name="files"></param>
+        /// <returns></returns>
+        private async Task InstallDroppedMods(string[] files)
+        {
+            await SetProgressAsync(0);
+            foreach (string file in files)
+            {
+                await SetProgressAsync(0.1);
+                PrintSync(file);
+                await ModManager.InstallMod(this, file);
+                await SetProgressAsync(0.95);
+            }
+            await SetProgressAsync(1);
+            ReloadModListFromDiskAsync();
+        }
     }
 }

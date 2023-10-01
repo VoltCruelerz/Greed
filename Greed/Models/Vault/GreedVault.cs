@@ -28,6 +28,10 @@ namespace Greed.Models.Vault
         public static GreedVault Load()
         {
             string modDir = ConfigurationManager.AppSettings["modDir"]!;
+            if (!Directory.Exists(modDir))
+            {
+                return new();
+            }
             var vaultPath = modDir + "\\" + VaultName;
 
             GreedVault pack;

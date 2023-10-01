@@ -18,7 +18,8 @@ _A mod loader for [Sins of a Solar Empire II](https://www.sinsofasolarempire2.co
             - [Greed Configuration](#greed-configuration)
         - [Basic Use](#basic-use)
             - [Install a Mod](#install-a-mod)
-                - [Automated (Recommended)](#automated-recommended)
+                - [Online Catalog (Recommended)](#online-catalog-recommended)
+                - [Drag-and-Drop](#drag-and-drop)
                 - [Manual Install](#manual-install)
             - [Activate a Mod](#activate-a-mod)
         - [Left Pane - Mods](#left-pane---mods)
@@ -38,6 +39,7 @@ _A mod loader for [Sins of a Solar Empire II](https://www.sinsofasolarempire2.co
 
 - **No More Manual Deconfliction**: File deconfliction happens automatically for you.
 - **Automated Installation**: You can automatically install mods and their dependencies from an online catalog.
+- **Drag-and-Drop Installation**: If you find a mod from some other source, you can drag-and-drop it into Greed to install it.
 - **Conflict Detection**: You are warned if you try to enable mods with a known conflict between them.
 - **Dependency Management**: You are warned if you attempt to enable a mod without its dependencies active.
 - **Mod Packs**: Easily create bundles of your favorite mods that you can quickly enable together.
@@ -67,13 +69,17 @@ Set the directories on the Settings tab. They will autosave if the paths exist.
 
 #### Install a Mod
 
-##### Automated (Recommended)
+##### Online Catalog (Recommended)
 
 ![Online Catalog](assets/OnlineCatalog.png)
 
 1. Press the `[☁️]` button to view the online catalog.
 2. Right click on whatever mod you want to install.
 3. Install the version of your choice.
+
+##### Drag-and-Drop
+
+![Drag-and-Drop](assets/Drag%20and%20Drop%20Rar.mp4)
 
 ##### Manual Install
 

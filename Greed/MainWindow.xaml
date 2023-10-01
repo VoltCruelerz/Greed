@@ -27,11 +27,12 @@
                     <ColumnDefinition Width="432*"/>
                 </Grid.ColumnDefinitions>
                 <ListView x:Name="viewModList" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="10,64,11,10"
+                          AllowDrop="True"
                           SelectionChanged="ModList_SelectionChanged"
                           MouseDoubleClick="Toggle_Click"
                           MouseUp="ModList_MouseUp"
                           MouseLeave="ModList_MouseLeave"
-                          ToolTip="Later mods overwrite earlier ones. Click to view a mod's details. Double click to toggle.">
+                          ToolTip="Later mods overwrite earlier ones. Click to view a mod's details. Double click to toggle." DragEnter="viewModList_DragEnter" DragLeave="viewModList_DragLeave" DragOver="viewModList_DragOver" Drop="viewModList_Drop">
                     <ListView.ContextMenu>
                         <ContextMenu x:Name="CtxRight">
                         </ContextMenu>
