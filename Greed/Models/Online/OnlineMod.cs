@@ -44,5 +44,11 @@ namespace Greed.Models.Online
         public override List<Dependency> GetDependencies() { return Live.Dependencies; }
 
         public override List<string> GetConflicts() { return Live.Conflicts; }
+
+        /// <summary>
+        /// The online catalog has no sense of this, nor should it.
+        /// </summary>
+        /// <returns></returns>
+        public override List<string> GetPredecessors() { return new(); }
     }
 }

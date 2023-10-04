@@ -145,9 +145,11 @@ namespace Greed
             }
 
             Debug.WriteLine($"Attempting to move {mover} to {destination} for list [{string.Join(", ", mods)}]");
-            CanMove(mods, mover, destination, out List<Mod> dependencyViolations, out List<Mod> dependentViolations);
+            CanMove(mods, mover, destination, out List<Mod> dependencyViolations, out List<Mod> dependentViolations, out List<Mod> predViolations, out List<Mod> succViolations);
             var blockedByDependencies = dependencyViolations.Any();
             var blockedByDependents = dependentViolations.Any();
+            var blockedByPredecessors = predViolations.Any();
+            var blockedBySuccessors = succViolations.Any();
 
             var moveDependencies = false;
             if (blockedByDependencies)
@@ -172,7 +174,7 @@ namespace Greed
             var moveDependents = false;
             if (blockedByDependents)
             {
-                var result = Warning.DependencyOrder(mover, dependentViolations.Select(d => $"- Dependent Order Violation: {d.Meta.Name}").ToList());
+                var result = Warning.DependentOrder(mover, dependentViolations.Select(d => $"- Dependent Order Violation: {d.Meta.Name}").ToList());
                 if (result == MessageBoxResult.Yes)
                 {
                     blockedByDependents = false;
@@ -181,6 +183,46 @@ namespace Greed
                 else if (result == MessageBoxResult.No)
                 {
                     blockedByDependents = false;
+                }
+                else
+                {
+                    // Abort
+                    return 0;
+                }
+            }
+
+            var movePredecessors = false;
+            if (blockedByPredecessors)
+            {
+                var result = Warning.PredecessorOrder(mover, predViolations.Select(d => $"- Predecessor Order Violation: {d.Meta.Name}").ToList());
+                if (result == MessageBoxResult.Yes)
+                {
+                    blockedByPredecessors = false;
+                    movePredecessors = true;
+                }
+                else if (result == MessageBoxResult.No)
+                {
+                    blockedByPredecessors = false;
+                }
+                else
+                {
+                    // Abort
+                    return 0;
+                }
+            }
+
+            var moveSuccessors = false;
+            if (blockedBySuccessors)
+            {
+                var result = Warning.SuccessorOrder(mover, succViolations.Select(d => $"- Successor Order Violation: {d.Meta.Name}").ToList());
+                if (result == MessageBoxResult.Yes)
+                {
+                    blockedBySuccessors = false;
+                    moveSuccessors = true;
+                }
+                else if (result == MessageBoxResult.No)
+                {
+                    blockedBySuccessors = false;
                 }
                 else
                 {
@@ -199,18 +241,30 @@ namespace Greed
                     movedDescendentCount += MoveModRecursive(mods, v, destination) + 1;
                 });
             }
-            if (!blockedByDependencies && !blockedByDependents)
+            var movedSuccessorCount = 0;
+            if (moveSuccessors)
+            {
+                succViolations.ForEach(v =>
+                {
+                    movedSuccessorCount += MoveModRecursive(mods, v, destination) + 1;
+                });
+            }
+            if (!blockedByDependencies && !blockedByDependents && !blockedByPredecessors && !blockedBySuccessors)
             {
                 var oldIndex = mods.IndexOf(mover);
                 mods.RemoveAt(oldIndex);
-                mods.Insert(destination - movedDescendentCount, mover);
+                mods.Insert(destination - movedDescendentCount - movedSuccessorCount, mover);
                 Debug.WriteLine($"- Moved {mover} to {destination}");
+            }
+            if (movePredecessors)
+            {
+                predViolations.ForEach(v => MoveModRecursive(mods, v, destination));
             }
             if (moveDependencies)
             {
                 dependencyViolations.ForEach(v => MoveModRecursive(mods, v, destination));
             }
-            return movedDescendentCount;
+            return movedDescendentCount + movedSuccessorCount;
         }
 
         /// <summary>
@@ -234,7 +288,7 @@ namespace Greed
         private static void ActivateGreed()
         {
             // If enabled path doesn't exist yet, make it.
-            var enabledPath = ConfigurationManager.AppSettings["modDir"]! + "\\enabled_mods.json";
+            var enabledPath = ConfigurationManager.AppSettings["exportDir"]! + "\\enabled_mods.json";
             EnabledMods enabled;
             var greedKey = new ModKey()
             {
@@ -266,15 +320,21 @@ namespace Greed
         }
 
         /// <summary>
-        /// Checks that the destination wouldn't break a dependency chain.
+        /// Checks that the destination wouldn't break a dependency or predecessor chain.
         /// </summary>
         /// <param name="mods"></param>
         /// <param name="mover"></param>
         /// <param name="destination"></param>
+        /// <param name="dependencyViolations"></param>
+        /// <param name="dependentViolations"></param>
+        /// <param name="predViolations"></param>
+        /// <param name="succViolations"></param>
         /// <returns></returns>
-        private static bool CanMove(List<Mod> mods, Mod mover, int destination, out List<Mod> dependencyViolations, out List<Mod> dependentViolations)
+        private static bool CanMove(List<Mod> mods, Mod mover, int destination, out List<Mod> dependencyViolations, out List<Mod> dependentViolations, out List<Mod> predViolations, out List<Mod> succViolations)
         {
             var oldIndex = mods.IndexOf(mover);
+
+            // Dependencies
             var dependencies = mover.Meta.GetDependencyMods(mods);
 
             dependencyViolations = !dependencies.Any()
@@ -283,8 +343,7 @@ namespace Greed
                     .Where(d => d.LoadOrder >= destination)
                     .ToList();
 
-            var dependents = mods
-                .Where(m => m.HasDirectDependency(mover));
+            var dependents = mods.Where(m => m.HasAsDirectDependency(mover));
 
             dependentViolations = !dependents.Any()
                 ? new List<Mod>()
@@ -292,7 +351,25 @@ namespace Greed
                     .Where(d => d.LoadOrder <= destination)
                     .ToList();
 
-            return !dependencyViolations.Any();
+            // Predecessors
+            var preds = mover.Meta.GetPredecessorMods(mods);
+
+            predViolations = !preds.Any()
+                ? new List<Mod>()
+                : preds
+                    .Where(p => p.LoadOrder >= destination)
+                    .ToList();
+
+            var successors = mods.Where(m => m.HasAsDirectPredecessor(mover));
+
+            succViolations = !successors.Any()
+                ? new List<Mod>()
+                : successors
+                    .Where(s => s.LoadOrder <= destination)
+                    .ToList();
+
+            return !dependencyViolations.Any() && !dependentViolations.Any()
+                && !predViolations.Any() && !succViolations.Any();
         }
 
         /// <summary>
@@ -525,7 +602,6 @@ namespace Greed
             // Check that greed.json actually exists. The mod might not be greedy, after all.
             if (string.IsNullOrEmpty(modId))
             {
-                var greedConfigPath = copyablePath + "\\greed.json";
                 var hypotheticalId = copyablePath.Split("\\")[^1];
                 await window.PrintAsync("Mod ID of auto-imported mod inferred as " + hypotheticalId, "[WARN]");
                 modId = hypotheticalId;

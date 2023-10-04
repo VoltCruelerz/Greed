@@ -190,7 +190,23 @@ namespace Greed.Models
                 CreateGreedDirIfNotExists(source.GreedPath);
 
                 var greedExists = File.Exists(source.GreedPath);
+                var parentExists = File.Exists(source.ParentGreedPath);
                 var goldExists = File.Exists(source.GoldPath);
+
+                // If the file has a parent that isn't in greed yet, copy it over.
+                if (!greedExists && !parentExists && source.ParentGreedPath != null)
+                {
+                    // The gold path for those with parents is that of the parent.
+                    File.Copy(source.GoldPath, source.ParentGreedPath);
+                    parentExists = true;
+                }
+
+                // If greed doesn't exist yet, but the parent does, initialize from parent
+                if (!greedExists && parentExists)
+                {
+                    File.Copy(source.ParentGreedPath!, source.GreedPath);
+                    greedExists = true;
+                }
 
                 // If greed doesn't exist yet, initialize it from gold as needed.
                 if (!greedExists && goldExists && source.RequiresGold())
@@ -510,9 +526,14 @@ namespace Greed.Models
             return potentialDependent.Meta.Dependencies.Any(d => d.Id == Id);
         }
 
-        public bool HasDirectDependency(Mod potentialDependency)
+        public bool HasAsDirectDependency(Mod potentialDependency)
         {
             return potentialDependency.HasDirectDependent(this);
+        }
+
+        public bool HasAsDirectPredecessor(Mod potentialPredecessor)
+        {
+            return Meta.GetPredecessors().Any(p => p == potentialPredecessor.Id);
         }
 
         public bool IsConflict(Mod other)

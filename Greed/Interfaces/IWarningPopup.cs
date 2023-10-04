@@ -12,6 +12,9 @@ namespace Greed.Interfaces
         public MessageBoxResult Dependents(Mod m, List<Mod> dependents);
         public MessageBoxResult Dependencies(Mod m, List<string> violations, List<Mod> dependents);
         public MessageBoxResult DependencyOrder(Mod m, List<string> violations);
+        public MessageBoxResult DependentOrder(Mod m, List<string> violations);
+        public MessageBoxResult PredecessorOrder(Mod m, List<string> violations);
+        public MessageBoxResult SuccessorOrder(Mod m, List<string> violations);
         public void FailedToResolveDependencies(List<string> violations);
         public MessageBoxResult ChainedInstall(OnlineMod mod, Dependency dep);
     }

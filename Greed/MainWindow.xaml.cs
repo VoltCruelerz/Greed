@@ -18,8 +18,10 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
+using Greed.Extensions;
 
 namespace Greed
 {
@@ -73,6 +75,8 @@ namespace Greed
 
             // Populate the config fields.
             PopulateConfigField(txtModsDir, "modDir", Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "AppData", "Local", "sins2", "mods"));
+            PopulateConfigField(txtExportDir, "exportDir", Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "AppData", "Local", "sins2", "mods"));
             PopulateConfigField(txtSinsDir, "sinsDir", "C:\\Program Files\\Epic Games\\SinsII");
             PopulateConfigField(txtDownloadDir, "downDir", Path.Combine(
@@ -354,10 +358,10 @@ namespace Greed
 
         private void Export_Click(object sender, RoutedEventArgs e)
         {
-            ExportSelections();
+            ExportActive();
         }
 
-        private void ExportSelections()
+        private void ExportActive()
         {
             cmdExport.IsEnabled = false;
             ReselectSelection();
@@ -372,6 +376,21 @@ namespace Greed
                     if (exportSucceeded)
                     {
                         _ = PrintAsync("Export Complete");
+
+                        var modDir = ConfigurationManager.AppSettings["modDir"];
+                        var expDir = ConfigurationManager.AppSettings["exportDir"];
+                        if (modDir != expDir)
+                        {
+                            var modGreedFolder = modDir! + "\\greed";
+                            var expGreedFolder = expDir! + "\\greed";
+                            _ = PrintAsync("Copying export to " + expDir + "\\greed");
+                            if (Directory.Exists(expDir + "\\greed"))
+                            {
+                                Directory.Delete(expDir + "\\greed", true);
+                            }
+                            Extensions.Extensions.CopyDirectory(modGreedFolder, expGreedFolder, true);
+                        }
+
                         var response = MessageBox.Show("Greedy mods are now active. Would you like to start sinning?", "Export Success", MessageBoxButton.YesNo, MessageBoxImage.Information);
 
                         if (response == MessageBoxResult.Yes)
@@ -407,7 +426,7 @@ namespace Greed
             }
             else if (e.Key == System.Windows.Input.Key.F6)
             {
-                ExportSelections();
+                ExportActive();
             }
             else if (e.Key == System.Windows.Input.Key.Space)
             {
@@ -560,6 +579,11 @@ namespace Greed
         private void TxtModDir_TextChanged(object sender, TextChangedEventArgs e)
         {
             SetTxtConfigOption("modDir", (TextBox)sender);
+        }
+
+        private void TxtExportDir_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            SetTxtConfigOption("exportDir", (TextBox)sender);
         }
 
         private void TxtDownloadDir_TextChanged(object sender, TextChangedEventArgs e)

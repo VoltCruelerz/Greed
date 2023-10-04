@@ -72,6 +72,17 @@ namespace Greed.Controls
                 doc.Blocks.Add(p);
             }
 
+            // Predecessors
+            if (meta.GetPredecessors().Any())
+            {
+                var p = new Paragraph(new Run("Load Order Predecessors")
+                {
+                    FontWeight = FontWeights.Bold
+                });
+                meta.GetPredecessors().ForEach(c => p.Inlines.Add(new Run(Environment.NewLine + Constants.UNI_BULLET + " " + c)));
+                doc.Blocks.Add(p);
+            }
+
             // Conflicts
             if (meta.GetConflicts().Any())
             {

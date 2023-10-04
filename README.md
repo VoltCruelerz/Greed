@@ -34,6 +34,7 @@ _A mod loader for [Sins of a Solar Empire II](https://www.sinsofasolarempire2.co
     - [Contributing to Greed](#contributing-to-greed)
         - [Bug Reports](#bug-reports)
     - [Contributing Mods](#contributing-mods)
+    - [Wishlist](#wishlist)
 
 ## Why Use Greed?
 
@@ -43,6 +44,7 @@ _A mod loader for [Sins of a Solar Empire II](https://www.sinsofasolarempire2.co
 - **Conflict Detection**: You are warned if you try to enable mods with a known conflict between them.
 - **Dependency Management**: You are warned if you attempt to enable a mod without its dependencies active.
 - **Mod Packs**: Easily create bundles of your favorite mods that you can quickly enable together.
+- **C Drive Offloading**: keep your inactive mods away from your limited-space C drive
 
 ## User Guide
 
@@ -61,8 +63,9 @@ _A mod loader for [Sins of a Solar Empire II](https://www.sinsofasolarempire2.co
 Set the directories on the Settings tab. They will autosave if the paths exist.
 
 - **Sins Directory**: the location of Sins II's exe. (eg `C:\Program Files\Epic Games\SinsII`)
-- **Mods Directory**: the location of the mod folder. (eg `C:\Users\YOUR_USER\AppData\Local\sins2\mods`)
-- **Downloads Directory**: the location where Greed is free to download mods to temporarily before extracting them to your mods directory. (eg `C:\Users\YOUR_USER\Downloads`)\
+- **Mods Directory**: where on your machine you wish to save your horde of mods, including the inactive ones. (eg `C:\Users\YOUR_USER\AppData\Local\sins2\mods`)
+- **Export Directory**: regardless of where you choose to store your horde of mods, Sins II expects active mods to be in a particular folder, which will nearly always be `C:\Users\YOUR_USER\AppData\Local\sins2\mods`.
+- **Downloads Directory**: the location where Greed is free to download mods to temporarily before extracting them to your mods directory. (eg `C:\Users\YOUR_USER\Downloads`)
 - **Channel Catalog**: allows you to download mods from other installation channels. For users, this should be left on `Live`.
 
 ### Basic Use
@@ -210,6 +213,9 @@ To make a mod compatible with Greed, you need only add a `greed.json` file to yo
             "version": "1.0.0"
         }
     ],
+    "predecessors": [
+        "pred-mod"
+    ]
     "conflicts": ["conflicting-mod"],
     "isTotalConversion": false
 }
@@ -226,7 +232,8 @@ While I recommend you take advantage of Greed's more powerful features like merg
 | `version`* | `version` | The version of the mod itself. |
 | `sinsVersion`* | `version` | The minimum compatible Sins version. |
 | `greedVersion`* | `version` | The minimum compatible Greed version. |
-| `dependencies`* | `dependency[]` | An array of dependencies. |
+| `dependencies`* | `dependency[]` | An array of dependencies that are REQUIRED for this mod to function. |
+| `predecessors`* | `string[]` | An array of mods that if this is co-active with SHOULD be loaded first. |
 | `conflicts`* | `string[]` | An array of mod ids with which this mod is incompatible. |
 | `isTotalConversion` | `bool` | Whether or not the mod should presume conflicts in the absence of dependencies. (default `false`) |
 
@@ -247,3 +254,11 @@ In the event of an error, consult the log (viewable both in the textbox at the b
 ## Contributing Mods
 
 To contribute a mod to the online catalog, open a merge request [here](https://github.com/League-of-Greedy-Modders/Greedy-Mods).
+
+## Wishlist
+
+> **NOTE**: The following items are things that may or _may not_ make it in.
+
+- **Remove-by-query**: right now, Greed struggles with (the admittedly uncommon) task of removing specific array elements without overwriting the entire array.
+- **Inheritance**: allow a file to inherit from another file, eg a new faction might inherit from an existing `.player` file it is similar to, so you don't have to redefine _everything_.
+- **Soft Prerequisites**: mod A does not require mod B, but if they are both active, mod B needs to be loaded first.

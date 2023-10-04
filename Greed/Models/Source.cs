@@ -5,6 +5,9 @@ namespace Greed.Models
     public class Source
     {
         public string SourcePath { get; set; }
+        /// <summary>
+        /// The file we'll be writing in the output and may need to merge with.
+        /// </summary>
         public string GreedPath { get; set; }
         public string GoldPath { get; set; }
         public string Mod { get; set; }

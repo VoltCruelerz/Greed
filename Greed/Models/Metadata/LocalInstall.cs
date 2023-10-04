@@ -14,22 +14,43 @@ namespace Greed.Models
 {
     public class LocalInstall : BasicMetadata
     {
+        /// <summary>
+        /// Mod version
+        /// </summary>
         [JsonRequired]
         [JsonProperty(PropertyName = "version")]
         public Version Version { get; set; } = new Version("0.0.0");
 
+        /// <summary>
+        /// Minimum Greed version
+        /// </summary>
         [JsonRequired]
         [JsonProperty(PropertyName = "greedVersion")]
         public Version GreedVersion { get; set; } = new Version("0.0.0");
 
+        /// <summary>
+        /// Minimum Sins version
+        /// </summary>
         [JsonRequired]
         [JsonProperty(PropertyName = "sinsVersion")]
         public Version SinsVersion { get; set; } = new Version("0.0.0.0");
 
+        /// <summary>
+        /// A list of REQUIRED mods.
+        /// </summary>
         [JsonRequired]
         [JsonProperty(PropertyName = "dependencies")]
         public List<Dependency> Dependencies { get; set; } = new List<Dependency>();
 
+        /// <summary>
+        /// If both mods are installed, this mod should be loaded AFTER those in this list.
+        /// </summary>
+        [JsonProperty(PropertyName = "predecessors")]
+        public List<string> Predecessors { get; set; } = new List<string>();
+
+        /// <summary>
+        /// The list of mods with which there are known conflicts.
+        /// </summary>
         [JsonRequired]
         [JsonProperty(PropertyName = "conflicts")]
         public List<string> Conflicts { get; set; } = new List<string>();
@@ -41,6 +62,8 @@ namespace Greed.Models
         public override Version GetSinsVersion() { return SinsVersion; }
 
         public override List<Dependency> GetDependencies() { return Dependencies; }
+
+        public override List<string> GetPredecessors() { return Predecessors; }
 
         public override List<string> GetConflicts() { return Conflicts; }
 
@@ -123,6 +146,11 @@ namespace Greed.Models
         public List<Mod> GetDependencyMods(List<Mod> allMods)
         {
             return allMods.Where(m => Dependencies.Any(d => d.Id == m.Id)).ToList();
+        }
+
+        public List<Mod> GetPredecessorMods(List<Mod> allMods)
+        {
+            return allMods.Where(m => Predecessors.Any(p => p == m.Id)).ToList();
         }
 
         /// <summary>

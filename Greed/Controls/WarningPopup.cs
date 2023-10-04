@@ -37,8 +37,30 @@ namespace Greed.Controls
         {
             var plural = violations.Count > 1 ? "ies" : "y";
             var rows = string.Join('\n', violations);
-            return MessageBox.Show($"Moving {m.Meta.Name} would cause a load order violation:\n{rows}\n\nTo continue moving {m.Meta.Name}, would you like to hoist its dependenc{plural} as well?", "Load Order Violation", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
+            return MessageBox.Show($"Moving {m.Meta.Name} would cause a load order violation:\n{rows}\n\nTo continue moving {m.Meta.Name}, would you like to hoist its dependenc{plural} as well?", "Dependency Load Order Violation", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
         }
+
+        public MessageBoxResult DependentOrder(Mod m, List<string> violations)
+        {
+            var plural = violations.Count > 1 ? "s" : "";
+            var rows = string.Join('\n', violations);
+            return MessageBox.Show($"Moving {m.Meta.Name} would cause a load order violation:\n{rows}\n\nTo continue moving {m.Meta.Name}, would you like to lower its dependent{plural} as well?", "Dependent Load Order Violation", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
+        }
+
+        public MessageBoxResult PredecessorOrder(Mod m, List<string> violations)
+        {
+            var plural = violations.Count > 1 ? "s" : "";
+            var rows = string.Join('\n', violations);
+            return MessageBox.Show($"Moving {m.Meta.Name} would cause a load order violation:\n{rows}\n\nTo continue moving {m.Meta.Name}, would you like to hoist its predecessor{plural} as well?", "Predecessor Load Order Violation", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
+        }
+
+        public MessageBoxResult SuccessorOrder(Mod m, List<string> violations)
+        {
+            var plural = violations.Count > 1 ? "s" : "";
+            var rows = string.Join('\n', violations);
+            return MessageBox.Show($"Moving {m.Meta.Name} would cause a load order violation:\n{rows}\n\nTo continue moving {m.Meta.Name}, would you like to lower its successor{plural} as well?", "Successor Load Order Violation", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
+        }
+
         public void FailedToResolveDependencies(List<string> violations)
         {
             MessageBox.Show("Unable to resolve all dependencies:\n" + string.Join("\n", violations));

@@ -33,6 +33,7 @@ namespace Greed.Models.Metadata
         public abstract Version GetSinsVersion();
 
         public abstract List<Dependency> GetDependencies();
+        public abstract List<string> GetPredecessors();
         public abstract List<string> GetConflicts();
     }
 }

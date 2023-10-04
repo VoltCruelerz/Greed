@@ -1,5 +1,6 @@
 ﻿using Greed.Controls.Diff;
 using Greed.Extensions;
+using Greed.Models.Vault;
 using JsonDiffer;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -8,14 +9,16 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Text;
+using System.Text.Json;
+using static System.Text.Json.JsonSerializer;
 
 namespace Greed.Models.Json
 {
     public class JsonSource : Source
     {
-        private static readonly string MergeReplaceSuffix = ".gmr";
-        private static readonly string MergeUnionSuffix = ".gmu";
-        private static readonly string MergeConcatSuffix = ".gmc";
+        private const string MergeReplaceSuffix = ".gmr";
+        private const string MergeUnionSuffix = ".gmu";
+        private const string MergeConcatSuffix = ".gmc";
 
         private static readonly List<string> NoGoldFiles = new()
         {
@@ -26,6 +29,12 @@ namespace Greed.Models.Json
         public SourceType Type { get; set; }
         public string Mergename { get; set; }
         public string Json { get; set; }
+        public SourceGreedRules? Config { get; set; }
+
+        /// <summary>
+        /// It's possible the parent was defined by another mod.
+        /// </summary>
+        public string? ParentGreedPath { get; set; }
 
         public JsonSource(string sourcePath) : base(sourcePath)
         {
@@ -52,6 +61,34 @@ namespace Greed.Models.Json
             GreedPath = $"{ConfigurationManager.AppSettings["modDir"]!}\\greed\\{Folder}\\{Mergename}";
 
             Json = ReadJsonWithComments(SourcePath);
+
+            // Handle the greed rules
+            var jObjWithGreed = JObject.Parse(Json);
+            if (jObjWithGreed["greed"] != null)
+            {
+                // Parse the config
+                var configStr = jObjWithGreed["greed"]!.ToString();
+                Config = JsonConvert.DeserializeObject<SourceGreedRules>(configStr)!;
+
+                // Clean up the JSON to remove the greed config.
+                jObjWithGreed.Remove("greed");
+                Json = jObjWithGreed.ToString();
+
+                // Handle the rules
+                if (Config.Parent != null)
+                {
+                    /*
+                     * When loading something with a parent...
+                     * 1. Try loading self from greed
+                     * 2. Try loading parent from greed
+                     * 3. Try loading parent from gold
+                     */
+                    var extension = Path.GetExtension(Mergename);
+                    var parentFilename = Config.Parent + extension;
+                    GoldPath = $"{ConfigurationManager.AppSettings["sinsDir"]!}\\{Folder}\\{parentFilename}";
+                    ParentGreedPath = $"{ConfigurationManager.AppSettings["modDir"]!}\\greed\\{Folder}\\{parentFilename}";
+                }
+            }
         }
 
         public virtual JsonSource Merge(JsonSource other)
@@ -115,7 +152,7 @@ namespace Greed.Models.Json
 
         public DiffResult DiffFromGold()
         {
-            if (File.Exists(GoldPath))
+            if (File.Exists(GreedPath))
             {
                 var gold = new JsonSource(GoldPath);
                 var greed = gold.Clone().Merge(this);

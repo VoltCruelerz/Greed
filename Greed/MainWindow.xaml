@@ -32,7 +32,7 @@
                           MouseDoubleClick="Toggle_Click"
                           MouseUp="ModList_MouseUp"
                           MouseLeave="ModList_MouseLeave"
-                          ToolTip="Later mods overwrite earlier ones. Click to view a mod's details. Double click to toggle." DragEnter="viewModList_DragEnter" DragLeave="viewModList_DragLeave" DragOver="viewModList_DragOver" Drop="viewModList_Drop">
+                          ToolTip="Later mods overwrite earlier ones. Click to view a mod's details. Double click to toggle. Drag-and-drop a .zip or .rar to install it." DragEnter="viewModList_DragEnter" DragLeave="viewModList_DragLeave" DragOver="viewModList_DragOver" Drop="viewModList_Drop">
                     <ListView.ContextMenu>
                         <ContextMenu x:Name="CtxRight">
                         </ContextMenu>
@@ -101,14 +101,16 @@
         </TabItem>
         <TabItem x:Name="TabSettings" Header="Settings">
             <Grid>
+                <Label Content="Sins Directory" HorizontalAlignment="Left" Margin="10,2,0,0" VerticalAlignment="Top" ToolTip="The directory containing sins2.exe"/>
                 <TextBox x:Name="txtSinsDir" HorizontalAlignment="Left" Margin="131,6,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="438" TextChanged="TxtSinsDir_TextChanged" ToolTip="Autosaves if directory exists."/>
-                <Label Content="Sins Directory" HorizontalAlignment="Left" Margin="10,2,0,0" VerticalAlignment="Top"/>
-                <TextBox x:Name="txtModsDir" HorizontalAlignment="Left" Margin="131,37,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="438" TextChanged="TxtModDir_TextChanged" ToolTip="Autosaves if directory exists."/>
-                <Label Content="Mods Directory" HorizontalAlignment="Left" Margin="10,33,0,0" VerticalAlignment="Top"/>
-                <Label Content="Download Directory" HorizontalAlignment="Left" Margin="10,64,0,0" VerticalAlignment="Top"/>
-                <TextBox x:Name="txtDownloadDir" HorizontalAlignment="Left" Margin="131,68,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="438" TextChanged="TxtDownloadDir_TextChanged" ToolTip="Autosaves if directory exists."/>
-                <Label Content="Catalog Channel" HorizontalAlignment="Left" Margin="10,95,0,0" VerticalAlignment="Top"/>
-                <ComboBox x:Name="CbxChannel" HorizontalAlignment="Left" Margin="131,97,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="CbxChannel_SelectionChanged">
+                <Label Content="Mods Directory" HorizontalAlignment="Left" Margin="10,25,0,0" VerticalAlignment="Top" ToolTip="Where mods should be stored on your system. Often the same as Export Directory."/>
+                <TextBox x:Name="txtModsDir" HorizontalAlignment="Left" Margin="131,29,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="438" TextChanged="TxtModDir_TextChanged" ToolTip="Autosaves if directory exists."/>
+                <Label Content="Export Directory" HorizontalAlignment="Left" Margin="10,48,0,0" VerticalAlignment="Top" ToolTip="Where Sins II loads mods from. Often the same as Mods Directory."/>
+                <TextBox x:Name="txtExportDir" HorizontalAlignment="Left" Margin="131,52,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="438" TextChanged="TxtExportDir_TextChanged" ToolTip="Autosaves if directory exists."/>
+                <Label Content="Download Directory" HorizontalAlignment="Left" Margin="10,71,0,0" VerticalAlignment="Top" ToolTip="A directory Greed can use as a workspace for downloads."/>
+                <TextBox x:Name="txtDownloadDir" HorizontalAlignment="Left" Margin="131,75,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="438" TextChanged="TxtDownloadDir_TextChanged" ToolTip="Autosaves if directory exists."/>
+                <Label Content="Catalog Channel" HorizontalAlignment="Left" Margin="10,94,0,0" VerticalAlignment="Top" ToolTip="Unless you're a modder, leave it on Live. Unless you're me, leave it off Alpha."/>
+                <ComboBox x:Name="CbxChannel" HorizontalAlignment="Left" Margin="131,98,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="CbxChannel_SelectionChanged" Height="22" FontSize="11" VerticalContentAlignment="Center">
                     <ComboBox.Items>
                         <ComboBoxItem Content="Live"/>
                         <ComboBoxItem Content="Beta"/>
