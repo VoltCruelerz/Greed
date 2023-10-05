@@ -5,6 +5,7 @@ using System.Configuration;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Greed.Controls.Popups;
 
 namespace Greed.Models.Online
 {
@@ -43,7 +44,7 @@ namespace Greed.Models.Online
             }
             catch (Exception ex)
             {
-                window.CriticalAlertPopup("Failed to Load Online Mod Listing", ex);
+                CriticalAlertPopup.Throw("Failed to Load Online Mod Listing", ex);
             }
             return new OnlineCatalog();
         }

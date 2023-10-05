@@ -1,6 +1,7 @@
 ﻿using Greed.Models.Json;
 using System;
 using System.IO;
+using Greed.Exceptions;
 
 namespace Greed.Models.ListItem
 {
@@ -12,7 +13,7 @@ namespace Greed.Models.ListItem
 
         public string Name { get; set; }
 
-        public SourceListItem(JsonSource s, MainWindow window)
+        public SourceListItem(JsonSource s)
         {
             DeltaSymbol = "+";
             if (File.Exists(s.GoldPath))
@@ -25,7 +26,7 @@ namespace Greed.Models.ListItem
                 }
                 catch (Exception ex)
                 {
-                    window.CriticalAlertPopup("JSON Error: " + s.GoldPath, ex);
+                    throw new ModLoadException("Gold copy exists, but failed to parse JSON: " + s.GoldPath, ex);
                 }
             }
             Folder = s.Folder;

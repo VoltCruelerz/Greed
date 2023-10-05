@@ -10,6 +10,7 @@ using System.Configuration;
 using System.IO;
 using System.Text;
 using System.Text.Json;
+using Greed.Exceptions;
 using static System.Text.Json.JsonSerializer;
 
 namespace Greed.Models.Json
@@ -63,31 +64,38 @@ namespace Greed.Models.Json
             Json = ReadJsonWithComments(SourcePath);
 
             // Handle the greed rules
-            var jObjWithGreed = JObject.Parse(Json);
-            if (jObjWithGreed["greed"] != null)
+            try
             {
-                // Parse the config
-                var configStr = jObjWithGreed["greed"]!.ToString();
-                Config = JsonConvert.DeserializeObject<SourceGreedRules>(configStr)!;
-
-                // Clean up the JSON to remove the greed config.
-                jObjWithGreed.Remove("greed");
-                Json = jObjWithGreed.ToString();
-
-                // Handle the rules
-                if (Config.Parent != null)
+                var jObjWithGreed = JObject.Parse(Json);
+                if (jObjWithGreed["greed"] != null)
                 {
-                    /*
-                     * When loading something with a parent...
-                     * 1. Try loading self from greed
-                     * 2. Try loading parent from greed
-                     * 3. Try loading parent from gold
-                     */
-                    var extension = Path.GetExtension(Mergename);
-                    var parentFilename = Config.Parent + extension;
-                    GoldPath = $"{ConfigurationManager.AppSettings["sinsDir"]!}\\{Folder}\\{parentFilename}";
-                    ParentGreedPath = $"{ConfigurationManager.AppSettings["modDir"]!}\\greed\\{Folder}\\{parentFilename}";
+                    // Parse the config
+                    var configStr = jObjWithGreed["greed"]!.ToString();
+                    Config = JsonConvert.DeserializeObject<SourceGreedRules>(configStr)!;
+
+                    // Clean up the JSON to remove the greed config.
+                    jObjWithGreed.Remove("greed");
+                    Json = jObjWithGreed.ToString();
+
+                    // Handle the rules
+                    if (Config.Parent != null)
+                    {
+                        /*
+                         * When loading something with a parent...
+                         * 1. Try loading self from greed
+                         * 2. Try loading parent from greed
+                         * 3. Try loading parent from gold
+                         */
+                        var extension = Path.GetExtension(Mergename);
+                        var parentFilename = Config.Parent + extension;
+                        GoldPath = $"{ConfigurationManager.AppSettings["sinsDir"]!}\\{Folder}\\{parentFilename}";
+                        ParentGreedPath = $"{ConfigurationManager.AppSettings["modDir"]!}\\greed\\{Folder}\\{parentFilename}";
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                throw new ModExportException("Failed to parse JSON for " + sourcePath, ex);
             }
         }
 

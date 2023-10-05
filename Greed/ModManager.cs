@@ -1,4 +1,5 @@
 ﻿using Greed.Controls;
+using Greed.Controls.Popups;
 using Greed.Interfaces;
 using Greed.Models;
 using Greed.Models.EnabledMods;
@@ -20,6 +21,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using Greed.Exceptions;
 
 namespace Greed
 {
@@ -90,11 +92,12 @@ namespace Greed
                     _ = window.PrintAsync("No active mods.");
                     return;
                 }
+                int i = 0;
                 try
                 {
                     // For each greedy mod, overwrite as needed.
                     var interval = 100 / active.Count;
-                    for (int i = 0; i < active.Count; i++)
+                    for (i = 0; i < active.Count; i++)
                     {
                         var mod = active[i];
                         _ = window.PrintAsync($"[{i + 1}/{active.Count}]: Merging {mod.Meta.Name}...");
@@ -111,7 +114,10 @@ namespace Greed
                 }
                 catch (Exception ex)
                 {
-                    _ = window.PrintAsync("Error: " + ex.ToString());
+                    var cause = i < active.Count
+                        ? active[i].ToString()
+                        : "enabled_mods.json";
+                    CriticalAlertPopup.ThrowAsync("Mod Export Error", new ModExportException("Failed to export during " + cause, ex));
                     callback(false);
                 }
             }).ConfigureAwait(false);
@@ -500,7 +506,7 @@ namespace Greed
             }
             catch (Exception ex)
             {
-                window.CriticalAlertPopup("Failed to Download Mod", ex);
+                CriticalAlertPopup.Throw("Failed to Download Mod", ex);
                 await window.SetProgressAsync(0);
                 return false;
             }

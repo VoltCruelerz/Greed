@@ -1,6 +1,7 @@
 ﻿using Greed.Controls;
 using Greed.Controls.Diff;
 using Greed.Controls.Online;
+using Greed.Controls.Popups;
 using Greed.Extensions;
 using Greed.Models;
 using Greed.Models.Json;
@@ -18,10 +19,9 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
-using Greed.Extensions;
+using Greed.Exceptions;
 
 namespace Greed
 {
@@ -30,9 +30,10 @@ namespace Greed
     /// </summary>
     public partial class MainWindow : Window
     {
+        public static MainWindow? Instance { get; private set; }
         private static readonly string LogPath = Directory.GetCurrentDirectory() + "\\log.txt";
         private static readonly string LogPrevPath = Directory.GetCurrentDirectory() + "\\log_prev.txt";
-        private static readonly WarningPopup Warning = new WarningPopup();
+        private static readonly WarningPopup Warning = new();
 
         private readonly ModManager Manager = new();
         private List<Mod> Mods = new();
@@ -54,6 +55,7 @@ namespace Greed
 
         public MainWindow()
         {
+            Instance = this;
             InitializeComponent();
             SetTitle();
             ReloadCatalog();
@@ -134,7 +136,7 @@ namespace Greed
             }
             catch (Exception e)
             {
-                CriticalAlertPopup("Mod Load Error", "Unable to locate all files.\n" + e.Message + "\n" + e.StackTrace);
+                CriticalAlertPopup.Throw("Mod Load Error", new ModLoadException("Unable to load mod(s)", e));
                 viewModList.Items.Clear();
                 Tabs.SelectedItem = TabSettings;
                 return;
@@ -226,7 +228,7 @@ namespace Greed
             }
             catch (Exception ex)
             {
-                CriticalAlertPopup("Metadata Error", ex);
+                CriticalAlertPopup.Throw("Metadata Error", ex);
             }
 
             UpdateRightClickMenuOptions();
@@ -319,7 +321,7 @@ namespace Greed
             }
             catch (Exception ex)
             {
-                CriticalAlertPopup("Mod Set Error", "Unable to locate all files.\n" + ex.Message + "\n" + ex.StackTrace);
+                CriticalAlertPopup.Throw("Mod Set Error", new ModLoadException("Unable to locate all files.", ex));
                 return;
             }
             RefreshModListUI();
@@ -340,7 +342,7 @@ namespace Greed
             }
             catch (Exception ex)
             {
-                CriticalAlertPopup("Mod Set Error", "Unable to locate all files.\n" + ex.Message + "\n" + ex.StackTrace);
+                CriticalAlertPopup.Throw("Mod Set Error", new ModLoadException("Unable to locate all files.", ex));
                 return;
             }
             RefreshModListUI();
@@ -398,15 +400,11 @@ namespace Greed
                             Play();
                         }
                     }
-                    else
-                    {
-                        CriticalAlertPopup("Mod Export Error", "Unable to locate all files.\nSee log for details.");
-                    }
                 });
             }
             catch (Exception ex)
             {
-                CriticalAlertPopup("Failed to Export", ex);
+                CriticalAlertPopup.Throw("Failed to Export", ex);
             }
             finally
             {
@@ -443,19 +441,6 @@ namespace Greed
                 viewModList.SelectedItem = SelectedMod;
                 viewModList.SelectedIndex = index;
             }
-        }
-        #endregion
-
-        #region Alert
-        public void CriticalAlertPopup(string title, Exception ex)
-        {
-            CriticalAlertPopup(title, ex.Message + "\n" + ex.StackTrace);
-        }
-
-        private void CriticalAlertPopup(string title, string message)
-        {
-            _ = PrintAsync(title + "\r\n" + message, "[CRITICAL]");
-            MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Error);
         }
         #endregion
 
@@ -496,11 +481,11 @@ namespace Greed
 
                 try
                 {
-                    AllSources.ForEach(p => viewFileList.Items.Add(new SourceListItem(p, this)));
+                    AllSources.ForEach(p => viewFileList.Items.Add(new SourceListItem(p)));
                 }
                 catch (Exception ex)
                 {
-                    CriticalAlertPopup("Failed to Load Mod", ex);
+                    CriticalAlertPopup.Throw("Failed to Load Mod", ex);
                 }
             }
         }
@@ -526,7 +511,7 @@ namespace Greed
             }
             catch (Exception ex)
             {
-                CriticalAlertPopup("Failed to Load Diff", ex.Message + "\n" + ex.StackTrace);
+                CriticalAlertPopup.Throw("Failed to Load Diff", new DiffException("Failed to load file difference.", ex));
             }
         }
         #endregion
@@ -846,7 +831,7 @@ namespace Greed
 
             if (name.Contains('"') || name.Contains('\\'))
             {
-                CriticalAlertPopup("Pack Creation Error", "You cannot create a mod pack with a name containing quotes or escape characters.");
+                MessageBox.Show("Pack Creation Error", "You cannot create a mod pack with a name containing quotes or escape characters.");
                 return;
             }
 
@@ -935,7 +920,7 @@ namespace Greed
                 var modToInstall = Catalog.Mods.Find(m => m.Id == portableMod.Id);
                 if (modToInstall == null)
                 {
-                    CriticalAlertPopup("Missing Mod", $"The mod {portableMod.Id} could not be located in the online catalog.");
+                    MessageBox.Show("Missing Mod", $"The mod {portableMod.Id} could not be located in the online catalog.");
                     allSuccess = false;
                     return;
                 }

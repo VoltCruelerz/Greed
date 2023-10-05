@@ -30,6 +30,7 @@ _A mod loader for [Sins of a Solar Empire II](https://www.sinsofasolarempire2.co
         - [Merge Types](#merge-types)
             - [Greed Merge Extensions](#greed-merge-extensions)
             - [Null Removal](#null-removal)
+        - [Greed Object Schema](#greed-object-schema)
         - [Greed Compatibility](#greed-compatibility)
     - [Contributing to Greed](#contributing-to-greed)
         - [Bug Reports](#bug-reports)
@@ -193,6 +194,23 @@ In all of these cases, if you leave an object's field undefined, it will not be 
 [Example](https://github.com/VoltCruelerz/constituent-components/blob/master/entities/trader_reserve_squadron_hangar.unit_item.gmr) removing a field from an item
 
 > _**Note**: be very careful when removing elements by index that you know **_exactly_** what is there already._
+
+### Greed Object Schema
+
+Inside source files, you can have a top-level object to define additional rules, as seen [here](https://github.com/VoltCruelerz/capital-starts/blob/main/entities/vasari_rebel_battle.player.gmr).
+
+```json
+{
+    "greed": {
+        "parent": "vasari_rebel"
+    }
+}
+```
+
+| Field | Type | Description | Default Value |
+|:------|:-----|:------------|:--------------|
+| `parent` | `string` | The file name of the file you wish to inherit from. A file with a parent will prefer to initialize from the parent file instead of from its own the gold file (if one even exists). The parent can be a gold file, a file created by your mod, or a file created by another mod. It must be in the same directory with the same type. For example, the above was in a `.player` file in the `entities/` directory, so the parent file should be as well. | `null` |
+| `mutations` | `mutation[]` | _This feature is WIP and will be documented once complete._ | `[]` |
 
 ### Greed Compatibility
 

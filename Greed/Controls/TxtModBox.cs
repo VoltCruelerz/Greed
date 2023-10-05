@@ -6,6 +6,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
+using Greed.Extensions;
 
 namespace Greed.Controls
 {
@@ -50,7 +51,7 @@ namespace Greed.Controls
                     NavigateUri = new Uri(meta.Url)
                 };
                 hyper.Inlines.Add(meta.Url);
-                hyper.RequestNavigate += (sender, args) => GoToUrl(meta.Url);
+                hyper.RequestNavigate += (sender, args) => meta.Url.NavigateToUrl();
                 hyperParagraph.Inlines.Add(hyper);
                 doc.Blocks.Add(hyperParagraph);
             }
@@ -97,11 +98,6 @@ namespace Greed.Controls
             localMod?.RenderReadme(doc.Blocks);
 
             Document = doc;
-        }
-
-        private static void GoToUrl(string url)
-        {
-            Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
         }
     }
 }
