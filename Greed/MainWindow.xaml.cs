@@ -162,11 +162,11 @@ namespace Greed
             viewModList.Items.Clear();
             Mods
                 .Where(m => string.IsNullOrWhiteSpace(SearchQuery)
-                    || m.Id.Contains(SearchQuery)
-                    || m.Readme.Contains(SearchQuery)
-                    || m.Meta.Name.Contains(SearchQuery)
-                    || m.Meta.Author.Contains(SearchQuery)
-                    || m.Meta.Description.Contains(SearchQuery))
+                    || m.Id.Contains(SearchQuery, StringComparison.InvariantCultureIgnoreCase)
+                    || m.Readme.Contains(SearchQuery, StringComparison.InvariantCultureIgnoreCase)
+                    || m.Meta.Name.Contains(SearchQuery, StringComparison.InvariantCultureIgnoreCase)
+                    || m.Meta.Author.Contains(SearchQuery, StringComparison.InvariantCultureIgnoreCase)
+                    || m.Meta.Description.Contains(SearchQuery, StringComparison.InvariantCultureIgnoreCase))
                 .Where(m => !SearchActive || m.IsActive)
                 .ToList()
                 .ForEach(m => viewModList.Items.Add(new ModListItem(m, this, Catalog)));
@@ -332,8 +332,8 @@ namespace Greed
         private void ToggleAll_Click(object sender, RoutedEventArgs e)
         {
             PrintSync("ToggleAll_Click()");
-            var areAllActive = Mods.All(m => m.IsActive);
-            Mods.ForEach(m => m.SetModActivity(Mods, !areAllActive));
+            var anyAreActive = Mods.Any(m => m.IsActive);
+            Mods.ForEach(m => m.SetModActivity(Mods, !anyAreActive, anyAreActive));
 
             string modDir = ConfigurationManager.AppSettings["modDir"]!;
             try

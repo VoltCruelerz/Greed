@@ -90,6 +90,7 @@ namespace Greed
                 if (!active.Any())
                 {
                     _ = window.PrintAsync("No active mods.");
+                    DeactivateGreed();
                     return;
                 }
                 int i = 0;
@@ -293,6 +294,10 @@ namespace Greed
         /// </summary>
         private static void ActivateGreed()
         {
+            if (!Directory.Exists(ConfigurationManager.AppSettings["exportDir"]))
+            {
+                Directory.CreateDirectory(ConfigurationManager.AppSettings["exportDir"]!);
+            }
             // If enabled path doesn't exist yet, make it.
             var enabledPath = ConfigurationManager.AppSettings["exportDir"]! + "\\enabled_mods.json";
             EnabledMods enabled;
@@ -323,6 +328,24 @@ namespace Greed
                 };
             }
             File.WriteAllText(enabledPath, JsonConvert.SerializeObject(enabled));
+        }
+
+        /// <summary>
+        /// Remove Greed from the active mods list.
+        /// </summary>
+        private static void DeactivateGreed()
+        {
+            // If enabled path doesn't exist yet, make it.
+            var greedPath = ConfigurationManager.AppSettings["exportDir"]! + "\\greed";
+            var enabledPath = ConfigurationManager.AppSettings["exportDir"]! + "\\enabled_mods.json";
+
+            if (File.Exists(enabledPath))
+            {
+                var enabled = JsonConvert.DeserializeObject<EnabledMods>(File.ReadAllText(enabledPath))!;
+                enabled.ModKeys = enabled.ModKeys.Where(m => m.Name != "greed").ToList();
+                Directory.Delete(greedPath, true);
+                File.WriteAllText(enabledPath, JsonConvert.SerializeObject(enabled));
+            }
         }
 
         /// <summary>
@@ -579,63 +602,72 @@ namespace Greed
 
         public static async Task InstallMod(MainWindow window, string archivePath, string modId = "")
         {
-            var extension = Path.GetExtension(archivePath);
-
-            // Extract the mod.
-            var extractPath = archivePath.Split(extension)[0];
-            if (Directory.Exists(extractPath))
-            {
-                Directory.Delete(extractPath, true);
-            }
-            await window.PrintAsync($"Extracting to {extractPath}...");
             try
             {
-                ExtractArchive(archivePath, extractPath);
-            } catch (Exception ex) {
-                await window.PrintAsync(ex);
-                await window.SetProgressAsync(0.0);
-                return;
+                var extension = Path.GetExtension(archivePath);
+
+                // Extract the mod.
+                var extractPath = archivePath.Split(extension)[0];
+                if (Directory.Exists(extractPath))
+                {
+                    Directory.Delete(extractPath, true);
+                }
+                await window.PrintAsync($"Extracting to {extractPath}...");
+                try
+                {
+                    ExtractArchive(archivePath, extractPath);
+                }
+                catch (Exception ex)
+                {
+                    await window.PrintAsync(ex);
+                    await window.SetProgressAsync(0.0);
+                    return;
+                }
+                await window.SetProgressAsync(0.8);
+                await window.PrintAsync($"Extract complete.");
+
+                // Check if the mod is shallow or nested, and get the folder we'll want to copy.
+                var isShallow = File.Exists(extractPath + "\\greed.json");
+                var copyablePath = isShallow
+                    ? extractPath
+                    : Directory.GetDirectories(extractPath)[0];
+
+                // Check that greed.json actually exists. The mod might not be greedy, after all.
+                if (string.IsNullOrEmpty(modId))
+                {
+                    var hypotheticalId = copyablePath.Split("\\")[^1];
+                    await window.PrintAsync("Mod ID of auto-imported mod inferred as " + hypotheticalId, "[WARN]");
+                    modId = hypotheticalId;
+                }
+
+
+                // Shift to the mod directory
+                var modPath = ConfigurationManager.AppSettings["modDir"]! + "\\" + modId;
+                if (Directory.Exists(modPath))
+                {
+                    Directory.Delete(modPath, true);
+                    await window.PrintAsync($"Deleted old install to make way for new one.");
+                }
+                if (!Directory.Exists(copyablePath))
+                {
+                    await window.PrintAsync($"Folder doesn't exist yet!");
+                }
+                await window.SetProgressAsync(0.8);
+                await window.PrintAsync($"Starting move from {copyablePath}...");
+                await MoveWithRetries(window, copyablePath, modPath);
+                await window.PrintAsync($"Move complete.");
+                await window.PrintAsync($"Install complete.");
+                await window.SetProgressAsync(0.9);
+
+                // Cleanup
+                if (!isShallow)
+                {
+                    Directory.Delete(extractPath, true);
+                }
             }
-            await window.SetProgressAsync(0.8);
-            await window.PrintAsync($"Extract complete.");
-
-            // Check if the mod is shallow or nested, and get the folder we'll want to copy.
-            var isShallow = File.Exists(extractPath + "\\greed.json");
-            var copyablePath = isShallow
-                ? extractPath
-                : Directory.GetDirectories(extractPath)[0];
-
-            // Check that greed.json actually exists. The mod might not be greedy, after all.
-            if (string.IsNullOrEmpty(modId))
+            catch (Exception ex)
             {
-                var hypotheticalId = copyablePath.Split("\\")[^1];
-                await window.PrintAsync("Mod ID of auto-imported mod inferred as " + hypotheticalId, "[WARN]");
-                modId = hypotheticalId;
-            }
-
-
-            // Shift to the mod directory
-            var modPath = ConfigurationManager.AppSettings["modDir"]! + "\\" + modId;
-            if (Directory.Exists(modPath))
-            {
-                Directory.Delete(modPath, true);
-                await window.PrintAsync($"Deleted old install to make way for new one.");
-            }
-            if (!Directory.Exists(copyablePath))
-            {
-                await window.PrintAsync($"Folder doesn't exist yet!");
-            }
-            await window.SetProgressAsync(0.8);
-            await window.PrintAsync($"Starting move from {copyablePath}...");
-            await MoveWithRetries(window, copyablePath, modPath);
-            await window.PrintAsync($"Move complete.");
-            await window.PrintAsync($"Install complete.");
-            await window.SetProgressAsync(0.9);
-
-            // Cleanup
-            if (!isShallow)
-            {
-                Directory.Delete(extractPath, true);
+                CriticalAlertPopup.Throw("Failed to Install Mod", ex);
             }
         }
 
@@ -673,15 +705,23 @@ namespace Greed
         /// <param name="dest"></param>
         /// <param name="maxRetries"></param>
         /// <exception cref="InvalidOperationException"></exception>
-        private static async Task MoveWithRetries(MainWindow window, string src, string dest, int maxRetries = 60)
+        private static async Task MoveWithRetries(MainWindow window, string src, string dest, int maxRetries = 5)
         {
+            var needToSwitchDrives = src.Split(":")[0] != dest.Split(":")[0];
             for (var retry = 0; retry <= maxRetries; retry++)
             {
                 if (Directory.Exists(src))
                 {
                     try
                     {
-                        Directory.Move(src, dest);
+                        if (needToSwitchDrives)
+                        {
+                            Extensions.Extensions.CopyDirectory(src, dest, true);
+                        }
+                        else
+                        {
+                            Directory.Move(src, dest);
+                        }
                         return;
                     }
                     catch (Exception ex)
@@ -689,7 +729,11 @@ namespace Greed
                         await window.PrintAsync(ex, "[WARN]");
                         //Thread.Sleep(retry * 100);
                         await Task.Delay(Math.Min(retry * 100, 1000)).ConfigureAwait(false);
-                        await window.PrintAsync($"Retrying move due to ZipFile not being thread safe (r={retry})");
+                        await window.PrintAsync($"Retrying move due to ZipFile not being thread safe (r={retry}/{maxRetries})");
+                        if (retry == maxRetries)
+                        {
+                            throw;
+                        }
                     }
                 }
                 else
