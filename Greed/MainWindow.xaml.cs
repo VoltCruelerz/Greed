@@ -496,7 +496,7 @@ namespace Greed
                 return;
             }
             var item = (SourceListItem)e.AddedItems[0]!;
-            SelectedSource = AllSources.Find(p => p.Mergename == item.Name && p.Folder == item.Folder);
+            SelectedSource = AllSources.Find(p => p.Filename == item.Filename && p.Folder == item.Folder);
             PrintSync("Selected " + SelectedSource?.Mergename);
             cmdDiff.IsEnabled = true;
         }
@@ -506,7 +506,7 @@ namespace Greed
             PrintSync("Diff_Click()");
             try
             {
-                var diffPopup = new DiffWindow(SelectedSource!);
+                var diffPopup = new DiffWindow(SelectedSource!, Mods.Where(m => m.IsActive).ToList());
                 diffPopup.ShowDialog();
             }
             catch (Exception ex)

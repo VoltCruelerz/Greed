@@ -12,14 +12,16 @@ using System.Text;
 using System.Text.Json;
 using Greed.Exceptions;
 using static System.Text.Json.JsonSerializer;
+using System.Linq;
+using System.Diagnostics;
 
 namespace Greed.Models.Json
 {
     public class JsonSource : Source
     {
-        private const string MergeReplaceSuffix = ".gmr";
-        private const string MergeUnionSuffix = ".gmu";
-        private const string MergeConcatSuffix = ".gmc";
+        private const string MergeReplaceSuffix = "gmr";
+        private const string MergeUnionSuffix = "gmu";
+        private const string MergeConcatSuffix = "gmc";
 
         private static readonly List<string> NoGoldFiles = new()
         {
@@ -30,7 +32,7 @@ namespace Greed.Models.Json
         public SourceType Type { get; set; }
         public string Mergename { get; set; }
         public string Json { get; set; }
-        public SourceGreedRules? Config { get; set; }
+        public SourceGreedRules? GreedRules { get; set; }
 
         /// <summary>
         /// It's possible the parent was defined by another mod.
@@ -40,24 +42,12 @@ namespace Greed.Models.Json
         public JsonSource(string sourcePath) : base(sourcePath)
         {
             Mergename = Filename;
-            Type = SourceType.Overwrite;
+            Type = GetSourceType(Path.GetExtension(Filename));
 
-            if (Mergename.EndsWith(MergeReplaceSuffix))
+            if (Type != SourceType.Overwrite)
             {
-                Mergename = Mergename[0..(Filename.Length - MergeReplaceSuffix.Length)];
-                Type = SourceType.MergeReplace;
+                Mergename = Mergename[0..(Filename.Length - 4)];
             }
-            else if (Mergename.EndsWith(MergeUnionSuffix))
-            {
-                Mergename = Mergename[0..(Filename.Length - MergeUnionSuffix.Length)];
-                Type = SourceType.MergeUnion;
-            }
-            else if (Mergename.EndsWith(MergeConcatSuffix))
-            {
-                Mergename = Mergename[0..(Filename.Length - MergeConcatSuffix.Length)];
-                Type = SourceType.MergeConcat;
-            }
-
             GoldPath = $"{ConfigurationManager.AppSettings["sinsDir"]!}\\{Folder}\\{Mergename}";
             GreedPath = $"{ConfigurationManager.AppSettings["modDir"]!}\\greed\\{Folder}\\{Mergename}";
 
@@ -71,14 +61,14 @@ namespace Greed.Models.Json
                 {
                     // Parse the config
                     var configStr = jObjWithGreed["greed"]!.ToString();
-                    Config = JsonConvert.DeserializeObject<SourceGreedRules>(configStr)!;
+                    GreedRules = JsonConvert.DeserializeObject<SourceGreedRules>(configStr)!;
 
                     // Clean up the JSON to remove the greed config.
                     jObjWithGreed.Remove("greed");
                     Json = jObjWithGreed.ToString();
 
                     // Handle the rules
-                    if (Config.Parent != null)
+                    if (GreedRules.Parent != null)
                     {
                         /*
                          * When loading something with a parent...
@@ -87,9 +77,19 @@ namespace Greed.Models.Json
                          * 3. Try loading parent from gold
                          */
                         var extension = Path.GetExtension(Mergename);
-                        var parentFilename = Config.Parent + extension;
+                        var parentFilename = GreedRules.Parent + extension;
                         GoldPath = $"{ConfigurationManager.AppSettings["sinsDir"]!}\\{Folder}\\{parentFilename}";
                         ParentGreedPath = $"{ConfigurationManager.AppSettings["modDir"]!}\\greed\\{Folder}\\{parentFilename}";
+                    }
+                    if (GreedRules.Alias != null)
+                    {
+                        Mergename = GreedRules.Alias;
+                        GoldPath = $"{ConfigurationManager.AppSettings["sinsDir"]!}\\{Folder}\\{Mergename}";
+                        GreedPath = $"{ConfigurationManager.AppSettings["modDir"]!}\\greed\\{Folder}\\{Mergename}";
+                    }
+                    if (GreedRules.MergeMode != null)
+                    {
+                        Type = GetSourceType(GreedRules.MergeMode);
                     }
                 }
             }
@@ -97,6 +97,18 @@ namespace Greed.Models.Json
             {
                 throw new ModExportException("Failed to parse JSON for " + sourcePath, ex);
             }
+        }
+
+        private SourceType GetSourceType(string type)
+        {
+            type = type.Replace(".", "");
+            return type switch
+            {
+                MergeReplaceSuffix => SourceType.MergeReplace,
+                MergeUnionSuffix => SourceType.MergeUnion,
+                MergeConcatSuffix => SourceType.MergeConcat,
+                _ => SourceType.Overwrite,
+            };
         }
 
         public virtual JsonSource Merge(JsonSource other)
@@ -158,7 +170,7 @@ namespace Greed.Models.Json
             return new DiffResult(Gold.Json.JsonFormat(), Greedy.Json.JsonFormat(), diff);
         }
 
-        public DiffResult DiffFromGold()
+        public DiffResult DiffFromGold(List<Mod> active)
         {
             if (File.Exists(GreedPath))
             {
@@ -309,6 +321,31 @@ namespace Greed.Models.Json
             sb.Append(str[^1]);
 
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// Folder -> Mergename -> Export Order -> Filename
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public int CompareTo(JsonSource other)
+        {
+            // Folder
+            var diff = Folder.CompareTo(other.Folder);
+            if (diff != 0) return diff;
+
+            // Merge
+            diff = Mergename.CompareTo(other.Mergename);
+            if (diff != 0) return diff;
+
+            // Export Order
+            var order = GreedRules?.ExportOrder ?? 0;
+            var otherOrder = other.GreedRules?.ExportOrder ?? 0;
+            diff = order.CompareTo(otherOrder);
+            if (diff != 0) return diff;
+
+            // Filename
+            return Filename.CompareTo(other.Filename);
         }
     }
 }

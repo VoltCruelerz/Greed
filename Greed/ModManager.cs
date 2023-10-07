@@ -102,7 +102,7 @@ namespace Greed
                     {
                         var mod = active[i];
                         _ = window.PrintAsync($"[{i + 1}/{active.Count}]: Merging {mod.Meta.Name}...");
-                        mod.Export();
+                        mod.Export(active);
                         pgbProgress.Dispatcher.Invoke(() =>
                         {
                             pgbProgress.Value = 100 * (i + 1) / active.Count;
