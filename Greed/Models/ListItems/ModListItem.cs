@@ -3,7 +3,6 @@ using Greed.Models.Metadata;
 using Greed.Models.Online;
 using System;
 using System.Linq;
-using System.Windows.Controls;
 
 namespace Greed.Models.ListItem
 {

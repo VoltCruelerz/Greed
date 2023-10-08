@@ -1,10 +1,10 @@
-﻿using Greed.Models.Json;
+﻿using Greed.Models;
+using Greed.Models.Json;
 using System;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
-using Greed.Models;
 
 namespace Greed.Controls.Diff
 {
@@ -19,14 +19,14 @@ namespace Greed.Controls.Diff
         private readonly SolidColorBrush Mutation = new(Colors.LightYellow);
         private readonly SolidColorBrush Normal = new(Colors.White);
 
-        public DiffWindow(JsonSource s, System.Collections.Generic.List<Mod> active)
+        public DiffWindow(JsonSource s)
         {
             Debug.WriteLine("DiffWindow()");
             Source = s;
             InitializeComponent();
             this.Title = Source.SourcePath;
 
-            var diff = Source.DiffFromGold(active);
+            var diff = Source.DiffFromGold();
 
             txtGold.Document = new FlowDocument(new Paragraph(new Run(diff.Gold)));
             txtGreedy.Document = new FlowDocument(new Paragraph(new Run(diff.Greedy)));

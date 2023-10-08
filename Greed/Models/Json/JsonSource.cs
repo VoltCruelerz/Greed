@@ -1,6 +1,6 @@
 ﻿using Greed.Controls.Diff;
+using Greed.Exceptions;
 using Greed.Extensions;
-using Greed.Models.Vault;
 using JsonDiffer;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -9,11 +9,6 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Text;
-using System.Text.Json;
-using Greed.Exceptions;
-using static System.Text.Json.JsonSerializer;
-using System.Linq;
-using System.Diagnostics;
 
 namespace Greed.Models.Json
 {
@@ -170,7 +165,7 @@ namespace Greed.Models.Json
             return new DiffResult(Gold.Json.JsonFormat(), Greedy.Json.JsonFormat(), diff);
         }
 
-        public DiffResult DiffFromGold(List<Mod> active)
+        public DiffResult DiffFromGold()
         {
             if (File.Exists(GreedPath))
             {

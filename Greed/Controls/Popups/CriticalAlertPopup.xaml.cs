@@ -1,13 +1,8 @@
 ﻿using Greed.Extensions;
-using Greed.Models.Json;
 using System;
 using System.Diagnostics;
 using System.Media;
 using System.Windows;
-using System.Windows.Documents;
-using System.Windows.Forms;
-using System.Windows.Media;
-using System.Threading.Tasks;
 
 namespace Greed.Controls.Popups
 {
@@ -64,7 +59,7 @@ namespace Greed.Controls.Popups
             return str;
         }
 
-        public static void Throw(string title,  Exception ex)
+        public static void Throw(string title, Exception ex)
         {
             var str = ParseException(ex);
             new CriticalAlertPopup(title, str, str.Contains("Newtonsoft.Json")).Show();

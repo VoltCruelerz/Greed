@@ -2,6 +2,7 @@
 using Greed.Controls.Diff;
 using Greed.Controls.Online;
 using Greed.Controls.Popups;
+using Greed.Exceptions;
 using Greed.Extensions;
 using Greed.Models;
 using Greed.Models.Json;
@@ -21,7 +22,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
-using Greed.Exceptions;
 
 namespace Greed
 {
@@ -34,9 +34,6 @@ namespace Greed
         private static readonly string LogPath = Directory.GetCurrentDirectory() + "\\log.txt";
         private static readonly string LogPrevPath = Directory.GetCurrentDirectory() + "\\log_prev.txt";
         private static readonly WarningPopup Warning = new();
-        private static readonly Brush Back0 = new SolidColorBrush(Color.FromRgb(230, 230, 230));
-        private static readonly Brush Back1 = new SolidColorBrush(Color.FromRgb(255, 255, 255));
-        private static readonly Brush BackSelected = new SolidColorBrush(Color.FromRgb(200, 200, 255));
 
 
         private readonly ModManager Manager = new();
@@ -322,7 +319,8 @@ namespace Greed
 
                 // We *are* actually reordering now.
                 Manager.MoveMod(Vault, Mods, DragMod, destIndex);
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 CriticalAlertPopup.Throw("Failed to reorder mod list.", ex);
             }
@@ -530,7 +528,7 @@ namespace Greed
 
                 try
                 {
-                    for (var i = 0; i <  AllSources.Count; i++)
+                    for (var i = 0; i < AllSources.Count; i++)
                     {
                         viewFileList.Items.Add(new SourceListItem(AllSources[i], i % 2 == 0));
                     }
@@ -558,7 +556,7 @@ namespace Greed
             PrintSync("Diff_Click()");
             try
             {
-                var diffPopup = new DiffWindow(SelectedSource!, Mods.Where(m => m.IsActive).ToList());
+                var diffPopup = new DiffWindow(SelectedSource!);
                 diffPopup.ShowDialog();
             }
             catch (Exception ex)

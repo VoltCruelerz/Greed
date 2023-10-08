@@ -1,5 +1,6 @@
 ﻿using Greed.Controls;
 using Greed.Controls.Popups;
+using Greed.Exceptions;
 using Greed.Interfaces;
 using Greed.Models;
 using Greed.Models.EnabledMods;
@@ -17,11 +18,9 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using Greed.Exceptions;
 
 namespace Greed
 {

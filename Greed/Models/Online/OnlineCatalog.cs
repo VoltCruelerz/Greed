@@ -1,11 +1,11 @@
-﻿using Newtonsoft.Json;
+﻿using Greed.Controls.Popups;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Greed.Controls.Popups;
 
 namespace Greed.Models.Online
 {

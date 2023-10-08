@@ -1,12 +1,11 @@
-﻿using Greed.Models;
+﻿using Greed.Extensions;
+using Greed.Models;
 using Greed.Models.Metadata;
 using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
-using Greed.Extensions;
 
 namespace Greed.Controls
 {

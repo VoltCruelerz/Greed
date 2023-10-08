@@ -1,4 +1,5 @@
-﻿using Greed.Interfaces;
+﻿using Greed.Exceptions;
+using Greed.Interfaces;
 using Greed.Models.Json;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -13,8 +14,6 @@ using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
 using FontFamily = System.Windows.Media.FontFamily;
-using Greed.Exceptions;
-using SharpCompress.Compressors.Xz;
 
 namespace Greed.Models
 {
@@ -133,7 +132,8 @@ namespace Greed.Models
                 Scenarios = ImportFolder(subdirs, path, "scenarios");
                 Meshes = ImportFolder(subdirs, path, "meshes");
                 Textures = ImportFolder(subdirs, path, "textures");
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 throw new ModLoadException("Failed to load mod at " + path, ex);
             }
@@ -280,8 +280,8 @@ namespace Greed.Models
         {
             var sb = new StringBuilder();
             sb.AppendLine(Id);
-            Entities.ForEach(p => sb.AppendLine("Entity " + p.DiffFromGold(active)));
-            LocalizedTexts.ForEach(p => sb.AppendLine("Localized Text " + p.DiffFromGold(active)));
+            Entities.ForEach(p => sb.AppendLine("Entity " + p.DiffFromGold()));
+            LocalizedTexts.ForEach(p => sb.AppendLine("Localized Text " + p.DiffFromGold()));
 
             return sb.ToString();
         }
