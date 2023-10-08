@@ -271,7 +271,7 @@ namespace Greed
             {
                 var oldIndex = mods.IndexOf(mover);
                 mods.RemoveAt(oldIndex);
-                mods.Insert(Math.Clamp(destination - movedDescendentCount - movedSuccessorCount, 0, mods.Count - 1), mover);
+                mods.Insert(Math.Clamp(destination - movedDescendentCount - movedSuccessorCount, 0, mods.Count), mover);
                 Debug.WriteLine($"- Moved {mover} to {destination}");
             }
             if (movePredecessors)
