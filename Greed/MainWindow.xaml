@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Greed"
         xmlns:localControls="clr-namespace:Greed.Controls"
+        xmlns:localList="clr-namespace:Greed.Models.ListItem"
         mc:Ignorable="d"
         KeyDown="Window_KeyDown"
         Title="Greed Mod Loader" Height="780" Width="1243" Icon="/icon.png" Background="#FFEDEDED" WindowStyle="ThreeDBorderWindow">
@@ -28,24 +29,44 @@
                 </Grid.ColumnDefinitions>
                 <ListView x:Name="viewModList" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="10,64,11,10"
                           AllowDrop="True"
-                          SelectionChanged="ModList_SelectionChanged"
                           MouseDoubleClick="Toggle_Click"
+                          PreviewMouseLeftButtonDown="ModList_MousePreview"
+                          SelectionChanged="ModList_SelectionChanged"
                           MouseUp="ModList_MouseUp"
                           MouseLeave="ModList_MouseLeave"
-                          ToolTip="Later mods overwrite earlier ones. Click to view a mod's details. Double click to toggle. Drag-and-drop a .zip or .rar to install it." DragEnter="viewModList_DragEnter" DragLeave="viewModList_DragLeave" DragOver="viewModList_DragOver" Drop="viewModList_Drop">
+                          ToolTip="Later mods overwrite earlier ones. Click to view a mod's details. Double click to toggle. Drag-and-drop a .zip or .rar to install it."
+                          DragEnter="viewModList_DragEnter"
+                          DragLeave="viewModList_DragLeave"
+                          DragOver="viewModList_DragOver"
+                          Drop="viewModList_Drop"
+                        >
                     <ListView.ContextMenu>
                         <ContextMenu x:Name="CtxRight">
                         </ContextMenu>
                     </ListView.ContextMenu>
                     <ListView.View>
                         <GridView x:Name="grdView">
-                            <GridViewColumn Header="" Width="30" DisplayMemberBinding="{Binding Active}" />
-                            <GridViewColumn Header="Mod Name" Width="160" DisplayMemberBinding="{Binding Name}" />
-                            <GridViewColumn Header="Version" Width="60" DisplayMemberBinding="{Binding Version}" />
-                            <GridViewColumn Header="Greed" Width="60" DisplayMemberBinding="{Binding GreedVersion}" />
-                            <GridViewColumn Header="Sins" Width="60" DisplayMemberBinding="{Binding SinsVersion}" />
+                            <GridViewColumn Header="" Width="NaN" DisplayMemberBinding="{Binding Active}" />
+                            <GridViewColumn Header="Mod Name" Width="NaN" DisplayMemberBinding="{Binding Displayname}" />
+                            <GridViewColumn Header="Version" Width="NaN" DisplayMemberBinding="{Binding Version}" />
+                            <GridViewColumn Header="Greed" Width="NaN" DisplayMemberBinding="{Binding GreedVersion}" />
+                            <GridViewColumn Header="Sins" Width="NaN" DisplayMemberBinding="{Binding SinsVersion}" />
                         </GridView>
                     </ListView.View>
+                    <ListView.Resources>
+                        <Style TargetType="{x:Type ListViewItem}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsEven}" Value="True">
+                                    <Setter Property="Background" Value="LightGray" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                    <Setter Property="Background" Value="Gold" />
+                                    <Setter Property="Foreground" Value="Black" />
+                                    <Setter Property="FontWeight" Value="Bold" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ListView.Resources>
                 </ListView>
                 <localControls:TxtModBox x:Name="TxtLocalModInfo" AutomationProperties.HelpText="Select a mod to see its details." IsReadOnly="True" Grid.Column="1" Margin="10,33,10,35" Background="#FFBDBDBD">
                     <FlowDocument>
@@ -58,12 +79,21 @@
                 <ListView x:Name="viewFileList" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="10,33,10,35" MouseDoubleClick="Diff_Click" Grid.Column="4" SelectionChanged="FileList_SelectionChanged">
                     <ListView.View>
                         <GridView x:Name="grdView1">
-                            <GridViewColumn Header="" Width="20" DisplayMemberBinding="{Binding DeltaSymbol}" />
-                            <GridViewColumn Header="Folder" Width="90" DisplayMemberBinding="{Binding Folder}" />
-                            <GridViewColumn Header="Merge Name" Width="290" DisplayMemberBinding="{Binding Mergename}" />
-                            <GridViewColumn Header="File Name" Width="290" DisplayMemberBinding="{Binding ShortFilename}" />
+                            <GridViewColumn Header="" Width="Auto" DisplayMemberBinding="{Binding DeltaSymbol}" />
+                            <GridViewColumn Header="Folder" Width="Auto" DisplayMemberBinding="{Binding Folder}" />
+                            <GridViewColumn Header="Merge Name" Width="Auto" DisplayMemberBinding="{Binding Mergename}" />
+                            <GridViewColumn Header="File Name" Width="Auto" DisplayMemberBinding="{Binding ShortFilename}" />
                         </GridView>
                     </ListView.View>
+                    <ListView.Resources>
+                        <Style TargetType="{x:Type ListViewItem}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsEven}" Value="True">
+                                    <Setter Property="Background" Value="LightGray" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ListView.Resources>
                 </ListView>
                 <Button x:Name="cmdDiff" Content="View Difference Report" Margin="10,0,0,10" VerticalAlignment="Bottom" Click="Diff_Click" IsEnabled="False" HorizontalAlignment="Left" Width="133" Height="20" Grid.Column="2" ToolTip="Display a difference report between the gold copy and the execution product."/>
                 <Label Content="JSON Files" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="26" Width="265" Grid.Column="2"/>

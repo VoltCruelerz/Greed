@@ -17,8 +17,11 @@ namespace Greed.Models.ListItem
 
         public string Mergename { get; set; }
 
-        public SourceListItem(JsonSource s)
+        public bool IsEven { get; set; }
+
+        public SourceListItem(JsonSource s, bool isEven)
         {
+            IsEven = isEven;
             DeltaSymbol = "+";
             if (File.Exists(s.GoldPath))
             {
@@ -37,6 +40,7 @@ namespace Greed.Models.ListItem
             Filename = s.Filename;
             Mergename = s.Mergename;
             ShortFilename = s.Filename.Replace(Mergename, "*");
+            IsEven = isEven;
         }
     }
 }

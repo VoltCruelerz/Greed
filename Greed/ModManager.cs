@@ -56,11 +56,23 @@ namespace Greed
             var modDirs = Directory.GetDirectories(modDir);
 
             var modIndex = 0;
-            return modDirs
+            var mods = modDirs
                 .Select(d => new Mod(vault, this, Warning, vault.Active, d, ref modIndex))
                 .Where(m => m.IsGreedy)
-                .OrderBy(m => m.LoadOrder)
                 .ToList();
+            mods.Sort((a, b) =>
+            {
+                var diff = a.LoadOrder.CompareTo(b.LoadOrder);
+                if (diff != 0) return diff;
+
+                var aLegal = a.Meta.IsLegalVersion().Any();
+                var bLegal = b.Meta.IsLegalVersion().Any();
+                if (aLegal && !bLegal) return 1;
+                if (!aLegal && bLegal) return -1;
+
+                return a.Meta.Name.CompareTo(b.Meta.Name);
+            });
+            return mods;
         }
 
         /// <summary>
@@ -260,7 +272,7 @@ namespace Greed
             {
                 var oldIndex = mods.IndexOf(mover);
                 mods.RemoveAt(oldIndex);
-                mods.Insert(destination - movedDescendentCount - movedSuccessorCount, mover);
+                mods.Insert(Math.Clamp(destination - movedDescendentCount - movedSuccessorCount, 0, mods.Count - 1), mover);
                 Debug.WriteLine($"- Moved {mover} to {destination}");
             }
             if (movePredecessors)
@@ -362,6 +374,8 @@ namespace Greed
         private static bool CanMove(List<Mod> mods, Mod mover, int destination, out List<Mod> dependencyViolations, out List<Mod> dependentViolations, out List<Mod> predViolations, out List<Mod> succViolations)
         {
             var oldIndex = mods.IndexOf(mover);
+            var isLower = oldIndex < destination;
+            var isHoist = oldIndex > destination;
 
             // Dependencies
             var dependencies = mover.Meta.GetDependencyMods(mods);
@@ -369,7 +383,7 @@ namespace Greed
             dependencyViolations = !dependencies.Any()
                 ? new List<Mod>()
                 : dependencies
-                    .Where(d => d.LoadOrder >= destination)
+                    .Where(s => isHoist ? s.LoadOrder >= destination : s.LoadOrder > destination)
                     .ToList();
 
             var dependents = mods.Where(m => m.HasAsDirectDependency(mover));
@@ -377,7 +391,7 @@ namespace Greed
             dependentViolations = !dependents.Any()
                 ? new List<Mod>()
                 : dependents
-                    .Where(d => d.LoadOrder <= destination)
+                    .Where(s => isLower ? s.LoadOrder <= destination : s.LoadOrder < destination)
                     .ToList();
 
             // Predecessors
@@ -386,7 +400,7 @@ namespace Greed
             predViolations = !preds.Any()
                 ? new List<Mod>()
                 : preds
-                    .Where(p => p.LoadOrder >= destination)
+                    .Where(s => isHoist ? s.LoadOrder >= destination : s.LoadOrder > destination)
                     .ToList();
 
             var successors = mods.Where(m => m.HasAsDirectPredecessor(mover));
@@ -394,7 +408,7 @@ namespace Greed
             succViolations = !successors.Any()
                 ? new List<Mod>()
                 : successors
-                    .Where(s => s.LoadOrder <= destination)
+                    .Where(s => isLower ? s.LoadOrder <= destination : s.LoadOrder < destination)
                     .ToList();
 
             return !dependencyViolations.Any() && !dependentViolations.Any()

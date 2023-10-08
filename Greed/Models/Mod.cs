@@ -14,6 +14,7 @@ using System.Windows.Documents;
 using System.Windows.Media;
 using FontFamily = System.Windows.Media.FontFamily;
 using Greed.Exceptions;
+using SharpCompress.Compressors.Xz;
 
 namespace Greed.Models
 {
@@ -448,7 +449,7 @@ namespace Greed.Models
 
         public void SetModActivity(List<Mod> allMods, bool willBeActive)
         {
-            var activeMods = allMods.Where(mod => mod.IsActive);
+            var activeMods = allMods.Where(mod => mod.IsActive).ToList();
 
             if (!willBeActive)
             {
@@ -511,6 +512,19 @@ namespace Greed.Models
                     // Abort.
                     return;
                 }
+            }
+
+            var preds = Meta.GetPredecessors().ToHashSet();
+
+            // Make sure we load after our predecessors and dependencies.
+
+            var lowestLegalIndex = Math.Min(
+                Meta.GetDependencyMods(allMods).Select(d => d.LoadOrder).DefaultIfEmpty(activeMods.Count - 1).Min(),
+                Meta.GetPredecessorMods(allMods).Select(d => d.LoadOrder).DefaultIfEmpty(activeMods.Count - 1).Min()
+            );
+            if (LoadOrder < lowestLegalIndex)
+            {
+                Manager.MoveMod(Vault, allMods, this, lowestLegalIndex);
             }
 
             // If we're turning a mod on, we need to check for conflicts in both directions because one mod might not know about the other.
