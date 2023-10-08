@@ -22,15 +22,29 @@
             </ListView.ContextMenu>
             <ListView.View>
                 <GridView x:Name="grdView">
-                    <GridViewColumn Header="" Width="30" DisplayMemberBinding="{Binding IsInstalled}" />
-                    <GridViewColumn Header="Mod Name" Width="160" DisplayMemberBinding="{Binding Name}" />
-                    <GridViewColumn Header="Author" Width="100" DisplayMemberBinding="{Binding Author}" />
-                    <GridViewColumn Header="Version" Width="60" DisplayMemberBinding="{Binding Version}" />
-                    <GridViewColumn Header="Greed" Width="60" DisplayMemberBinding="{Binding GreedVersion}" />
-                    <GridViewColumn Header="Sins" Width="60" DisplayMemberBinding="{Binding SinsVersion}" />
-                    <GridViewColumn Header="Modified" Width="60" DisplayMemberBinding="{Binding LastUpdated}" />
+                    <GridViewColumn Header="" Width="Auto" DisplayMemberBinding="{Binding IsInstalled}" />
+                    <GridViewColumn Header="Mod Name" Width="Auto" DisplayMemberBinding="{Binding Name}" />
+                    <GridViewColumn Header="Author" Width="Auto" DisplayMemberBinding="{Binding Author}" />
+                    <GridViewColumn Header="Version" Width="Auto" DisplayMemberBinding="{Binding Version}" />
+                    <GridViewColumn Header="Greed" Width="Auto" DisplayMemberBinding="{Binding GreedVersion}" />
+                    <GridViewColumn Header="Sins" Width="Auto" DisplayMemberBinding="{Binding SinsVersion}" />
+                    <GridViewColumn Header="Modified" Width="Auto" DisplayMemberBinding="{Binding LastUpdated}" />
                 </GridView>
             </ListView.View>
+            <ListView.Resources>
+                <Style TargetType="{x:Type ListViewItem}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsEven}" Value="True">
+                            <Setter Property="Background" Value="LightGray" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                            <Setter Property="Background" Value="Gold" />
+                            <Setter Property="Foreground" Value="Black" />
+                            <Setter Property="FontWeight" Value="Bold" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ListView.Resources>
         </ListView>
         <localControls:TxtModBox x:Name="TxtOnlineInfo" AutomationProperties.HelpText="Select a mod to see its details." IsReadOnly="True" Grid.Column="1" Margin="4,5,5,26" Background="#FFBDBDBD">
             <FlowDocument>

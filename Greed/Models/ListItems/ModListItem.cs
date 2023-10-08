@@ -12,7 +12,7 @@ namespace Greed.Models.ListItem
 
         public string Active { get; set; }
 
-        public string Name { get; set; }
+        public string Displayname { get; set; }
 
         public string Version { get; set; }
 
@@ -24,15 +24,23 @@ namespace Greed.Models.ListItem
 
         public bool IsLegal { get; set; }
 
-        public ModListItem(Mod mod, MainWindow window, OnlineCatalog catalog)
+        public bool IsEven { get; set; }
+
+        public bool IsSelected { get; set; }
+
+        public ModListItem(Mod mod, MainWindow window, OnlineCatalog catalog, bool isEven, bool isSelected)
         {
             Id = mod.Id;
             Active = mod.IsActive ? Constants.UNI_CHECK : " ";
-            Name = mod.Meta.Name;
+            Displayname = mod.Meta.Name;
             Version = mod.Meta.Version.ToString();
             Latest = Version;
             GreedVersion = mod.Meta.GreedVersion.ToString();
             SinsVersion = mod.Meta.SinsVersion.ToString();
+            IsEven = isEven;
+            IsSelected = isSelected;
+            IsLegal = true;
+
 
             // Handle violations
             var versionViolations = mod.Meta.IsLegalVersion();
@@ -52,6 +60,7 @@ namespace Greed.Models.ListItem
             if (versionViolations.Any())
             {
                 _ = window.PrintAsync("WARNING - Incompatible Version: " + mod.Meta.Name + Environment.NewLine + versionViolations.Select(v => v.GetDescription()).ToBulletedList());
+                IsLegal = false;
             }
 
             // Handle outdated
@@ -64,6 +73,11 @@ namespace Greed.Models.ListItem
                     Version = Constants.UNI_READY_FOR_UPDATE + " " + Version;
                 }
             }
+        }
+
+        public override string ToString()
+        {
+            return Displayname + " v" + Version;
         }
     }
 }

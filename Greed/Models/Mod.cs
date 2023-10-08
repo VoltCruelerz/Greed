@@ -1,4 +1,5 @@
-﻿using Greed.Interfaces;
+﻿using Greed.Exceptions;
+using Greed.Interfaces;
 using Greed.Models.Json;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -13,7 +14,6 @@ using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
 using FontFamily = System.Windows.Media.FontFamily;
-using Greed.Exceptions;
 
 namespace Greed.Models
 {
@@ -132,7 +132,8 @@ namespace Greed.Models
                 Scenarios = ImportFolder(subdirs, path, "scenarios");
                 Meshes = ImportFolder(subdirs, path, "meshes");
                 Textures = ImportFolder(subdirs, path, "textures");
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 throw new ModLoadException("Failed to load mod at " + path, ex);
             }
@@ -142,9 +143,13 @@ namespace Greed.Models
         {
             if (subdirs.Contains(folder))
             {
-                return Directory.GetFiles(path + "\\" + folder)
+                var sources = Directory.GetFiles(path + "\\" + folder)
                     .Select(p => handleFileImport(p))
                     .ToList();
+
+                // Sort ASC: export order -> file name.
+                sources.Sort((a, b) => a.CompareTo(b));
+                return sources;
             }
             return new List<JsonSource>();
         }
@@ -153,35 +158,37 @@ namespace Greed.Models
         {
             if (subdirs.Contains(folder))
             {
-                return Directory.GetFiles(path + "\\" + folder)
+                var sources = Directory.GetFiles(path + "\\" + folder)
                     .Select(p => new Source(p))
                     .ToList();
+                sources.Sort((a, b) => a.Filename.CompareTo(b.Filename));
+                return sources;
             }
             return new List<Source>();
         }
 
-        public void Export()
+        public void Export(List<Mod> active)
         {
             Debug.WriteLine("- Exporting " + Id);
 
             // Merge Json
-            ExportJsonFolder(Brushes);
-            ExportJsonFolder(Colors);
-            ExportJsonFolder(Cursors);
-            ExportJsonFolder(DeathSequences);
-            ExportJsonFolder(Effects);
-            ExportJsonFolder(Entities);
-            ExportJsonFolder(Fonts);
-            ExportJsonFolder(GravityWellProps);
-            ExportJsonFolder(Gui);
-            ExportJsonFolder(MeshMaterials);
-            ExportJsonFolder(PlayerColors);
-            ExportJsonFolder(PlayerIcons);
-            ExportJsonFolder(PlayerPortraits);
-            ExportJsonFolder(Skyboxes);
-            ExportJsonFolder(TextureAnimations);
-            ExportJsonFolder(Uniforms);
-            ExportJsonFolder(LocalizedTexts);
+            ExportJsonFolder(Brushes, active);
+            ExportJsonFolder(Colors, active);
+            ExportJsonFolder(Cursors, active);
+            ExportJsonFolder(DeathSequences, active);
+            ExportJsonFolder(Effects, active);
+            ExportJsonFolder(Entities, active);
+            ExportJsonFolder(Fonts, active);
+            ExportJsonFolder(GravityWellProps, active);
+            ExportJsonFolder(Gui, active);
+            ExportJsonFolder(MeshMaterials, active);
+            ExportJsonFolder(PlayerColors, active);
+            ExportJsonFolder(PlayerIcons, active);
+            ExportJsonFolder(PlayerPortraits, active);
+            ExportJsonFolder(Skyboxes, active);
+            ExportJsonFolder(TextureAnimations, active);
+            ExportJsonFolder(Uniforms, active);
+            ExportJsonFolder(LocalizedTexts, active);
 
             // Overwrite binary types
             ExportSourceFolder(Meshes);
@@ -191,10 +198,19 @@ namespace Greed.Models
             ExportSourceFolder(Textures);
         }
 
-        private static void ExportJsonFolder(List<JsonSource> sources)
+        private static void ExportJsonFolder(List<JsonSource> sources, List<Mod> active)
         {
             foreach (var source in sources)
             {
+                // If the source has prerequisites, check that they're on first.
+                var activeIds = active.Select(m => m.Id).ToHashSet();
+                var prereqs = source.GreedRules?.Prerequisites ?? new List<string>();
+                if (!prereqs.All(p => activeIds.Contains(p)))
+                {
+                    Debug.WriteLine("- - - Skipping " + source.Filename);
+                    continue;
+                }
+
                 Debug.WriteLine("- - " + source.Filename);
                 CreateGreedDirIfNotExists(source.GreedPath);
 
@@ -260,7 +276,7 @@ namespace Greed.Models
             }
         }
 
-        public string DiffFromGold()
+        public string DiffFromGold(List<Mod> active)
         {
             var sb = new StringBuilder();
             sb.AppendLine(Id);
@@ -419,7 +435,6 @@ namespace Greed.Models
             return Id;
         }
 
-
         public void SetModActivity(List<Mod> allMods, bool willBeActive, bool force)
         {
             if (force)
@@ -434,7 +449,7 @@ namespace Greed.Models
 
         public void SetModActivity(List<Mod> allMods, bool willBeActive)
         {
-            var activeMods = allMods.Where(mod => mod.IsActive);
+            var activeMods = allMods.Where(mod => mod.IsActive).ToList();
 
             if (!willBeActive)
             {
@@ -497,6 +512,19 @@ namespace Greed.Models
                     // Abort.
                     return;
                 }
+            }
+
+            var preds = Meta.GetPredecessors().ToHashSet();
+
+            // Make sure we load after our predecessors and dependencies.
+
+            var lowestLegalIndex = Math.Min(
+                Meta.GetDependencyMods(allMods).Select(d => d.LoadOrder).DefaultIfEmpty(activeMods.Count - 1).Min(),
+                Meta.GetPredecessorMods(allMods).Select(d => d.LoadOrder).DefaultIfEmpty(activeMods.Count - 1).Min()
+            );
+            if (LoadOrder < lowestLegalIndex)
+            {
+                Manager.MoveMod(Vault, allMods, this, lowestLegalIndex);
             }
 
             // If we're turning a mod on, we need to check for conflicts in both directions because one mod might not know about the other.

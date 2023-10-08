@@ -30,12 +30,12 @@ _A mod loader for [Sins of a Solar Empire II](https://www.sinsofasolarempire2.co
         - [Merge Types](#merge-types)
             - [Greed Merge Extensions](#greed-merge-extensions)
             - [Null Removal](#null-removal)
-        - [Greed Object Schema](#greed-object-schema)
-        - [Greed Compatibility](#greed-compatibility)
+        - [Greedy File Object Schema](#greedy-file-object-schema)
+            - [GFOS Example](#gfos-example)
+        - [Greed Configuration](#greed-configuration-1)
     - [Contributing to Greed](#contributing-to-greed)
         - [Bug Reports](#bug-reports)
     - [Contributing Mods](#contributing-mods)
-    - [Wishlist](#wishlist)
 
 ## Why Use Greed?
 
@@ -68,6 +68,10 @@ Set the directories on the Settings tab. They will autosave if the paths exist.
 - **Export Directory**: regardless of where you choose to store your horde of mods, Sins II expects active mods to be in a particular folder, which will nearly always be `C:\Users\YOUR_USER\AppData\Local\sins2\mods`.
 - **Downloads Directory**: the location where Greed is free to download mods to temporarily before extracting them to your mods directory. (eg `C:\Users\YOUR_USER\Downloads`)
 - **Channel Catalog**: allows you to download mods from other installation channels. For users, this should be left on `Live`.
+    - **Live**: The main channel for users.
+    - **Beta**: Reserved for cooperative _LGM_ testing.
+    - **Alpha**: Reserved for Greed development.
+    - **Custom**: Reserved for _LGM_ merge testing.
 
 ### Basic Use
 
@@ -153,10 +157,12 @@ https://github.com/VoltCruelerz/Greed/assets/4068550/a0d3662e-25e5-46c2-ba97-54b
 
 - **Selective Inclusion**: Your mod only needs to include what you changed about a particular source file (eg add a new property, delete a property, or add an array element), _drastically_ reducing the risk of collisions between mods.
 - **Patch Merge**: Intelligent merging of files, allowing automated merge even within the same file.
+- **Inheritance**: You can use one file as a base for another.
+- **Conditional Export**: You can configure your mod to export the same file multiple ways depending on which mods are installed.
 - **Dependency Autoinstall**: Users can automatically install your mod's dependencies.
 - **Automated Updates**: Users can update to the latest version of your mod automatically.
 - **Comments**: You can add C-style comments to your source files.
-- **Reduced Boilerplate**: Fractional files reduces the effort required to make small mods
+- **Reduced Boilerplate**: Fractional files and inheritance reduces the effort required to make small mods
 - **Improved Exposure**: Greed comes with a catalog of online mods that can be automatically installed.
 - **File Diff**: Greed ships with a diff tool specifically for Sins II data files, allowing you to readily see exactly what you've done.
 
@@ -195,24 +201,35 @@ In all of these cases, if you leave an object's field undefined, it will not be 
 
 > _**Note**: be very careful when removing elements by index that you know **_exactly_** what is there already._
 
-### Greed Object Schema
+### Greedy File Object Schema
 
-Inside source files, you can have a top-level object to define additional rules, as seen [here](https://github.com/VoltCruelerz/capital-starts/blob/main/entities/vasari_rebel_battle.player.gmr).
-
-```json
-{
-    "greed": {
-        "parent": "vasari_rebel"
-    }
-}
-```
+Inside json source files, you can have a top-level object to define additional rules, as seen [here](https://github.com/VoltCruelerz/capital-starts/blob/main/entities/vasari_rebel_battle.player.gmr) or in [these files](https://github.com/VoltCruelerz/alias-test/tree/main/localized_text).
 
 | Field | Type | Description | Default Value |
 |:------|:-----|:------------|:--------------|
 | `parent` | `string` | The file name of the file you wish to inherit from. A file with a parent will prefer to initialize from the parent file instead of from its own the gold file (if one even exists). The parent can be a gold file, a file created by your mod, or a file created by another mod. It must be in the same directory with the same type. For example, the above was in a `.player` file in the `entities/` directory, so the parent file should be as well. | `null` |
+| `alias` | `string` | By default, a greedy file will export with its own name (eg `a.buff.gmr` produces `a.buff`), but if alias is specified, it allows you to control what the output filename will be. | \<filename\> |
+| `exportOrder` | `int` | Files are exported by the following hierarchical ascending sort:<br/><ol><li>Mod Export Order</li><li>Folder</li><li>Export Name</li><li>File Export Order</li><li>Lexicographically</li></ol> | 0 |
+| `prerequisites` | `string[]` | Only export this file if the provided mods are **all** installed and active. | `[]` |
+| `mode` | `string` | Allows in-file specification of the greed merge type, eg `gmr`. | \<extension\> |
 | `mutations` | `mutation[]` | _This feature is WIP and will be documented once complete._ | `[]` |
 
-### Greed Compatibility
+#### GFOS Example
+
+```json
+{
+    "greed": {
+        "parent": "my_parent_file",
+        "alias": "actual_export_file",
+        "exportOrder": 2,
+        "prerequisites": ["other-mod"],
+        "mode": "gmr",
+        "mutations": []
+    }
+}
+```
+
+### Greed Configuration
 
 To make a mod compatible with Greed, you need only add a `greed.json` file to your mod's folder, as seen below.
 
@@ -246,8 +263,8 @@ While I recommend you take advantage of Greed's more powerful features like merg
 | `name`* | `string` | The human-readable name of your mod |
 | `author`* | `string` | Who you are. |
 | `description`* | `string` | A brief summary of your mod. Save details for the readme. |
-| `url`* | `url` | The URL to your thread or repo where you give greater details about your mod. Details beyond what is covered in the description should be covered here. |
-| `version`* | `version` | The version of the mod itself. |
+| `url`* | `url` | The URL to your thread or repo where you give greater details about your mod. Details beyond what is covered in the description should be covered here, as well as the means to contact you with bugs. |
+| `version`* | `version` | The version of the mod itself. If contributing to the catalog, this MUST match the version there. |
 | `sinsVersion`* | `version` | The minimum compatible Sins version. |
 | `greedVersion`* | `version` | The minimum compatible Greed version. |
 | `dependencies`* | `dependency[]` | An array of dependencies that are REQUIRED for this mod to function. |
@@ -271,12 +288,4 @@ In the event of an error, consult the log (viewable both in the textbox at the b
 
 ## Contributing Mods
 
-To contribute a mod to the online catalog, open a merge request [here](https://github.com/League-of-Greedy-Modders/Greedy-Mods).
-
-## Wishlist
-
-> **NOTE**: The following items are things that may or _may not_ make it in.
-
-- **Remove-by-query**: right now, Greed struggles with (the admittedly uncommon) task of removing specific array elements without overwriting the entire array.
-- **Inheritance**: allow a file to inherit from another file, eg a new faction might inherit from an existing `.player` file it is similar to, so you don't have to redefine _everything_.
-- **Soft Prerequisites**: mod A does not require mod B, but if they are both active, mod B needs to be loaded first.
+To contribute a mod to the online catalog, follow the instructions [here](https://github.com/League-of-Greedy-Modders/Greedy-Mods).

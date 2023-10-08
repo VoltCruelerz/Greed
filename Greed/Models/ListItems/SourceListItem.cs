@@ -1,7 +1,7 @@
-﻿using Greed.Models.Json;
+﻿using Greed.Exceptions;
+using Greed.Models.Json;
 using System;
 using System.IO;
-using Greed.Exceptions;
 
 namespace Greed.Models.ListItem
 {
@@ -11,10 +11,17 @@ namespace Greed.Models.ListItem
 
         public string Folder { get; set; }
 
-        public string Name { get; set; }
+        public string Filename { get; set; }
 
-        public SourceListItem(JsonSource s)
+        public string ShortFilename { get; set; }
+
+        public string Mergename { get; set; }
+
+        public bool IsEven { get; set; }
+
+        public SourceListItem(JsonSource s, bool isEven)
         {
+            IsEven = isEven;
             DeltaSymbol = "+";
             if (File.Exists(s.GoldPath))
             {
@@ -30,7 +37,10 @@ namespace Greed.Models.ListItem
                 }
             }
             Folder = s.Folder;
-            Name = s.Mergename;
+            Filename = s.Filename;
+            Mergename = s.Mergename;
+            ShortFilename = s.Filename.Replace(Mergename, "*");
+            IsEven = isEven;
         }
     }
 }

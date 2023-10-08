@@ -5,7 +5,7 @@
     <TargetFramework>net7.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
-    <Version>2.2.2</Version>
+    <Version>2.3.0</Version>
     <Title>Greed Mod Manager</Title>
     <Authors>Volt Cruelerz</Authors>
     <Description>A mod loader for Sins of a Solar Empire II.</Description>
@@ -32,7 +32,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="github-mark-black.png" />
     <Resource Include="icon.png" />
   </ItemGroup>
 

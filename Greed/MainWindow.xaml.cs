@@ -2,6 +2,7 @@
 using Greed.Controls.Diff;
 using Greed.Controls.Online;
 using Greed.Controls.Popups;
+using Greed.Exceptions;
 using Greed.Extensions;
 using Greed.Models;
 using Greed.Models.Json;
@@ -19,9 +20,9 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
-using Greed.Exceptions;
 
 namespace Greed
 {
@@ -35,15 +36,18 @@ namespace Greed
         private static readonly string LogPrevPath = Directory.GetCurrentDirectory() + "\\log_prev.txt";
         private static readonly WarningPopup Warning = new();
 
+
         private readonly ModManager Manager = new();
         private List<Mod> Mods = new();
-        private Mod? SelectedMod;
+        private Mod? DragPastMod;
+        private int ActualSelectedModIndex = -1;
         private readonly List<JsonSource> AllSources = new();
         private JsonSource? SelectedSource;
 
         private readonly SolidColorBrush Valid = new(Colors.White);
         private readonly SolidColorBrush Invalid = new(Colors.Pink);
 
+        private bool ReadyToDrag = false;
         private Mod? DragMod;
         private Mod? DestMod;
         private string SearchQuery = string.Empty;
@@ -160,7 +164,7 @@ namespace Greed
         {
             PrintSync($"RefreshModListUI for {Mods.Count} mods.");
             viewModList.Items.Clear();
-            Mods
+            var printableMods = Mods
                 .Where(m => string.IsNullOrWhiteSpace(SearchQuery)
                     || m.Id.Contains(SearchQuery, StringComparison.InvariantCultureIgnoreCase)
                     || m.Readme.Contains(SearchQuery, StringComparison.InvariantCultureIgnoreCase)
@@ -168,8 +172,13 @@ namespace Greed
                     || m.Meta.Author.Contains(SearchQuery, StringComparison.InvariantCultureIgnoreCase)
                     || m.Meta.Description.Contains(SearchQuery, StringComparison.InvariantCultureIgnoreCase))
                 .Where(m => !SearchActive || m.IsActive)
-                .ToList()
-                .ForEach(m => viewModList.Items.Add(new ModListItem(m, this, Catalog)));
+                .ToList();
+
+            for (var i = 0; i < printableMods.Count; i++)
+            {
+                var m = printableMods[i];
+                viewModList.Items.Add(new ModListItem(m, this, Catalog, i % 2 == 0, i == ActualSelectedModIndex));
+            }
         }
 
         /// <summary>
@@ -196,6 +205,7 @@ namespace Greed
 
         private void ModList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            Debug.WriteLine("ModList_SelectionChanged() from " + DragPastMod);
             // This gets hit when refreshing the display.
             if (e.AddedItems.Count == 0)
             {
@@ -204,27 +214,41 @@ namespace Greed
             var item = (ModListItem)e.AddedItems[0]!;
             var newSelection = Mods.First(p => p.Id == item.Id);
 
-            // Ignore the user re-clicking.
-            if (newSelection == SelectedMod)
-            {
-                return;
-            }
-            SelectedMod = newSelection;
+            DragPastMod = newSelection;
+            Debug.WriteLine("- New Selected Mod " + DragPastMod.ToString());
 
-            // If there is no mod currently selected, start the drag process.
-            if (DragMod == null)
+            // If we're ready to drag, start the drag.
+            if (ReadyToDrag)
             {
-                DragMod = SelectedMod;
+                // Update the flag so the binding catches which to highlight.
+                if (ActualSelectedModIndex != viewModList.SelectedIndex)
+                {
+                    // Out with the old
+                    if (ActualSelectedModIndex != -1)
+                    {
+                        ((ModListItem)viewModList.Items[ActualSelectedModIndex]).IsSelected = false;
+                    }
+                    // In with the new
+                    ActualSelectedModIndex = viewModList.SelectedIndex;
+                    ((ModListItem)viewModList.Items[ActualSelectedModIndex]).IsSelected = true;
+                    RefreshModListUI();
+                }
+
+                // Initiate drag.
+                DragMod = DragPastMod;
+                ReadyToDrag = false;
+                Debug.WriteLine("- Start drag from " + DragMod.ToString());
             }
             else
             {
-                DestMod = SelectedMod;
+                DestMod = DragPastMod;
+                Debug.WriteLine("- Temporary destination mod is " + DestMod.ToString());
             }
 
             // Load the text field.
             try
             {
-                TxtLocalModInfo.SetContent(SelectedMod.Meta, SelectedMod);
+                TxtLocalModInfo.SetContent(Mods[ActualSelectedModIndex].Meta, Mods[ActualSelectedModIndex]);
             }
             catch (Exception ex)
             {
@@ -256,7 +280,7 @@ namespace Greed
             CtxRight.Items.Add(uninstall);
 
             // Set to Version
-            var catalogEntry = Catalog.Mods.Find(m => m.Id == SelectedMod!.Id);
+            var catalogEntry = Catalog.Mods.Find(m => m.Id == DragPastMod!.Id);
             if (catalogEntry != null)
             {
                 var versions = catalogEntry.Versions.Keys.ToList();
@@ -264,48 +288,107 @@ namespace Greed
                 {
                     var update = new MenuItem();
                     update.Header = "Install v" + v;
-                    update.Click += (sender, e) => UpdateMod(SelectedMod!, catalogEntry.Versions[v]);
-                    update.IsEnabled = SelectedMod!.Meta.GetVersion().ToString() != v;
+                    update.Click += (sender, e) => UpdateMod(DragPastMod!, catalogEntry.Versions[v]);
+                    update.IsEnabled = DragPastMod!.Meta.GetVersion().ToString() != v;
                     CtxRight.Items.Add(update);
                 });
             }
         }
 
+        private void TxtSearchMods_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var txt = (TextBox)sender;
+            SearchQuery = txt.Text;
+            RefreshModListUI();
+        }
+
+        private void CheckActive_Toggle(object sender, RoutedEventArgs e)
+        {
+            var cbx = (CheckBox)sender;
+            SearchActive = cbx.IsChecked ?? false;
+            RefreshModListUI();
+        }
+
         #region Drag Elements
         private void ModList_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
+            Debug.WriteLine("ModList_MouseUp()");
             if (DestMod == null || DragMod == DestMod)
             {
+                Debug.WriteLine("- Abort drag-and-drop");
                 // We aren't or aborted drag-and-drop.
                 DragMod = null;
                 DestMod = null;
+                ReadyToDrag = false;
                 return;
             }
 
-            if (DragMod == null)
+            var destIndex = Mods.IndexOf(DestMod);
+            try
             {
-                throw new InvalidOperationException("DragMod was somehow null.");
-            }
+                Debug.WriteLine("Initiating drag-and-drop movement for " + DragMod?.ToString());
+                if (DragMod == null)
+                {
+                    throw new InvalidOperationException("DragMod was somehow null.");
+                }
 
-            // We *are* actually reordering now.
-            Manager.MoveMod(Vault, Mods, DragMod, Mods.IndexOf(DestMod));
+                // We *are* actually reordering now.
+                Manager.MoveMod(Vault, Mods, DragMod, destIndex);
+            }
+            catch (Exception ex)
+            {
+                CriticalAlertPopup.Throw("Failed to reorder mod list.", ex);
+            }
             DragMod = null;
             DestMod = null;
             Vault.ArchiveActiveOnly(Mods);
+            ActualSelectedModIndex = destIndex;
             RefreshModListUI();
         }
 
         private void ModList_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
         {
+            Debug.WriteLine("ModList_MouseLeave()");
             DragMod = null;
             DestMod = null;
+            ReadyToDrag = false;
+        }
+
+        private void ModList_MousePreview(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            Debug.WriteLine("ModList_MousePreview()");
+            DragMod = null;
+            DestMod = null;
+            ReadyToDrag = true;
+        }
+        #endregion
+
+        #region Column Sorting
+        private void HeaderModName_Click(object sender, RoutedEventArgs e)
+        {
+            Debug.WriteLine("HeaderModName_Click()");
+        }
+
+        private void HeaderVersion_Click(object sender, RoutedEventArgs e)
+        {
+            Debug.WriteLine("HeaderVersion_Click()");
+        }
+
+        private void HeaderGreed_Click(object sender, RoutedEventArgs e)
+        {
+            Debug.WriteLine("HeaderGreed_Click()");
+        }
+
+        private void HeaderSins_Click(object sender, RoutedEventArgs e)
+        {
+            Debug.WriteLine("HeaderSins_Click()");
         }
         #endregion
 
         #region Center Pane
         private void Toggle_Click(object sender, RoutedEventArgs e)
         {
-            ToggleSingleMod(SelectedMod);
+            ToggleSingleMod(DragPastMod);
         }
 
         private void ToggleSingleMod(Mod? mod)
@@ -428,17 +511,17 @@ namespace Greed
             }
             else if (e.Key == System.Windows.Input.Key.Space)
             {
-                ToggleSingleMod(SelectedMod);
+                ToggleSingleMod(DragPastMod);
             }
         }
 
         private void ReselectSelection()
         {
-            SelectedMod = Mods.Find(m => m.Id == SelectedMod?.Id);
-            if (SelectedMod != null)
+            DragPastMod = Mods.Find(m => m.Id == DragPastMod?.Id);
+            if (DragPastMod != null)
             {
-                var index = Mods.IndexOf(SelectedMod!);
-                viewModList.SelectedItem = SelectedMod;
+                var index = Mods.IndexOf(DragPastMod!);
+                viewModList.SelectedItem = DragPastMod;
                 viewModList.SelectedIndex = index;
             }
         }
@@ -449,39 +532,43 @@ namespace Greed
         {
             SelectedSource = null;
             viewFileList.Items.Clear();
-            if (SelectedMod != null)
+            if (ActualSelectedModIndex > -1)
             {
+                var selectedMod = Mods[ActualSelectedModIndex];
                 AllSources.Clear();
 
                 // Json
-                AllSources.AddRange(SelectedMod.Brushes);
-                AllSources.AddRange(SelectedMod.Colors);
-                AllSources.AddRange(SelectedMod.Cursors);
-                AllSources.AddRange(SelectedMod.DeathSequences);
-                AllSources.AddRange(SelectedMod.Effects);
-                AllSources.AddRange(SelectedMod.Fonts);
-                AllSources.AddRange(SelectedMod.GravityWellProps);
-                AllSources.AddRange(SelectedMod.Gui);
-                AllSources.AddRange(SelectedMod.MeshMaterials);
-                AllSources.AddRange(SelectedMod.PlayerColors);
-                AllSources.AddRange(SelectedMod.PlayerIcons);
-                AllSources.AddRange(SelectedMod.PlayerPortraits);
-                AllSources.AddRange(SelectedMod.Skyboxes);
-                AllSources.AddRange(SelectedMod.TextureAnimations);
-                AllSources.AddRange(SelectedMod.Uniforms);
-                AllSources.AddRange(SelectedMod.Entities);
-                AllSources.AddRange(SelectedMod.LocalizedTexts);
+                AllSources.AddRange(selectedMod.Brushes);
+                AllSources.AddRange(selectedMod.Colors);
+                AllSources.AddRange(selectedMod.Cursors);
+                AllSources.AddRange(selectedMod.DeathSequences);
+                AllSources.AddRange(selectedMod.Effects);
+                AllSources.AddRange(selectedMod.Fonts);
+                AllSources.AddRange(selectedMod.GravityWellProps);
+                AllSources.AddRange(selectedMod.Gui);
+                AllSources.AddRange(selectedMod.MeshMaterials);
+                AllSources.AddRange(selectedMod.PlayerColors);
+                AllSources.AddRange(selectedMod.PlayerIcons);
+                AllSources.AddRange(selectedMod.PlayerPortraits);
+                AllSources.AddRange(selectedMod.Skyboxes);
+                AllSources.AddRange(selectedMod.TextureAnimations);
+                AllSources.AddRange(selectedMod.Uniforms);
+                AllSources.AddRange(selectedMod.Entities);
+                AllSources.AddRange(selectedMod.LocalizedTexts);
 
                 // Non-Json
-                //AllSources.AddRange(SelectedMod.Meshes);
-                //AllSources.AddRange(SelectedMod.Scenarios);
-                //AllSources.AddRange(SelectedMod.Shaders);
-                //AllSources.AddRange(SelectedMod.Sounds);
-                //AllSources.AddRange(SelectedMod.Textures);
+                //AllSources.AddRange(selectedMod.Meshes);
+                //AllSources.AddRange(selectedMod.Scenarios);
+                //AllSources.AddRange(selectedMod.Shaders);
+                //AllSources.AddRange(selectedMod.Sounds);
+                //AllSources.AddRange(selectedMod.Textures);
 
                 try
                 {
-                    AllSources.ForEach(p => viewFileList.Items.Add(new SourceListItem(p)));
+                    for (var i = 0; i < AllSources.Count; i++)
+                    {
+                        viewFileList.Items.Add(new SourceListItem(AllSources[i], i % 2 == 0));
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -496,7 +583,7 @@ namespace Greed
                 return;
             }
             var item = (SourceListItem)e.AddedItems[0]!;
-            SelectedSource = AllSources.Find(p => p.Mergename == item.Name && p.Folder == item.Folder);
+            SelectedSource = AllSources.Find(p => p.Filename == item.Filename && p.Folder == item.Folder);
             PrintSync("Selected " + SelectedSource?.Mergename);
             cmdDiff.IsEnabled = true;
         }
@@ -558,25 +645,25 @@ namespace Greed
 
         private void TxtSinsDir_TextChanged(object sender, TextChangedEventArgs e)
         {
-            SetTxtConfigOption("sinsDir", (TextBox)sender);
+            SetFolderConfigOption("sinsDir", (TextBox)sender);
         }
 
         private void TxtModDir_TextChanged(object sender, TextChangedEventArgs e)
         {
-            SetTxtConfigOption("modDir", (TextBox)sender);
+            SetFolderConfigOption("modDir", (TextBox)sender);
         }
 
         private void TxtExportDir_TextChanged(object sender, TextChangedEventArgs e)
         {
-            SetTxtConfigOption("exportDir", (TextBox)sender);
+            SetFolderConfigOption("exportDir", (TextBox)sender);
         }
 
         private void TxtDownloadDir_TextChanged(object sender, TextChangedEventArgs e)
         {
-            SetTxtConfigOption("downDir", (TextBox)sender);
+            SetFolderConfigOption("downDir", (TextBox)sender);
         }
 
-        private void SetTxtConfigOption(string key, TextBox txt)
+        private void SetFolderConfigOption(string key, TextBox txt)
         {
             string newVal = txt.Text.Replace("/", "\\");
             var exists = Directory.Exists(newVal);
@@ -603,6 +690,16 @@ namespace Greed
             var item = (ComboBoxItem)((ComboBox)sender).SelectedItem;
             SetConfigOptions("channel", item.Content.ToString()!.ToLower());
             ReloadCatalog();
+        }
+
+        private void TxtManualCatalog_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var txt = (TextBox)sender;
+            if (string.IsNullOrEmpty(txt.Text))
+            {
+                SetConfigOptions("channel", "live");
+            }
+            SetConfigOptions("channel", txt.Text);
         }
 
         private static void SetConfigOptions(string key, string value)
@@ -727,26 +824,13 @@ namespace Greed
         }
         #endregion
 
-        private void TxtSearchMods_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            var txt = (TextBox)sender;
-            SearchQuery = txt.Text;
-            RefreshModListUI();
-        }
-
-        private void CheckActive_Toggle(object sender, RoutedEventArgs e)
-        {
-            var cbx = (CheckBox)sender;
-            SearchActive = cbx.IsChecked ?? false;
-            RefreshModListUI();
-        }
-
         private void CmdOnline_Click(object sender, RoutedEventArgs e)
         {
             var onlinePopup = new OnlineWindow(Catalog, this);
             onlinePopup.ShowDialog();
         }
 
+        #region Uninstall Mod
         public void Uninstall(string id)
         {
             ModManager.Uninstall(this, Warning, Mods, id);
@@ -754,13 +838,14 @@ namespace Greed
 
         private void MenuUninstall_Click(object sender, RoutedEventArgs e)
         {
-            ModManager.Uninstall(this, Warning, Mods, SelectedMod!.Id);
+            ModManager.Uninstall(this, Warning, Mods, DragPastMod!.Id);
         }
 
         public bool IsModInstalled(string id)
         {
             return Mods.Any(m => m.Id == id);
         }
+        #endregion
 
         public Dictionary<string, Version> GetModVersions()
         {
@@ -772,6 +857,7 @@ namespace Greed
             return dict;
         }
 
+        #region Update Mod
         public void UpdateModAsync(Mod modToUpdate, VersionEntry targetVersion)
         {
             Dispatcher.Invoke(() => UpdateModInternal(modToUpdate, targetVersion));
@@ -808,6 +894,7 @@ namespace Greed
             // Reload Mods
             ReloadModListFromDiskAsync();
         }
+        #endregion
 
         #region Mod Packs
         private void RefreshVaultPackUI()
@@ -949,6 +1036,7 @@ namespace Greed
 
         #endregion
 
+        #region File Drag-and-Drop
         private void Window_DragEnter(object sender, DragEventArgs e)
         {
             PrintSync("Window_DragEnter()");
@@ -963,31 +1051,6 @@ namespace Greed
             PrintSync("Window_Drop()");
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
             foreach (string file in files) Console.WriteLine(file);
-        }
-
-        private void Window_DragLeave(object sender, DragEventArgs e)
-        {
-            PrintSync("Window_DragLeave()");
-        }
-
-        private void Window_DragOver(object sender, DragEventArgs e)
-        {
-            PrintSync("Window_DragOver()");
-        }
-
-        private void viewModList_DragEnter(object sender, DragEventArgs e)
-        {
-            PrintSync("viewModList_DragEnter()");
-        }
-
-        private void viewModList_DragLeave(object sender, DragEventArgs e)
-        {
-            PrintSync("viewModList_DragLeave()");
-        }
-
-        private void viewModList_DragOver(object sender, DragEventArgs e)
-        {
-            PrintSync("viewModList_DragOver()");
         }
 
         private void viewModList_Drop(object sender, DragEventArgs e)
@@ -1020,5 +1083,6 @@ namespace Greed
             await SetProgressAsync(1);
             ReloadModListFromDiskAsync();
         }
+        #endregion
     }
 }
