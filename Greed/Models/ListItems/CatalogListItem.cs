@@ -24,11 +24,17 @@ namespace Greed.Models.ListItem
 
         public string IsInstalled { get; set; }
 
-        public CatalogListItem(OnlineMod m, Dictionary<string, Version> installedModVersions)
+        public bool IsEven { get; set; }
+
+        public bool IsSelected { get; set; }
+
+        public CatalogListItem(OnlineMod m, Dictionary<string, Version> installedModVersions, bool isEven, bool isSelected)
         {
             Name = m.Name;
             Id = m.Id ?? m.Name;
             Author = m.Author;
+            IsEven = isEven;
+            IsSelected = isSelected;
 
             Version = m.Latest.ToString();
             if (installedModVersions.ContainsKey(Id) && installedModVersions[Id].IsOlderThan(m.Latest))
@@ -59,6 +65,8 @@ namespace Greed.Models.ListItem
                 : string.IsNullOrEmpty(m.Live.Download)
                     ? Constants.UNI_NO_INSTALL
                     : Constants.UNI_READY_FOR_INSTALL;
+            IsEven = isEven;
+            IsSelected = isSelected;
         }
     }
 }

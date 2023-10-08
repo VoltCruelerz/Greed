@@ -35,9 +35,6 @@
                           MouseUp="ModList_MouseUp"
                           MouseLeave="ModList_MouseLeave"
                           ToolTip="Later mods overwrite earlier ones. Click to view a mod's details. Double click to toggle. Drag-and-drop a .zip or .rar to install it."
-                          DragEnter="viewModList_DragEnter"
-                          DragLeave="viewModList_DragLeave"
-                          DragOver="viewModList_DragOver"
                           Drop="viewModList_Drop"
                         >
                     <ListView.ContextMenu>
@@ -46,11 +43,27 @@
                     </ListView.ContextMenu>
                     <ListView.View>
                         <GridView x:Name="grdView">
-                            <GridViewColumn Header="" Width="NaN" DisplayMemberBinding="{Binding Active}" />
-                            <GridViewColumn Header="Mod Name" Width="NaN" DisplayMemberBinding="{Binding Displayname}" />
-                            <GridViewColumn Header="Version" Width="NaN" DisplayMemberBinding="{Binding Version}" />
-                            <GridViewColumn Header="Greed" Width="NaN" DisplayMemberBinding="{Binding GreedVersion}" />
-                            <GridViewColumn Header="Sins" Width="NaN" DisplayMemberBinding="{Binding SinsVersion}" />
+                            <GridViewColumn Header="" Width="NaN" DisplayMemberBinding="{Binding Active}"/>
+                            <GridViewColumn Width="NaN" DisplayMemberBinding="{Binding Displayname}">
+                                <GridViewColumn.Header>
+                                    <GridViewColumnHeader Tag="Mod Name" Click="HeaderModName_Click">Mod Name</GridViewColumnHeader>
+                                </GridViewColumn.Header>
+                            </GridViewColumn>
+                            <GridViewColumn Width="NaN" DisplayMemberBinding="{Binding Version}">
+                                <GridViewColumn.Header>
+                                    <GridViewColumnHeader Tag="Version" Click="HeaderVersion_Click">Version</GridViewColumnHeader>
+                                </GridViewColumn.Header>
+                            </GridViewColumn>
+                            <GridViewColumn Width="NaN" DisplayMemberBinding="{Binding GreedVersion}">
+                                <GridViewColumn.Header>
+                                    <GridViewColumnHeader Tag="Greed" Click="HeaderGreed_Click">Greed</GridViewColumnHeader>
+                                </GridViewColumn.Header>
+                            </GridViewColumn>
+                            <GridViewColumn Width="NaN" DisplayMemberBinding="{Binding SinsVersion}">
+                                <GridViewColumn.Header>
+                                    <GridViewColumnHeader Tag="Sins" Click="HeaderSins_Click">Sins</GridViewColumnHeader>
+                                </GridViewColumn.Header>
+                            </GridViewColumn>
                         </GridView>
                     </ListView.View>
                     <ListView.Resources>
@@ -99,7 +112,7 @@
                 <Label Content="JSON Files" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="26" Width="265" Grid.Column="2"/>
                 <Button x:Name="cmdPlay" Grid.Column="1" Content="▶" Margin="168,0,0,10" RenderTransformOrigin="-0.059,-0.389" Height="20" VerticalAlignment="Bottom" Background="#FF759E66" Click="Play_Click" ToolTip="Launch Sins II" HorizontalAlignment="Left" Width="50"/>
                 <Button x:Name="cmdToggleAll" Content="!∀" Margin="10,37,0,0" VerticalAlignment="Top" Click="ToggleAll_Click" Height="22" ToolTip="Toggle all mods on or off." HorizontalAlignment="Left" Width="28"/>
-                <ProgressBar x:Name="pgbProgress" Margin="10,5,10,117" Grid.ColumnSpan="3" Foreground="#FF06B025" Background="#FFAAAAAA" BorderBrush="#FF747474" Value="0" Grid.Row="1" />
+                <ProgressBar x:Name="pgbProgress" Margin="10,5,10,0" Grid.ColumnSpan="3" Foreground="#FF06B025" Background="#FFAAAAAA" BorderBrush="#FF747474" Value="0" Grid.Row="1" Height="20" VerticalAlignment="Top" />
                 <TextBox x:Name="TxtLog" Margin="10,30,10,10" Grid.Row="1" TextWrapping="Wrap" Text="" Grid.ColumnSpan="3" Background="#FFBDBDBD" IsReadOnly="True" FontFamily="Consolas" VerticalScrollBarVisibility="Auto"/>
                 <Label Content="Details" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="26" Width="265" Grid.Column="1"/>
                 <Button x:Name="CmdRefresh" Content="↻" Padding="0,-4,1,1" Margin="0,37,44,0" VerticalAlignment="Top" Click="Refresh_Click" Height="22" ToolTip="Refresh the mod list." FontSize="16" HorizontalAlignment="Right" Width="28"/>
@@ -140,7 +153,7 @@
                 <TextBox x:Name="txtExportDir" HorizontalAlignment="Left" Margin="131,52,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="438" TextChanged="TxtExportDir_TextChanged" ToolTip="Autosaves if directory exists."/>
                 <Label Content="Download Directory" HorizontalAlignment="Left" Margin="10,71,0,0" VerticalAlignment="Top" ToolTip="A directory Greed can use as a workspace for downloads."/>
                 <TextBox x:Name="txtDownloadDir" HorizontalAlignment="Left" Margin="131,75,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="438" TextChanged="TxtDownloadDir_TextChanged" ToolTip="Autosaves if directory exists."/>
-                <Label Content="Catalog Channel" HorizontalAlignment="Left" Margin="10,94,0,0" VerticalAlignment="Top" ToolTip="Unless you're a modder, leave it on Live. Unless you're me, leave it off Alpha."/>
+                <Label Content="Catalog Channel" HorizontalAlignment="Left" Margin="10,94,0,0" VerticalAlignment="Top" ToolTip="Unless you're in the LGM, leave it on Live. Unless you're a Greed developer, leave it off Alpha."/>
                 <ComboBox x:Name="CbxChannel" HorizontalAlignment="Left" Margin="131,98,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="CbxChannel_SelectionChanged" Height="22" FontSize="11" VerticalContentAlignment="Center">
                     <ComboBox.Items>
                         <ComboBoxItem Content="Live"/>
@@ -148,6 +161,7 @@
                         <ComboBoxItem Content="Alpha"/>
                     </ComboBox.Items>
                 </ComboBox>
+                <TextBox x:Name="txtManualCatalog" HorizontalAlignment="Left" Margin="256,100,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="313" TextChanged="TxtManualCatalog_TextChanged" ToolTip="Manual catalog location."/>
             </Grid>
         </TabItem>
     </TabControl>

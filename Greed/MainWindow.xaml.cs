@@ -20,6 +20,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 
@@ -294,6 +295,20 @@ namespace Greed
             }
         }
 
+        private void TxtSearchMods_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var txt = (TextBox)sender;
+            SearchQuery = txt.Text;
+            RefreshModListUI();
+        }
+
+        private void CheckActive_Toggle(object sender, RoutedEventArgs e)
+        {
+            var cbx = (CheckBox)sender;
+            SearchActive = cbx.IsChecked ?? false;
+            RefreshModListUI();
+        }
+
         #region Drag Elements
         private void ModList_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
@@ -345,6 +360,28 @@ namespace Greed
             DragMod = null;
             DestMod = null;
             ReadyToDrag = true;
+        }
+        #endregion
+
+        #region Column Sorting
+        private void HeaderModName_Click(object sender, RoutedEventArgs e)
+        {
+            Debug.WriteLine("HeaderModName_Click()");
+        }
+
+        private void HeaderVersion_Click(object sender, RoutedEventArgs e)
+        {
+            Debug.WriteLine("HeaderVersion_Click()");
+        }
+
+        private void HeaderGreed_Click(object sender, RoutedEventArgs e)
+        {
+            Debug.WriteLine("HeaderGreed_Click()");
+        }
+
+        private void HeaderSins_Click(object sender, RoutedEventArgs e)
+        {
+            Debug.WriteLine("HeaderSins_Click()");
         }
         #endregion
 
@@ -608,25 +645,25 @@ namespace Greed
 
         private void TxtSinsDir_TextChanged(object sender, TextChangedEventArgs e)
         {
-            SetTxtConfigOption("sinsDir", (TextBox)sender);
+            SetFolderConfigOption("sinsDir", (TextBox)sender);
         }
 
         private void TxtModDir_TextChanged(object sender, TextChangedEventArgs e)
         {
-            SetTxtConfigOption("modDir", (TextBox)sender);
+            SetFolderConfigOption("modDir", (TextBox)sender);
         }
 
         private void TxtExportDir_TextChanged(object sender, TextChangedEventArgs e)
         {
-            SetTxtConfigOption("exportDir", (TextBox)sender);
+            SetFolderConfigOption("exportDir", (TextBox)sender);
         }
 
         private void TxtDownloadDir_TextChanged(object sender, TextChangedEventArgs e)
         {
-            SetTxtConfigOption("downDir", (TextBox)sender);
+            SetFolderConfigOption("downDir", (TextBox)sender);
         }
 
-        private void SetTxtConfigOption(string key, TextBox txt)
+        private void SetFolderConfigOption(string key, TextBox txt)
         {
             string newVal = txt.Text.Replace("/", "\\");
             var exists = Directory.Exists(newVal);
@@ -653,6 +690,16 @@ namespace Greed
             var item = (ComboBoxItem)((ComboBox)sender).SelectedItem;
             SetConfigOptions("channel", item.Content.ToString()!.ToLower());
             ReloadCatalog();
+        }
+
+        private void TxtManualCatalog_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var txt = (TextBox)sender;
+            if (string.IsNullOrEmpty(txt.Text))
+            {
+                SetConfigOptions("channel", "live");
+            }
+            SetConfigOptions("channel", txt.Text);
         }
 
         private static void SetConfigOptions(string key, string value)
@@ -777,26 +824,13 @@ namespace Greed
         }
         #endregion
 
-        private void TxtSearchMods_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            var txt = (TextBox)sender;
-            SearchQuery = txt.Text;
-            RefreshModListUI();
-        }
-
-        private void CheckActive_Toggle(object sender, RoutedEventArgs e)
-        {
-            var cbx = (CheckBox)sender;
-            SearchActive = cbx.IsChecked ?? false;
-            RefreshModListUI();
-        }
-
         private void CmdOnline_Click(object sender, RoutedEventArgs e)
         {
             var onlinePopup = new OnlineWindow(Catalog, this);
             onlinePopup.ShowDialog();
         }
 
+        #region Uninstall Mod
         public void Uninstall(string id)
         {
             ModManager.Uninstall(this, Warning, Mods, id);
@@ -811,6 +845,7 @@ namespace Greed
         {
             return Mods.Any(m => m.Id == id);
         }
+        #endregion
 
         public Dictionary<string, Version> GetModVersions()
         {
@@ -822,6 +857,7 @@ namespace Greed
             return dict;
         }
 
+        #region Update Mod
         public void UpdateModAsync(Mod modToUpdate, VersionEntry targetVersion)
         {
             Dispatcher.Invoke(() => UpdateModInternal(modToUpdate, targetVersion));
@@ -858,6 +894,7 @@ namespace Greed
             // Reload Mods
             ReloadModListFromDiskAsync();
         }
+        #endregion
 
         #region Mod Packs
         private void RefreshVaultPackUI()
@@ -999,6 +1036,7 @@ namespace Greed
 
         #endregion
 
+        #region File Drag-and-Drop
         private void Window_DragEnter(object sender, DragEventArgs e)
         {
             PrintSync("Window_DragEnter()");
@@ -1013,31 +1051,6 @@ namespace Greed
             PrintSync("Window_Drop()");
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
             foreach (string file in files) Console.WriteLine(file);
-        }
-
-        private void Window_DragLeave(object sender, DragEventArgs e)
-        {
-            PrintSync("Window_DragLeave()");
-        }
-
-        private void Window_DragOver(object sender, DragEventArgs e)
-        {
-            PrintSync("Window_DragOver()");
-        }
-
-        private void viewModList_DragEnter(object sender, DragEventArgs e)
-        {
-            PrintSync("viewModList_DragEnter()");
-        }
-
-        private void viewModList_DragLeave(object sender, DragEventArgs e)
-        {
-            PrintSync("viewModList_DragLeave()");
-        }
-
-        private void viewModList_DragOver(object sender, DragEventArgs e)
-        {
-            PrintSync("viewModList_DragOver()");
         }
 
         private void viewModList_Drop(object sender, DragEventArgs e)
@@ -1070,5 +1083,6 @@ namespace Greed
             await SetProgressAsync(1);
             ReloadModListFromDiskAsync();
         }
+        #endregion
     }
 }

@@ -22,6 +22,8 @@ namespace Greed.Controls.Online
         private string SearchQuery { get; set; } = string.Empty;
         private bool SearchUninstalled { get; set; } = false;
 
+        private int SelectedIndex = -1;
+
         public OnlineWindow(OnlineCatalog listing, MainWindow parent)
         {
             InitializeComponent();
@@ -38,15 +40,19 @@ namespace Greed.Controls.Online
             _ = ParentWindow.PrintAsync($"RefreshOnlineModListUI for {Catalog.Mods.Count} mods.");
             var modVersions = ParentWindow.GetModVersions();
             ViewOnlineModList.Items.Clear();
-            Catalog.Mods
+            var viewableMods = Catalog.Mods
                 .Where(m => string.IsNullOrWhiteSpace(SearchQuery)
-                    || m.Id.Contains(SearchQuery)
-                    || m.Name.Contains(SearchQuery)
-                    || m.Author.Contains(SearchQuery)
-                    || m.Description.Contains(SearchQuery))
+                    || m.Id.Contains(SearchQuery, StringComparison.InvariantCultureIgnoreCase)
+                    || m.Name.Contains(SearchQuery, StringComparison.InvariantCultureIgnoreCase)
+                    || m.Author.Contains(SearchQuery, StringComparison.InvariantCultureIgnoreCase)
+                    || m.Description.Contains(SearchQuery, StringComparison.InvariantCultureIgnoreCase))
                 .Where(m => !SearchUninstalled || !ParentWindow.IsModInstalled(m.Id))
-                .ToList()
-                .ForEach(m => ViewOnlineModList.Items.Add(new CatalogListItem(m, modVersions)));
+                .ToList();
+
+            for (var i = 0; i < viewableMods.Count; i++)
+            {
+                ViewOnlineModList.Items.Add(new CatalogListItem(viewableMods[i], modVersions, i % 2 == 0, i == SelectedIndex));
+            }
             UpdateRightClickMenuOptions();
         }
 
@@ -60,7 +66,15 @@ namespace Greed.Controls.Online
             var item = (CatalogListItem)e.AddedItems[0]!;
             var meta = Catalog.Mods.First(m => m.Name == item.Name);
             SelectedMod = meta;
-            UpdateRightClickMenuOptions();
+            if (SelectedIndex != ViewOnlineModList.SelectedIndex)
+            {
+                SelectedIndex = ViewOnlineModList.SelectedIndex;
+                RefreshOnlineModListUI();
+            }
+            else
+            {
+                UpdateRightClickMenuOptions();
+            }
 
             try
             {
