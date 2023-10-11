@@ -1,4 +1,4 @@
-﻿namespace Greed.UnitTest
+﻿namespace Greed.UnitTest.Models.Mutations
 {
     [TestClass]
     public class MutationTest
