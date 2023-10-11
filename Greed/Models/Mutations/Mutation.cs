@@ -1,13 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using Greed.Models.Mutations.Variables;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using Greed.Exceptions;
-using Greed.Extensions;
-using Greed.Models.Mutations.Variables;
-using Greed.Models.Mutations.Operations.Arrays;
-using System.Text.RegularExpressions;
-using System.Linq;
 
 namespace Greed.Models.Mutations
 {
@@ -26,27 +20,6 @@ namespace Greed.Models.Mutations
             {
                 Type = type;
             }
-        }
-
-        public static bool IsTruthy(object? obj)
-        {
-            if (obj == null)
-            {
-                return false;
-            }
-            if (obj.Equals(false))
-            {
-                return false;
-            }
-            if (obj.Equals(""))
-            {
-                return false;
-            }
-            if (obj.Equals(0))
-            {
-                return false;
-            }
-            return true;
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using Greed.Models;
-using Greed.Models.Json;
+﻿using Greed.Models.Json;
 using System;
 using System.Diagnostics;
 using System.Windows;

@@ -1,14 +1,11 @@
-﻿using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Greed.Models.Mutations.Variables;
-using Greed.Exceptions;
+﻿using Greed.Exceptions;
 using Greed.Extensions;
 using Greed.Models.Mutations.Operations.Arrays;
 using Greed.Models.Mutations.Operations.Logical;
+using Greed.Models.Mutations.Variables;
+using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
 
 namespace Greed.Models.Mutations
 {
@@ -68,6 +65,27 @@ namespace Greed.Models.Mutations
             }
 
             throw new ResolvableParseException("Failed to parse: " + obj?.ToString());
+        }
+
+        public static bool IsTruthy(object? obj)
+        {
+            if (obj == null)
+            {
+                return false;
+            }
+            if (obj.Equals(false))
+            {
+                return false;
+            }
+            if (obj.Equals(""))
+            {
+                return false;
+            }
+            if (obj.Equals(0))
+            {
+                return false;
+            }
+            return true;
         }
     }
 }

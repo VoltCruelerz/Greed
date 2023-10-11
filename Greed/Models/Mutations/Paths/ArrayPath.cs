@@ -1,8 +1,8 @@
-﻿using Greed.Models.Mutations.Variables;
+﻿using Greed.Exceptions;
+using Greed.Models.Mutations.Variables;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using Greed.Exceptions;
 
 namespace Greed.Models.Mutations.Paths
 {
@@ -36,7 +36,7 @@ namespace Greed.Models.Mutations.Paths
                 variables.Add(Index, index);
                 variables.Add(Element, element);
                 var nextAction = path[^depthRemaining];
-                for ( var i = 0; i < array.Count; i++)
+                for (var i = 0; i < array.Count; i++)
                 {
                     index.Value = i;
                     element.Value = array[i];
