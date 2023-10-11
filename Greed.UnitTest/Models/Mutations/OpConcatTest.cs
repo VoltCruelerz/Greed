@@ -340,7 +340,7 @@ namespace Greed.UnitTest.Models.Mutations
 
         #region Conditional
         [TestMethod]
-        public void Concat_Conditional_D1_TRUE()
+        public void Concat_Conditional_D1_TRUE_Var()
         {
             // Arrange
             var root = JObject.Parse("""
@@ -368,9 +368,38 @@ namespace Greed.UnitTest.Models.Mutations
             Debug.WriteLine(root.ToString());
             Assert.AreEqual(3, a.Count);
         }
+        [TestMethod]
+        public void Concat_Conditional_D1_TRUE_Bool()
+        {
+            // Arrange
+            var root = JObject.Parse("""
+                {
+                    "a": [0,1]
+                }
+                """);
+            var config = JObject.Parse("""
+                {
+                    "path": "a[i]",
+                    "value": 2,
+                    "condition": {
+                        "type": "EQ",
+                        "params": [ true ]
+                    }
+                }
+                """);
+            var op = new OpConcat(config);
+
+            // Act
+            op.Exec(root);
+
+            // Assert
+            var a = (JArray)root["a"]!;
+            Debug.WriteLine(root.ToString());
+            Assert.AreEqual(3, a.Count);
+        }
 
         [TestMethod]
-        public void Concat_Conditional_D1_FALSE()
+        public void Concat_Conditional_D1_FALSE_Var()
         {
             // Arrange
             var root = JObject.Parse("""
@@ -385,6 +414,36 @@ namespace Greed.UnitTest.Models.Mutations
                     "condition": {
                         "type": "EQ",
                         "params": [ "$false" ]
+                    }
+                }
+                """);
+            var op = new OpConcat(config);
+
+            // Act
+            op.Exec(root);
+
+            // Assert
+            var a = (JArray)root["a"]!;
+            Debug.WriteLine(root.ToString());
+            Assert.AreEqual(3, a.Count);
+        }
+
+        [TestMethod]
+        public void Concat_Conditional_D1_FALSE_Bool()
+        {
+            // Arrange
+            var root = JObject.Parse("""
+                {
+                    "a": [0,1]
+                }
+                """);
+            var config = JObject.Parse("""
+                {
+                    "path": "a[i]",
+                    "value": 2,
+                    "condition": {
+                        "type": "EQ",
+                        "params": [ false ]
                     }
                 }
                 """);

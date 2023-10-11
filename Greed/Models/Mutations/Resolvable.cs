@@ -54,6 +54,17 @@ namespace Greed.Models.Mutations
                 {
                     return new VariableReference(str[1..]);
                 }
+                else
+                {
+                    return token.Type switch
+                    {
+                        JTokenType.Integer => new ConstantReference(token.Value<int>()),
+                        JTokenType.Float => new ConstantReference(token.Value<float>()),
+                        JTokenType.Boolean => new ConstantReference(token.Value<bool>()),
+                        JTokenType.String => new ConstantReference(token.Value<string>()),
+                        _ => throw new ResolvableParseException("Unrecognized type " + token.Type),
+                    };
+                }
             }
 
             throw new ResolvableParseException("Failed to parse: " + obj?.ToString());
