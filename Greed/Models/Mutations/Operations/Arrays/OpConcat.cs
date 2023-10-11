@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Greed.Exceptions;
 using Greed.Models.Mutations.Variables;
+using Greed.Models.Mutations.Operations.Primitive;
 
 namespace Greed.Models.Mutations.Operations.Arrays
 {
@@ -17,12 +18,13 @@ namespace Greed.Models.Mutations.Operations.Arrays
     {
         public JToken Value { get; set; }
 
-        public int BreakDepth { get; set; }
+        public Resolvable? Condition { get; set; }
 
         public OpConcat(JObject obj) : base(obj)
         {
             Value = obj["value"]!;
-            BreakDepth = int.Parse(obj["breakDepth"]?.ToString() ?? "0");
+            var condition = obj["condition"];
+            Condition = condition != null ? GenerateResolvable((JObject)condition) : null;
         }
 
         /// <summary>
@@ -30,21 +32,37 @@ namespace Greed.Models.Mutations.Operations.Arrays
         /// </summary>
         /// <param name="root"></param>
         /// <returns></returns>
-        /// <exception cref="MutationExecException"></exception>
-        public override object? Exec(JObject root)
+        /// <exception cref="ResolvableExecException"></exception>
+        public override object? Exec(JObject root, Dictionary<string, Variable> variables)
         {
             if (root == null) return null;
 
-
-            DoWork(root, Path, 0, new Dictionary<string, Variable>(), (JToken token, Dictionary<string, Variable> vars) =>
+            Path[0].DoWork(root, Path, Path.Count - 1, Variables, (JToken? token, Dictionary<string, Variable> vars) =>
             {
-                if (token.GetType() != typeof(JArray)) throw new MutationExecException($"Path {string.Join(".", Path)} did not lead to array. Instead, found {token.GetType()}");
+                if (token is null) return;
+
+                if (token.GetType() != typeof(JArray)) throw new ResolvableExecException($"Path {string.Join(".", Path)} did not lead to array. Instead, found {token.GetType()}");
 
                 var arr = (JArray)token;
                 arr.Add(Value);
             });
 
             return null;
+        }
+
+        public object? Exec(JObject root)
+        {
+            // Prepopulate with the stock variables.
+            var variables = new Dictionary<string, Variable>
+            {
+                { "true", new Variable("true", OpPrimitive.TRUE) },
+                { "false", new Variable("false", OpPrimitive.FALSE) },
+                { "null", new Variable("null", OpPrimitive.NULL) },
+                { "fixed_zero", new Variable("fixed_zero", OpPrimitive.FIXED_ZERO) },
+                { "fixed_one", new Variable("fixed_one", OpPrimitive.FIXED_ONE) },
+            };
+
+            return Exec(root, variables);
         }
     }
 }

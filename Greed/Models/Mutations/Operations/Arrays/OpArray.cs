@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Greed.Models.Mutations.Paths;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -10,11 +11,13 @@ namespace Greed.Models.Mutations.Operations.Arrays
 {
     public abstract class OpArray : Mutation
     {
-        public string[] Path { get; set; }
+        public string PathStr { get; set; }
+        public List<ActionPath> Path { get; set; }
 
         public OpArray(JObject obj) : base(obj)
         {
-            Path = obj["path"]!.ToString().Split(".");
+            PathStr = obj["path"]!.ToString();
+            Path = ActionPath.Build(PathStr);
         }
     }
 }

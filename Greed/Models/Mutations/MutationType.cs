@@ -5,18 +5,29 @@ namespace Greed.Models.Mutations
     public enum MutationType
     {
         [Description("NONE")]
-        NONE = 0,
+        NONE,
 
+        [Description("PRIMITIVE")]
+        PRIMITIVE,
+
+        // Logical
+        [Description("EQ")]
+        EQ,
+
+        [Description("NEQ")]
+        NEQ,
+
+        // Array Operations
         [Description("CONCAT")]
-        CONCAT = 1,
+        CONCAT,
 
         [Description("INSERT")]
-        INSERT = 2,
+        INSERT,
 
         [Description("FILTER")]
-        FILTER = 3,
+        FILTER,
 
         [Description("REPLACE")]
-        REPLACE = 4,
+        REPLACE,
     }
 }
