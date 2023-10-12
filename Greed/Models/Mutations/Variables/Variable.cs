@@ -17,6 +17,11 @@ namespace Greed.Models.Mutations.Variables
             ScopeDepth = scopeDepth;
         }
 
+        public override string ToString()
+        {
+            return $"[{ScopeDepth}] {Name} := {Value?.ToString()}";
+        }
+
         public static Dictionary<string, Variable> GetGlobals()
         {
             return new Dictionary<string, Variable>

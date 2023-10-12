@@ -12,8 +12,6 @@ namespace Greed.Models.Mutations
     {
         public MutationType Type { get; set; } = MutationType.NONE;
 
-        public Dictionary<string, Variable> Variables = new();
-
         public Mutation(JObject obj)
         {
             if (Enum.TryParse(obj["type"]?.ToString(), out MutationType type))

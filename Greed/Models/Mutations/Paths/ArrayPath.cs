@@ -31,16 +31,12 @@ namespace Greed.Models.Mutations.Paths
 
             if (token is JArray array)
             {
-                var index = new Variable(Index, 0, depth);
-                var element = new Variable(Element, null, depth);
-                variables.Add(Index, index);
-                variables.Add(Element, element);
                 var nextAction = path[depth + 1];
                 // Work backwards because deletion is easier.
                 for (var i = array.Count - 1; i >= 0; i--)
                 {
-                    index.Value = i;
-                    element.Value = array[i];
+                    variables.Add(Index, new Variable(Index, i, depth));
+                    variables.Add(Element, new Variable(Element, array[i], depth));
 
                     // I've tried other methods of handling break depths. This is the cleanest option.
                     // Alternatives require OpFilter to basically rewrite all of this exploration code
@@ -48,14 +44,14 @@ namespace Greed.Models.Mutations.Paths
                     try
                     {
                         nextAction.DoWork(array[i], path, depth + 1, variables, action);
+                        variables.Remove(Index);
+                        variables.Remove(Element);
                     }
                     catch (BreakDepthEjection bde)
                     {
-                        bde.TryHandle(depth, array, i);
+                        bde.TryHandle(depth, array, i, variables);
                     }
                 }
-                variables.Remove(Index);
-                variables.Remove(Element);
                 return;
             }
 

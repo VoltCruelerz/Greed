@@ -289,5 +289,94 @@ namespace Greed.UnitTest.Models.Mutations
             // Assert
             Assert.AreEqual(expected.ToString(), root.ToString());
         }
+
+        [TestMethod]
+        public void Remove_Middle_By_Str_3D_Nested_BD4()
+        {
+            // Arrange
+            var root = JObject.Parse("""
+                {
+                    "a": [
+                        {
+                            "b": [["c", "d"], ["e"]]
+                        },
+                        {
+                            "b": [["f", "g"], ["h"]]
+                        }
+                    ]
+                }
+            """);
+            var config = JObject.Parse("""
+                {
+                    "path": "a[i].b[j][k]",
+                    "breakDepth": 4,
+                    "condition": {
+                        "type": "NEQ",
+                        "params": [ "$element_k", "d" ]
+                    }
+                }
+                """);
+            var expected = JObject.Parse("""
+                 {
+                     "a": [
+                         {
+                             "b": [["c"], ["e"]]
+                         },
+                         {
+                             "b": [["f", "g"], ["h"]]
+                         }
+                     ]
+                 }
+             """);
+
+            // Act
+            new OpFilter(config).Exec(root);
+
+            // Assert
+            Assert.AreEqual(expected.ToString(), root.ToString());
+        }
+
+        [TestMethod]
+        public void Remove_Middle_By_Str_3D_Nested_BD1()
+        {
+            // Arrange
+            var root = JObject.Parse("""
+                {
+                    "a": [
+                        {
+                            "b": [["c", "d"], ["e"]]
+                        },
+                        {
+                            "b": [["f", "g"], ["h"]]
+                        }
+                    ]
+                }
+            """);
+            var config = JObject.Parse("""
+                {
+                    "path": "a[i].b[j][k]",
+                    "breakDepth": 1,
+                    "condition": {
+                        "type": "NEQ",
+                        "params": [ "$element_k", "d" ]
+                    }
+                }
+                """);
+            var expected = JObject.Parse("""
+                 {
+                     "a": [
+                         {
+                             "b": [["f", "g"], ["h"]]
+                         }
+                     ]
+                 }
+             """);
+
+            // Act
+            new OpFilter(config).Exec(root);
+
+            // Assert
+            Assert.AreEqual(expected.ToString(), root.ToString());
+        }
     }
 }

@@ -25,14 +25,20 @@ namespace Greed.Exceptions
             BreakDepth = breakDepth;
         }
 
-        public void TryHandle(int currentDepth, JArray arr, int index)
+        public void TryHandle(int currentDepth, JArray arr, int index, Dictionary<string, Variable> variables)
         {
+            // Remove out-of-scope variables
+            var varList = variables.Values.Where(v => v.ScopeDepth > currentDepth).ToList();
+            varList.ForEach(v => variables.Remove(v.Name));
+
+            // Handle if this is the appropriate place
             if (BreakDepth == currentDepth)
             {
                 Handler(arr, index);
                 return;
             }
 
+            // Go back up the call chain if this isn't the appropriate place.
             throw this;
         }
     }
