@@ -37,11 +37,15 @@ namespace Greed.Models.Mutations
                     MutationType.NONE => throw new NotImplementedException(),
                     MutationType.EQ => new OpEq(jobj),
                     MutationType.NEQ => new OpNeq(jobj),
+                    MutationType.AND => new OpAnd(jobj),
+                    MutationType.OR => new OpOr(jobj),
+                    MutationType.XOR => new OpXor(jobj),
+                    MutationType.GT => new OpGt(jobj),
                     MutationType.CONCAT => new OpConcat(jobj),
                     MutationType.INSERT => throw new NotImplementedException(),
                     MutationType.FILTER => throw new NotImplementedException(),
                     MutationType.REPLACE => throw new NotImplementedException(),
-                    _ => throw new ResolvableParseException("Unrecognized type " + type.GetDescription()),
+                    _ => throw new ResolvableParseException("No handler configured for type: " + type.GetDescription()),
                 };
             }
             else if (obj is JToken token)

@@ -12,6 +12,7 @@ namespace Greed.UnitTest.Models.Mutations
     [TestClass]
     public class OpFilterTests
     {
+        #region Basic Array Filtering
         [TestMethod]
         public void Remove_Solo_By_Int_D0()
         {
@@ -155,7 +156,9 @@ namespace Greed.UnitTest.Models.Mutations
             var expected = JObject.Parse(""" { "a": { "b": ["c", "e"] } } """);
             Assert.AreEqual(expected.ToString(), root.ToString());
         }
+        #endregion
 
+        #region Break Depth Testing
         [TestMethod]
         public void Remove_Middle_By_Str_2D_Nested_BD_Default()
         {
@@ -378,5 +381,58 @@ namespace Greed.UnitTest.Models.Mutations
             // Assert
             Assert.AreEqual(expected.ToString(), root.ToString());
         }
+        #endregion
+
+        #region Element Exploration Testing
+
+        [TestMethod]
+        public void Remove_First_By_Child_Int_BD1()
+        {
+            // Arrange
+            var root = JObject.Parse("""
+                {
+                    "a": [
+                        {
+                            "b": {
+                                "c": 0
+                            }
+                        },
+                        {
+                            "b": {
+                                "c": 1
+                            }
+                        }
+                    ]
+                }
+            """);
+            var config = JObject.Parse("""
+                {
+                    "path": "a[i]",
+                    "breakDepth": 1,
+                    "condition": {
+                        "type": "GT",
+                        "params": [ "$element_i.b.c", 0 ]
+                    }
+                }
+                """);
+            var expected = JObject.Parse("""
+                 {
+                     "a": [
+                         {
+                             "b": {
+                                 "c": 1
+                             }
+                         }
+                     ]
+                 }
+             """);
+
+            // Act
+            new OpFilter(config).Exec(root);
+
+            // Assert
+            Assert.AreEqual(expected.ToString(), root.ToString());
+        }
+        #endregion
     }
 }

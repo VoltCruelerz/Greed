@@ -29,6 +29,18 @@ namespace Greed.Models.Mutations
         [Description("XOR")]
         XOR,
 
+        [Description("LT")]
+        LT,
+
+        [Description("GT")]
+        GT,
+
+        [Description("LTE")]
+        LTE,
+
+        [Description("GTE")]
+        GTE,
+
         // Array Operations
         [Description("CONCAT")]
         CONCAT,
