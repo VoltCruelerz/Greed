@@ -6,7 +6,7 @@ using Newtonsoft.Json.Linq;
 namespace Greed.UnitTest.Models.Mutations
 {
     [TestClass]
-    public class MutationTest
+    public class MutationTests
     {
         [TestMethod]
         public void IsTruthy_True()

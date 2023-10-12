@@ -53,14 +53,7 @@ namespace Greed.Models.Mutations
                 }
                 else
                 {
-                    return token.Type switch
-                    {
-                        JTokenType.Integer => new ConstantReference(token.Value<int>()),
-                        JTokenType.Float => new ConstantReference(token.Value<float>()),
-                        JTokenType.Boolean => new ConstantReference(token.Value<bool>()),
-                        JTokenType.String => new ConstantReference(token.Value<string>()),
-                        _ => throw new ResolvableParseException("Unrecognized type " + token.Type),
-                    };
+                    return new ConstantReference(token.Resolve());
                 }
             }
 
@@ -86,6 +79,16 @@ namespace Greed.Models.Mutations
                 return false;
             }
             return true;
+        }
+
+        public static bool AreEqual(object? a, object? b)
+        {
+            if (a == null || b == null)
+            {
+                return a == null && b == null;
+            }
+
+            return a.Equals(b);
         }
     }
 }

@@ -6,7 +6,7 @@ using System.Diagnostics;
 namespace Greed.UnitTest.Models.Mutations
 {
     [TestClass]
-    public class OpConcatTest
+    public class OpConcatTests
     {
         #region Always
         /// <summary>

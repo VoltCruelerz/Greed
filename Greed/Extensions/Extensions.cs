@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Greed.Exceptions;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -245,6 +247,24 @@ namespace Greed.Extensions
                     sb.AppendFormat("%{0:X2}", (int)c);
             }
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// Resolves a token to its primitive type.
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        /// <exception cref="ResolvableParseException"></exception>
+        public static object Resolve(this JToken token)
+        {
+            return token.Type switch
+            {
+                JTokenType.Integer => token.Value<int>()!,
+                JTokenType.Float => token.Value<float>()!,
+                JTokenType.Boolean => token.Value<bool>()!,
+                JTokenType.String => token.Value<string>()!,
+                _ => throw new ResolvableParseException("Unresolvable type " + token.Type),
+            };
         }
     }
 }

@@ -21,7 +21,7 @@ namespace Greed.Models.Mutations.Operations.Logical
             {
                 var op = Parameters[i];
                 var hypo = op.Exec(root, variables);
-                if (obj != hypo)
+                if (!AreEqual(obj, hypo))
                 {
                     return true;
                 }

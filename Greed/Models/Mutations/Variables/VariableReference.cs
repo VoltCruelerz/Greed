@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Greed.Extensions;
+using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 
 namespace Greed.Models.Mutations.Variables
@@ -13,7 +14,15 @@ namespace Greed.Models.Mutations.Variables
 
         public override object? Exec(JObject root, Dictionary<string, Variable> variables)
         {
-            return variables[Name];
+            var value = variables[Name].Value;
+            if (value == null) return null;
+
+            if (value is JToken token)
+            {
+                return token.Resolve();
+            }
+
+            return value;
         }
     }
 }
