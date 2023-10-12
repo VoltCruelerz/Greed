@@ -1,7 +1,5 @@
-﻿using Greed.Models.Mutations.Variables;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
 
 namespace Greed.Models.Mutations
 {

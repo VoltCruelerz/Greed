@@ -3,8 +3,6 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Greed.Exceptions
 {
@@ -19,7 +17,7 @@ namespace Greed.Exceptions
         private readonly int BreakDepth;
 
 
-        public BreakDepthEjection(Action<JArray,int> handler, int breakDepth) : base("If you see this, you probably have a typo in your array path or break depth.")
+        public BreakDepthEjection(Action<JArray, int> handler, int breakDepth) : base("If you see this, you probably have a typo in your array path or break depth.")
         {
             Handler = handler;
             BreakDepth = breakDepth;

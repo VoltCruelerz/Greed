@@ -1,10 +1,8 @@
 ﻿using Greed.Exceptions;
-using Greed.Models.Mutations.Operations.Primitive;
+using Greed.Models.Mutations.Paths;
 using Greed.Models.Mutations.Variables;
 using Newtonsoft.Json.Linq;
-using System;
 using System.Collections.Generic;
-using Greed.Models.Mutations.Paths;
 
 namespace Greed.Models.Mutations.Operations.Arrays
 {
@@ -58,7 +56,8 @@ namespace Greed.Models.Mutations.Operations.Arrays
                     variables.Add(lastPath.Element, new Variable(lastPath.Element, item, depth));
 
                     // Remove as needed
-                    if (!IsTruthy(Condition.Exec(root, variables))) {
+                    if (!IsTruthy(Condition.Exec(root, variables)))
+                    {
                         // Try to handle here, but if not, eject until we find the break depth.
                         if (depth == BreakDepth)
                         {
