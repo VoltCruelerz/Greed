@@ -32,7 +32,7 @@ namespace Greed.Models.Mutations.Operations.Arrays
         {
             if (root == null) return null;
 
-            Path[0].DoWork(root, Path, 0, Variables, (JToken? token, Dictionary<string, Variable> vars) =>
+            Path[0].DoWork(root, Path, 0, Variables, (JToken? token, Dictionary<string, Variable> vars, int depth) =>
             {
                 if (token is null) return;
 
@@ -47,17 +47,7 @@ namespace Greed.Models.Mutations.Operations.Arrays
 
         public object? Exec(JObject root)
         {
-            // Prepopulate with the stock variables.
-            var variables = new Dictionary<string, Variable>
-            {
-                { "true", new Variable("true", OpPrimitive.TRUE) },
-                { "false", new Variable("false", OpPrimitive.FALSE) },
-                { "null", new Variable("null", OpPrimitive.NULL) },
-                { "fixed_zero", new Variable("fixed_zero", OpPrimitive.FIXED_ZERO) },
-                { "fixed_one", new Variable("fixed_one", OpPrimitive.FIXED_ONE) },
-            };
-
-            return Exec(root, variables);
+            return Exec(root, Variable.GetGlobals());
         }
     }
 }

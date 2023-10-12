@@ -16,11 +16,11 @@ namespace Greed.Models.Mutations.Paths
             Element = "element_" + index;
         }
 
-        public override void DoWork(JToken? token, List<ActionPath> path, int depth, Dictionary<string, Variable> variables, Action<JToken?, Dictionary<string, Variable>> action)
+        public override void DoWork(JToken? token, List<ActionPath> path, int depth, Dictionary<string, Variable> variables, Action<JToken?, Dictionary<string, Variable>, int> action)
         {
             if (depth == path.Count - 1)
             {
-                action(token, variables);
+                action(token, variables, depth);
                 return;
             }
 
@@ -31,16 +31,28 @@ namespace Greed.Models.Mutations.Paths
 
             if (token is JArray array)
             {
-                var index = new Variable(Index, 0);
-                var element = new Variable(Element, null);
+                var index = new Variable(Index, 0, depth);
+                var element = new Variable(Element, null, depth);
                 variables.Add(Index, index);
                 variables.Add(Element, element);
                 var nextAction = path[depth + 1];
-                for (var i = 0; i < array.Count; i++)
+                // Work backwards because deletion is easier.
+                for (var i = array.Count - 1; i >= 0; i--)
                 {
                     index.Value = i;
                     element.Value = array[i];
-                    nextAction.DoWork(array[i], path, depth + 1, variables, action);
+
+                    // I've tried other methods of handling break depths. This is the cleanest option.
+                    // Alternatives require OpFilter to basically rewrite all of this exploration code
+                    // for itself.
+                    try
+                    {
+                        nextAction.DoWork(array[i], path, depth + 1, variables, action);
+                    }
+                    catch (BreakDepthEjection bde)
+                    {
+                        bde.TryHandle(depth, array, i);
+                    }
                 }
                 variables.Remove(Index);
                 variables.Remove(Element);

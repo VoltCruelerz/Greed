@@ -15,11 +15,11 @@ namespace Greed.Models.Mutations.Paths
             Name = name;
         }
 
-        public override void DoWork(JToken? token, List<ActionPath> path, int depth, Dictionary<string, Variable> variables, Action<JToken?, Dictionary<string, Variable>> action)
+        public override void DoWork(JToken? token, List<ActionPath> path, int depth, Dictionary<string, Variable> variables, Action<JToken?, Dictionary<string, Variable>, int> action)
         {
             if (depth == path.Count - 1)
             {
-                action(token, variables);
+                action(token, variables, depth);
                 return;
             }
 

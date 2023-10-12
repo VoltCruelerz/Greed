@@ -33,7 +33,12 @@ namespace Greed.Models.Mutations.Operations.Arrays
         {
             if (root == null) return null;
 
-            Path[0].DoWork(root, Path, 0, Variables, (JToken? token, Dictionary<string, Variable> vars) =>
+            static void handle(JArray arr, int index)
+            {
+                arr.RemoveAt(index);
+            }
+
+            Path[0].DoWork(root, Path, 0, Variables, (JToken? token, Dictionary<string, Variable> vars, int depth) =>
             {
                 if (token is null) return;
 
@@ -49,12 +54,20 @@ namespace Greed.Models.Mutations.Operations.Arrays
                     var item = arr[i];
 
                     // Populate variables
-                    variables.Add(lastPath.Index, new Variable(lastPath.Index, i));
-                    variables.Add(lastPath.Element, new Variable(lastPath.Element, item));
+                    variables.Add(lastPath.Index, new Variable(lastPath.Index, i, depth));
+                    variables.Add(lastPath.Element, new Variable(lastPath.Element, item, depth));
 
                     // Remove as needed
                     if (!IsTruthy(Condition.Exec(root, variables))) {
-                        arr.RemoveAt(i);
+                        // Try to handle here, but if not, eject until we find the break depth.
+                        if (depth == BreakDepth)
+                        {
+                            handle(arr, i);
+                        }
+                        else
+                        {
+                            throw new BreakDepthEjection(handle, BreakDepth);
+                        }
                     }
 
                     // Clean up
@@ -68,17 +81,7 @@ namespace Greed.Models.Mutations.Operations.Arrays
 
         public object? Exec(JObject root)
         {
-            // Prepopulate with the stock variables.
-            var variables = new Dictionary<string, Variable>
-            {
-                { "true", new Variable("true", OpPrimitive.TRUE) },
-                { "false", new Variable("false", OpPrimitive.FALSE) },
-                { "null", new Variable("null", OpPrimitive.NULL) },
-                { "fixed_zero", new Variable("fixed_zero", OpPrimitive.FIXED_ZERO) },
-                { "fixed_one", new Variable("fixed_one", OpPrimitive.FIXED_ONE) },
-            };
-
-            return Exec(root, variables);
+            return Exec(root, Variable.GetGlobals());
         }
     }
 }

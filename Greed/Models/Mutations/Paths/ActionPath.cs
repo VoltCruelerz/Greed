@@ -19,7 +19,7 @@ namespace Greed.Models.Mutations.Paths
             PathElement = type;
         }
 
-        public abstract void DoWork(JToken? token, List<ActionPath> path, int depth, Dictionary<string, Variable> variables, Action<JToken?, Dictionary<string, Variable>> action);
+        public abstract void DoWork(JToken? token, List<ActionPath> path, int depth, Dictionary<string, Variable> variables, Action<JToken?, Dictionary<string, Variable>, int> action);
 
         public static List<ActionPath> Build(string path)
         {
