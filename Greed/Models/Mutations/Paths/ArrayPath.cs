@@ -16,9 +16,9 @@ namespace Greed.Models.Mutations.Paths
             Element = "element_" + index;
         }
 
-        public override void DoWork(JToken? token, List<ActionPath> path, int depthRemaining, Dictionary<string, Variable> variables, Action<JToken?, Dictionary<string, Variable>> action)
+        public override void DoWork(JToken? token, List<ActionPath> path, int depth, Dictionary<string, Variable> variables, Action<JToken?, Dictionary<string, Variable>> action)
         {
-            if (depthRemaining == 0)
+            if (depth == path.Count - 1)
             {
                 action(token, variables);
                 return;
@@ -35,19 +35,19 @@ namespace Greed.Models.Mutations.Paths
                 var element = new Variable(Element, null);
                 variables.Add(Index, index);
                 variables.Add(Element, element);
-                var nextAction = path[^depthRemaining];
+                var nextAction = path[depth + 1];
                 for (var i = 0; i < array.Count; i++)
                 {
                     index.Value = i;
                     element.Value = array[i];
-                    nextAction.DoWork(array[i], path, depthRemaining - 1, variables, action);
+                    nextAction.DoWork(array[i], path, depth + 1, variables, action);
                 }
                 variables.Remove(Index);
                 variables.Remove(Element);
                 return;
             }
 
-            throw new ResolvableExecException($"Expected JArray at action depth {depthRemaining}, but found {token.GetType()}");
+            throw new ResolvableExecException($"Expected JArray at action depth {depth}, but found {token.GetType()}");
         }
     }
 }

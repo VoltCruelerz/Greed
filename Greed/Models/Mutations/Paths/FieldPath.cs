@@ -15,9 +15,9 @@ namespace Greed.Models.Mutations.Paths
             Name = name;
         }
 
-        public override void DoWork(JToken? token, List<ActionPath> path, int depthRemaining, Dictionary<string, Variable> variables, Action<JToken?, Dictionary<string, Variable>> action)
+        public override void DoWork(JToken? token, List<ActionPath> path, int depth, Dictionary<string, Variable> variables, Action<JToken?, Dictionary<string, Variable>> action)
         {
-            if (depthRemaining == 0)
+            if (depth == path.Count - 1)
             {
                 action(token, variables);
                 return;
@@ -30,17 +30,17 @@ namespace Greed.Models.Mutations.Paths
 
             if (token is JArray array)
             {
-                throw new ResolvableExecException($"Expected value or JObject at action depth {depthRemaining}, but found JArray.");
+                throw new ResolvableExecException($"Expected value or JObject at action depth {depth}, but found JArray.");
             }
             else if (token is JObject obj)
             {
-                var nextAction = path[^depthRemaining];
+                var nextAction = path[depth + 1];
                 var child = obj[Name];
-                nextAction.DoWork(child, path, depthRemaining - 1, variables, action);
+                nextAction.DoWork(child, path, depth + 1, variables, action);
             }
             else
             {
-                throw new ResolvableExecException($"Unexpected type encountered at action depth {depthRemaining}: {token.GetType()}");
+                throw new ResolvableExecException($"Unexpected type encountered at action depth {depth}: {token.GetType()}");
             }
         }
     }

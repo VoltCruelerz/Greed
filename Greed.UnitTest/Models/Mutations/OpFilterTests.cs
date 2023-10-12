@@ -17,7 +17,7 @@ namespace Greed.UnitTest.Models.Mutations
         {
             // Arrange
             var root = JObject.Parse(""" { "a": [0,1,2] } """);
-            var config = JObject.Parse("""
+            var greedConfig = JObject.Parse("""
                 {
                     "path": "a[i]",
                     "condition": {
@@ -26,16 +26,243 @@ namespace Greed.UnitTest.Models.Mutations
                     }
                 }
                 """);
-            var op = new OpFilter(config);
+            var op = new OpFilter(greedConfig);
 
             // Act
             op.Exec(root);
 
             // Assert
-            var a = (JArray)root["a"]!;
-            Debug.WriteLine(root.ToString());
-            Assert.AreEqual(2, a.Count);
             var expected = JObject.Parse(""" { "a": [0,2] } """);
+            Assert.AreEqual(expected.ToString(), root.ToString());
+        }
+
+        [TestMethod]
+        public void Remove_First_By_Int_D0()
+        {
+            // Arrange
+            var root = JObject.Parse(""" { "a": [0,1,2] } """);
+            var greedConfig = JObject.Parse("""
+                {
+                    "path": "a[i]",
+                    "condition": {
+                        "type": "NEQ",
+                        "params": [ "$element_i", 0 ]
+                    }
+                }
+                """);
+            var op = new OpFilter(greedConfig);
+
+            // Act
+            op.Exec(root);
+
+            // Assert
+            var expected = JObject.Parse(""" { "a": [1,2] } """);
+            Assert.AreEqual(expected.ToString(), root.ToString());
+        }
+
+        [TestMethod]
+        public void Remove_Last_By_Int_D0()
+        {
+            // Arrange
+            var root = JObject.Parse(""" { "a": [0,1,2] } """);
+            var greedConfig = JObject.Parse("""
+                {
+                    "path": "a[i]",
+                    "condition": {
+                        "type": "NEQ",
+                        "params": [ "$element_i", 2 ]
+                    }
+                }
+                """);
+            var op = new OpFilter(greedConfig);
+
+            // Act
+            op.Exec(root);
+
+            // Assert
+            var expected = JObject.Parse(""" { "a": [0,1] } """);
+            Assert.AreEqual(expected.ToString(), root.ToString());
+        }
+
+        [TestMethod]
+        public void Remove_Middle_By_Str_D0()
+        {
+            // Arrange
+            var root = JObject.Parse(""" { "a": ["b", "c", "d"] } """);
+            var greedConfig = JObject.Parse("""
+                {
+                    "path": "a[i]",
+                    "condition": {
+                        "type": "NEQ",
+                        "params": [ "$element_i", "c" ]
+                    }
+                }
+                """);
+            var op = new OpFilter(greedConfig);
+
+            // Act
+            op.Exec(root);
+
+            // Assert
+            var expected = JObject.Parse(""" { "a": ["b", "d"] } """);
+            Assert.AreEqual(expected.ToString(), root.ToString());
+        }
+
+        [TestMethod]
+        public void Remove_Middle_By_Str_D1()
+        {
+            // Arrange
+            var root = JObject.Parse(""" { "a": { "b": ["c", "d", "e"] } } """);
+            var greedConfig = JObject.Parse("""
+                {
+                    "path": "a.b[i]",
+                    "condition": {
+                        "type": "NEQ",
+                        "params": [ "$element_i", "d" ]
+                    }
+                }
+                """);
+            var op = new OpFilter(greedConfig);
+
+            // Act
+            op.Exec(root);
+
+            // Assert
+            var expected = JObject.Parse(""" { "a": { "b": ["c", "e"] } } """);
+            Assert.AreEqual(expected.ToString(), root.ToString());
+        }
+
+        [TestMethod]
+        public void Remove_Middle_By_Str_2D_Nested_BD_Default()
+        {
+            // Arrange
+            var root = JObject.Parse("""
+                {
+                    "a": [
+                        {
+                            "b": ["c", "d", "e"]
+                        },
+                        {
+                            "b": ["f", "g", "h"]
+                        }
+                    ]
+                }
+            """);
+            var greedConfig = JObject.Parse("""
+                {
+                    "path": "a[i].b[j]",
+                    "condition": {
+                        "type": "NEQ",
+                        "params": [ "$element_j", "d" ]
+                    }
+                }
+                """);
+            var expected = JObject.Parse("""
+                 {
+                     "a": [
+                         {
+                             "b": ["c", "e"]
+                         },
+                         {
+                             "b": ["f", "g", "h"]
+                         }
+                     ]
+                 }
+             """);
+
+            // Act
+            new OpFilter(greedConfig).Exec(root);
+
+            // Assert
+            Assert.AreEqual(expected.ToString(), root.ToString());
+        }
+
+        [TestMethod]
+        public void Remove_Middle_By_Str_2D_Nested_BD3()
+        {
+            // Arrange
+            var root = JObject.Parse("""
+                {
+                    "a": [
+                        {
+                            "b": ["c", "d", "e"]
+                        },
+                        {
+                            "b": ["f", "g", "h"]
+                        }
+                    ]
+                }
+            """);
+            var greedConfig = JObject.Parse("""
+                {
+                    "path": "a[i].b[j]",
+                    "breakDepth": 3,
+                    "condition": {
+                        "type": "NEQ",
+                        "params": [ "$element_j", "d" ]
+                    }
+                }
+                """);
+            var expected = JObject.Parse("""
+                 {
+                     "a": [
+                         {
+                             "b": ["c", "e"]
+                         },
+                         {
+                             "b": ["f", "g", "h"]
+                         }
+                     ]
+                 }
+             """);
+
+            // Act
+            new OpFilter(greedConfig).Exec(root);
+
+            // Assert
+            Assert.AreEqual(expected.ToString(), root.ToString());
+        }
+
+        [TestMethod]
+        public void Remove_Middle_By_Str_2D_Nested_BD1()
+        {
+            // Arrange
+            var root = JObject.Parse("""
+                {
+                    "a": [
+                        {
+                            "b": ["c", "d", "e"]
+                        },
+                        {
+                            "b": ["f", "g", "h"]
+                        }
+                    ]
+                }
+            """);
+            var greedConfig = JObject.Parse("""
+                {
+                    "path": "a[i].b[j]",
+                    "breakDepth": 1,
+                    "condition": {
+                        "type": "NEQ",
+                        "params": [ "$element_j", "d" ]
+                    }
+                }
+                """);
+            var expected = JObject.Parse("""
+                 {
+                     "a": [
+                         {
+                             "b": ["f", "g", "h"]
+                         }
+                     ]
+                 }
+             """);
+
+            // Act
+            new OpFilter(greedConfig).Exec(root);
+
+            // Assert
             Assert.AreEqual(expected.ToString(), root.ToString());
         }
     }

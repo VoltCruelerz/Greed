@@ -32,7 +32,7 @@ namespace Greed.Models.Mutations.Operations.Arrays
         {
             if (root == null) return null;
 
-            Path[0].DoWork(root, Path, Path.Count - 1, Variables, (JToken? token, Dictionary<string, Variable> vars) =>
+            Path[0].DoWork(root, Path, 0, Variables, (JToken? token, Dictionary<string, Variable> vars) =>
             {
                 if (token is null) return;
 
