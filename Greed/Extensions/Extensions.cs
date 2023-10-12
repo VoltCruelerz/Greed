@@ -263,6 +263,7 @@ namespace Greed.Extensions
                 JTokenType.Float => token.Value<float>()!,
                 JTokenType.Boolean => token.Value<bool>()!,
                 JTokenType.String => token.Value<string>()!,
+                JTokenType.Array => ((JArray)token).Count,
                 _ => throw new ResolvableParseException("Unresolvable type " + token.Type),
             };
         }
