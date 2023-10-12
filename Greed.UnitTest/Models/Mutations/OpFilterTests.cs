@@ -239,7 +239,7 @@ namespace Greed.UnitTest.Models.Mutations
                     ]
                 }
             """);
-            var greedConfig = JObject.Parse("""
+            var config = JObject.Parse("""
                 {
                     "path": "a[i].b[j]",
                     "breakDepth": 1,
@@ -260,7 +260,7 @@ namespace Greed.UnitTest.Models.Mutations
              """);
 
             // Act
-            new OpFilter(greedConfig).Exec(root);
+            new OpFilter(config).Exec(root);
 
             // Assert
             Assert.AreEqual(expected.ToString(), root.ToString());

@@ -19,7 +19,7 @@ namespace Greed.Exceptions
         private readonly int BreakDepth;
 
 
-        public BreakDepthEjection(Action<JArray,int> handler, int breakDepth)
+        public BreakDepthEjection(Action<JArray,int> handler, int breakDepth) : base("If you see this, you probably have a typo in your array path or break depth.")
         {
             Handler = handler;
             BreakDepth = breakDepth;
