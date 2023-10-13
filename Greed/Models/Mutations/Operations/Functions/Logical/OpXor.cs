@@ -3,21 +3,23 @@ using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Greed.Models.Mutations.Operations.Logical
+namespace Greed.Models.Mutations.Operations.Functions.Logical
 {
     /// <summary>
     /// Returns TRUE if exactly ONE of the parameters is truthy.
     /// </summary>
-    public class OpXor : OpLogical
+    public class OpXor : OpFunction
     {
         public OpXor(JObject config) : base(config)
         {
             // Do nothing
         }
 
+        public OpXor(List<Resolvable> parameters) : base(parameters, MutationType.XOR) { }
+
         public override object? Exec(JObject root, Dictionary<string, Variable> variables)
         {
-            return 1 == Parameters.Count(p => IsTruthy(p.Exec(root, variables)));
+            return 1 == Parameters.Count(p => IsTruthy(p.Exec(root, variables), root, variables));
         }
     }
 }

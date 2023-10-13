@@ -3,19 +3,21 @@ using Greed.Models.Mutations.Variables;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 
-namespace Greed.Models.Mutations.Operations.Logical
+namespace Greed.Models.Mutations.Operations.Functions.Comparison.Inequalities
 {
     /// <summary>
     /// Returns TRUE if p[0] > p[1]
     /// </summary>
-    public class OpGt : OpLogical
+    public class OpGt : OpFunction
     {
         public OpGt(JObject config) : base(config)
         {
-            if (Parameters.Count != 2)
-            {
-                throw new ResolvableParseException("GT requires exactly two parameters.");
-            }
+            AssertNParams(2);
+        }
+
+        public OpGt(List<Resolvable> parameters) : base(parameters, MutationType.GT)
+        {
+            AssertNParams(2);
         }
 
         public override object? Exec(JObject root, Dictionary<string, Variable> variables)

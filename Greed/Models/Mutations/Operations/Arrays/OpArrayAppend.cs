@@ -8,13 +8,13 @@ namespace Greed.Models.Mutations.Operations.Arrays
     /// <summary>
     /// Concatenates the Value onto the array.
     /// </summary>
-    public class OpConcat : OpArray
+    public class OpArrayAppend : OpArray
     {
         public JToken Value { get; set; }
 
         public Resolvable? Condition { get; set; }
 
-        public OpConcat(JObject obj) : base(obj)
+        public OpArrayAppend(JObject obj) : base(obj)
         {
             Value = obj["value"]!;
             var condition = obj["condition"];
@@ -30,6 +30,7 @@ namespace Greed.Models.Mutations.Operations.Arrays
         public override object? Exec(JObject root, Dictionary<string, Variable> variables)
         {
             if (root == null) return null;
+            var length = 0;
 
             Path[0].DoWork(root, Path, 0, variables, (JToken? token, Dictionary<string, Variable> vars, int depth) =>
             {
@@ -39,14 +40,15 @@ namespace Greed.Models.Mutations.Operations.Arrays
 
                 var arr = (JArray)token;
                 arr.Add(Value);
+                length = arr.Count;
             });
 
-            return null;
+            return length;
         }
 
         public object? Exec(JObject root)
         {
-            return Exec(root, Variable.GetGlobals());
+            return Exec(root, Variable.GetGlobals(root));
         }
     }
 }

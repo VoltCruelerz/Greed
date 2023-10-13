@@ -2,17 +2,19 @@
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 
-namespace Greed.Models.Mutations.Operations.Logical
+namespace Greed.Models.Mutations.Operations.Functions.Comparison
 {
     /// <summary>
-    /// Returns TRUE if any of the parameters are not equivalent.
+    /// Returns TRUE if ALL of the parameters resolve to the same value.
     /// </summary>
-    public class OpNeq : OpLogical
+    public class OpEq : OpFunction
     {
-        public OpNeq(JObject config) : base(config)
+        public OpEq(JObject config) : base(config)
         {
             // Do nothing
         }
+
+        public OpEq(List<Resolvable> parameters) : base(parameters, MutationType.EQ) { }
 
         public override object? Exec(JObject root, Dictionary<string, Variable> variables)
         {
@@ -23,10 +25,10 @@ namespace Greed.Models.Mutations.Operations.Logical
                 var hypo = op.Exec(root, variables);
                 if (!AreEqual(obj, hypo))
                 {
-                    return true;
+                    return false;
                 }
             }
-            return false;
+            return true;
         }
     }
 }

@@ -9,15 +9,15 @@ namespace Greed.Models.Mutations.Operations.Arrays
     /// <summary>
     /// Filters the the array to only those where the condition returns true.
     /// </summary>
-    public class OpFilter : OpArray
+    public class OpArrayFilter : OpArray
     {
-        public int BreakDepth { get; set; }
+        public int ResolutionDepth { get; set; }
 
         public Resolvable Condition { get; set; }
 
-        public OpFilter(JObject obj) : base(obj)
+        public OpArrayFilter(JObject obj) : base(obj)
         {
-            BreakDepth = obj["breakDepth"]?.Value<int>() ?? Path.Count - 1;
+            ResolutionDepth = obj["resolutionDepth"]?.Value<int>() ?? Path.Count - 1;
             Condition = GenerateResolvable((JObject)obj["condition"]!);
         }
 
@@ -31,9 +31,12 @@ namespace Greed.Models.Mutations.Operations.Arrays
         {
             if (root == null) return null;
 
-            static void handle(JArray arr, int index)
+            var length = 0;
+
+            void handle(JArray arr, int index)
             {
                 arr.RemoveAt(index);
+                length = arr.Count;
             }
 
             Path[0].DoWork(root, Path, 0, variables, (JToken? token, Dictionary<string, Variable> vars, int depth) =>
@@ -56,16 +59,16 @@ namespace Greed.Models.Mutations.Operations.Arrays
                     variables.Add(lastPath.Element, new Variable(lastPath.Element, item, depth));
 
                     // Remove as needed
-                    if (!IsTruthy(Condition.Exec(root, variables)))
+                    if (!IsTruthy(Condition.Exec(root, variables), root, variables))
                     {
                         // Try to handle here, but if not, eject until we find the break depth.
-                        if (depth == BreakDepth)
+                        if (depth == ResolutionDepth)
                         {
                             handle(arr, i);
                         }
                         else
                         {
-                            throw new BreakDepthEjection(handle, BreakDepth);
+                            throw new BreakDepthEjection(handle, ResolutionDepth);
                         }
                     }
 
@@ -75,12 +78,12 @@ namespace Greed.Models.Mutations.Operations.Arrays
                 }
             });
 
-            return null;
+            return length;
         }
 
         public object? Exec(JObject root)
         {
-            return Exec(root, Variable.GetGlobals());
+            return Exec(root, Variable.GetGlobals(root));
         }
     }
 }

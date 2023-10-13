@@ -8,6 +8,10 @@ namespace Greed.UnitTest.Models.Mutations
     [TestClass]
     public class MutationTests
     {
+        public static readonly OpPrimitive TRUE = new(true);
+        public static readonly OpPrimitive FALSE = new(false);
+        public static readonly OpPrimitive NULL = new(null);
+
         [TestMethod]
         public void IsTruthy_True()
         {
@@ -16,10 +20,10 @@ namespace Greed.UnitTest.Models.Mutations
             // Act
 
             // Assert
-            Assert.IsTrue(Mutation.IsTruthy(true));
-            Assert.IsTrue(Mutation.IsTruthy(new object()));
-            Assert.IsTrue(Mutation.IsTruthy(1));
-            Assert.IsTrue(Mutation.IsTruthy(OpPrimitive.TRUE.Exec(new JObject(), new Dictionary<string, Variable>())));
+            Assert.IsTrue(Resolvable.IsTruthy(true, new(), new()));
+            Assert.IsTrue(Resolvable.IsTruthy(new object(), new(), new()));
+            Assert.IsTrue(Resolvable.IsTruthy(1, new(), new()));
+            Assert.IsTrue(Resolvable.IsTruthy(TRUE.Exec(new JObject(), new Dictionary<string, Variable>()), new(), new()));
         }
 
         [TestMethod]
@@ -30,12 +34,12 @@ namespace Greed.UnitTest.Models.Mutations
             // Act
 
             // Assert
-            Assert.IsFalse(Mutation.IsTruthy(false));
-            Assert.IsFalse(Mutation.IsTruthy(null));
-            Assert.IsFalse(Mutation.IsTruthy(""));
-            Assert.IsFalse(Mutation.IsTruthy(0));
-            Assert.IsFalse(Mutation.IsTruthy(OpPrimitive.FALSE.Exec(new JObject(), new Dictionary<string, Variable>())));
-            Assert.IsFalse(Mutation.IsTruthy(OpPrimitive.NULL.Exec(new JObject(), new Dictionary<string, Variable>())));
+            Assert.IsFalse(Resolvable.IsTruthy(false, new(), new()));
+            Assert.IsFalse(Resolvable.IsTruthy(null, new(), new()));
+            Assert.IsFalse(Resolvable.IsTruthy("", new(), new()));
+            Assert.IsFalse(Resolvable.IsTruthy(0, new(), new()));
+            Assert.IsFalse(Resolvable.IsTruthy(FALSE.Exec(new JObject(), new Dictionary<string, Variable>()), new(), new()));
+            Assert.IsFalse(Resolvable.IsTruthy(NULL.Exec(new JObject(), new Dictionary<string, Variable>()), new(), new()));
         }
     }
 }

@@ -14,13 +14,13 @@ namespace Greed.Exceptions
     public class BreakDepthEjection : Exception
     {
         private Action<JArray, int> Handler { get; set; }
-        private readonly int BreakDepth;
+        private readonly int ResolutionDepth;
 
 
-        public BreakDepthEjection(Action<JArray, int> handler, int breakDepth) : base("If you see this, you probably have a typo in your array path or break depth.")
+        public BreakDepthEjection(Action<JArray, int> handler, int resolutionDepth) : base("If you see this, you probably have a typo in your array path or break depth.")
         {
             Handler = handler;
-            BreakDepth = breakDepth;
+            ResolutionDepth = resolutionDepth;
         }
 
         public void TryHandle(int currentDepth, JArray arr, int index, Dictionary<string, Variable> variables)
@@ -30,7 +30,7 @@ namespace Greed.Exceptions
             varList.ForEach(v => variables.Remove(v.Name));
 
             // Handle if this is the appropriate place
-            if (BreakDepth == currentDepth)
+            if (ResolutionDepth == currentDepth)
             {
                 Handler(arr, index);
                 return;

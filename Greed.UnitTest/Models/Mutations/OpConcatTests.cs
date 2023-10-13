@@ -22,7 +22,7 @@ namespace Greed.UnitTest.Models.Mutations
                 { "path", "a[i]" },
                 { "value", 2 }
             };
-            var op = new OpConcat(config);
+            var op = new OpArrayAppend(config);
 
             // Act
             op.Exec(root, new Dictionary<string, Variable>());
@@ -47,7 +47,7 @@ namespace Greed.UnitTest.Models.Mutations
                 { "path", "a[i]" },
                 { "value", "strC" }
             };
-            var op = new OpConcat(config);
+            var op = new OpArrayAppend(config);
 
             // Act
             op.Exec(root, new Dictionary<string, Variable>());
@@ -75,7 +75,7 @@ namespace Greed.UnitTest.Models.Mutations
                 { "path", "a[i]" },
                 { "value", new JArray { "strE", "strF" } }
             };
-            var op = new OpConcat(config);
+            var op = new OpArrayAppend(config);
 
             // Act
             op.Exec(root, new Dictionary<string, Variable>());
@@ -103,7 +103,7 @@ namespace Greed.UnitTest.Models.Mutations
                 { "path", "a[i][j]" },
                 { "value", "strE" }
             };
-            var op = new OpConcat(config);
+            var op = new OpArrayAppend(config);
 
             // Act
             op.Exec(root, new Dictionary<string, Variable>());
@@ -131,7 +131,7 @@ namespace Greed.UnitTest.Models.Mutations
                 { "path", "a.b[i]" },
                 { "value", 2 }
             };
-            var op = new OpConcat(config);
+            var op = new OpArrayAppend(config);
 
             // Act
             op.Exec(root, new Dictionary<string, Variable>());
@@ -162,7 +162,7 @@ namespace Greed.UnitTest.Models.Mutations
                 { "path", "a.b.c[i]" },
                 { "value", 2 }
             };
-            var op = new OpConcat(config);
+            var op = new OpArrayAppend(config);
 
             // Act
             op.Exec(root, new Dictionary<string, Variable>());
@@ -198,7 +198,7 @@ namespace Greed.UnitTest.Models.Mutations
                 { "path", "a.b[i][j][k]" },
                 { "value", 8 }
             };
-            var op = new OpConcat(config);
+            var op = new OpArrayAppend(config);
 
             // Act
             op.Exec(root, new Dictionary<string, Variable>());
@@ -238,7 +238,7 @@ namespace Greed.UnitTest.Models.Mutations
                     "value": [8,9]
                 }
                 """);
-            var op = new OpConcat(config);
+            var op = new OpArrayAppend(config);
 
             // Act
             op.Exec(root, new Dictionary<string, Variable>());
@@ -277,7 +277,7 @@ namespace Greed.UnitTest.Models.Mutations
                     "value": [[8,9],[10,11]]
                 }
                 """);
-            var op = new OpConcat(config);
+            var op = new OpArrayAppend(config);
 
             // Act
             op.Exec(root, new Dictionary<string, Variable>());
@@ -321,7 +321,7 @@ namespace Greed.UnitTest.Models.Mutations
                     "value": 2
                 }
                 """);
-            var op = new OpConcat(config);
+            var op = new OpArrayAppend(config);
 
             // Act
             op.Exec(root, new Dictionary<string, Variable>());
@@ -358,7 +358,7 @@ namespace Greed.UnitTest.Models.Mutations
                     }
                 }
                 """);
-            var op = new OpConcat(config);
+            var op = new OpArrayAppend(config);
 
             // Act
             op.Exec(root);
@@ -387,7 +387,7 @@ namespace Greed.UnitTest.Models.Mutations
                     }
                 }
                 """);
-            var op = new OpConcat(config);
+            var op = new OpArrayAppend(config);
 
             // Act
             op.Exec(root);
@@ -417,7 +417,7 @@ namespace Greed.UnitTest.Models.Mutations
                     }
                 }
                 """);
-            var op = new OpConcat(config);
+            var op = new OpArrayAppend(config);
 
             // Act
             op.Exec(root);
@@ -447,7 +447,7 @@ namespace Greed.UnitTest.Models.Mutations
                     }
                 }
                 """);
-            var op = new OpConcat(config);
+            var op = new OpArrayAppend(config);
 
             // Act
             op.Exec(root);

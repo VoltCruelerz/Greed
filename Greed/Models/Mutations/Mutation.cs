@@ -17,5 +17,10 @@ namespace Greed.Models.Mutations
                 Type = type;
             }
         }
+
+        public Mutation(MutationType type)
+        {
+            Type = type;
+        }
     }
 }

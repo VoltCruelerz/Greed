@@ -21,7 +21,7 @@ namespace Greed.UnitTest.Models.Mutations
                     }
                 }
                 """);
-            var op = new OpFilter(config);
+            var op = new OpArrayFilter(config);
 
             // Act
             op.Exec(root);
@@ -45,7 +45,7 @@ namespace Greed.UnitTest.Models.Mutations
                     }
                 }
                 """);
-            var op = new OpFilter(config);
+            var op = new OpArrayFilter(config);
 
             // Act
             op.Exec(root);
@@ -69,7 +69,7 @@ namespace Greed.UnitTest.Models.Mutations
                     }
                 }
                 """);
-            var op = new OpFilter(config);
+            var op = new OpArrayFilter(config);
 
             // Act
             op.Exec(root);
@@ -93,7 +93,7 @@ namespace Greed.UnitTest.Models.Mutations
                     }
                 }
                 """);
-            var op = new OpFilter(config);
+            var op = new OpArrayFilter(config);
 
             // Act
             op.Exec(root);
@@ -117,7 +117,7 @@ namespace Greed.UnitTest.Models.Mutations
                     }
                 }
                 """);
-            var op = new OpFilter(config);
+            var op = new OpArrayFilter(config);
 
             // Act
             op.Exec(root);
@@ -141,7 +141,7 @@ namespace Greed.UnitTest.Models.Mutations
                     }
                 }
                 """);
-            var op = new OpFilter(config);
+            var op = new OpArrayFilter(config);
 
             // Act
             op.Exec(root);
@@ -192,7 +192,7 @@ namespace Greed.UnitTest.Models.Mutations
              """);
 
             // Act
-            new OpFilter(config).Exec(root);
+            new OpArrayFilter(config).Exec(root);
 
             // Assert
             Assert.AreEqual(expected.ToString(), root.ToString());
@@ -217,7 +217,7 @@ namespace Greed.UnitTest.Models.Mutations
             var config = JObject.Parse("""
                 {
                     "path": "a[i].b[j]",
-                    "breakDepth": 3,
+                    "resolutionDepth": 3,
                     "condition": {
                         "type": "NEQ",
                         "params": [ "$element_j", "d" ]
@@ -238,7 +238,7 @@ namespace Greed.UnitTest.Models.Mutations
              """);
 
             // Act
-            new OpFilter(config).Exec(root);
+            new OpArrayFilter(config).Exec(root);
 
             // Assert
             Assert.AreEqual(expected.ToString(), root.ToString());
@@ -263,7 +263,7 @@ namespace Greed.UnitTest.Models.Mutations
             var config = JObject.Parse("""
                 {
                     "path": "a[i].b[j]",
-                    "breakDepth": 1,
+                    "resolutionDepth": 1,
                     "condition": {
                         "type": "NEQ",
                         "params": [ "$element_j", "d" ]
@@ -281,7 +281,7 @@ namespace Greed.UnitTest.Models.Mutations
              """);
 
             // Act
-            new OpFilter(config).Exec(root);
+            new OpArrayFilter(config).Exec(root);
 
             // Assert
             Assert.AreEqual(expected.ToString(), root.ToString());
@@ -306,7 +306,7 @@ namespace Greed.UnitTest.Models.Mutations
             var config = JObject.Parse("""
                 {
                     "path": "a[i].b[j][k]",
-                    "breakDepth": 4,
+                    "resolutionDepth": 4,
                     "condition": {
                         "type": "NEQ",
                         "params": [ "$element_k", "d" ]
@@ -327,7 +327,7 @@ namespace Greed.UnitTest.Models.Mutations
              """);
 
             // Act
-            new OpFilter(config).Exec(root);
+            new OpArrayFilter(config).Exec(root);
 
             // Assert
             Assert.AreEqual(expected.ToString(), root.ToString());
@@ -352,7 +352,7 @@ namespace Greed.UnitTest.Models.Mutations
             var config = JObject.Parse("""
                 {
                     "path": "a[i].b[j][k]",
-                    "breakDepth": 1,
+                    "resolutionDepth": 1,
                     "condition": {
                         "type": "NEQ",
                         "params": [ "$element_k", "d" ]
@@ -370,7 +370,7 @@ namespace Greed.UnitTest.Models.Mutations
              """);
 
             // Act
-            new OpFilter(config).Exec(root);
+            new OpArrayFilter(config).Exec(root);
 
             // Assert
             Assert.AreEqual(expected.ToString(), root.ToString());
@@ -402,7 +402,7 @@ namespace Greed.UnitTest.Models.Mutations
             var config = JObject.Parse("""
                 {
                     "path": "a[i]",
-                    "breakDepth": 1,
+                    "resolutionDepth": 1,
                     "condition": {
                         "type": "GT",
                         "params": [ "$element_i.b.c", 0 ]
@@ -422,7 +422,7 @@ namespace Greed.UnitTest.Models.Mutations
              """);
 
             // Act
-            new OpFilter(config).Exec(root);
+            new OpArrayFilter(config).Exec(root);
 
             // Assert
             Assert.AreEqual(expected.ToString(), root.ToString());
