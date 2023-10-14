@@ -212,7 +212,7 @@ Inside json source files, you can have a top-level object to define additional r
 | `exportOrder` | `int` | Files are exported by the following hierarchical ascending sort:<br/><ol><li>Mod Export Order</li><li>Folder</li><li>Export Name</li><li>File Export Order</li><li>Lexicographically</li></ol> | 0 |
 | `prerequisites` | `string[]` | Only export this file if the provided mods are **all** installed and active. | `[]` |
 | `mode` | `string` | Allows in-file specification of the greed merge type, eg `gmr`. | \<extension\> |
-| `mutations` | `mutation[]` | _This feature is WIP and will be documented once complete._ | `[]` |
+| `mutations` | `mutation[]` | See the [dedicated document](https://github.com/VoltCruelerz/Greed/blob/master/Mutations.md). | `[]` |
 
 #### GFOS Example
 
