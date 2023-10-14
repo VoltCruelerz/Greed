@@ -10,6 +10,18 @@ namespace Greed.Models.Mutations
         [Description("PRIMITIVE")]
         PRIMITIVE,
 
+        // Arithmetic
+        [Description("ADD")]
+        ADD,
+        [Description("SUB")]
+        SUB,
+        [Description("MUL")]
+        MUL,
+        [Description("DIV")]
+        DIV,
+        [Description("MOD")]
+        MOD,
+
         // Logical
         [Description("EQ")]
         EQ,
@@ -61,6 +73,8 @@ namespace Greed.Models.Mutations
         FILTER,
         [Description("REPLACE")]
         REPLACE,
+        [Description("INDEX_OF")]
+        INDEX_OF,
         [Description("DISTINCT")]
         DISTINCT,
     }

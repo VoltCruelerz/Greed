@@ -23,6 +23,14 @@ namespace Greed.Models.Mutations.Operations.Functions
             }
         }
 
+        public void AssertAtLeastNParams(int count)
+        {
+            if (Parameters.Count < count)
+            {
+                throw new ResolvableParseException($"Function type {Type} requires at lease {count} parameters, but you provided {Parameters.Count}.");
+            }
+        }
+
         public OpFunction(List<Resolvable> parameters, MutationType type) : base(type)
         {
             Parameters = parameters;

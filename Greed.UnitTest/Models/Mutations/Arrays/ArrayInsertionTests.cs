@@ -4,7 +4,7 @@ using Greed.Models.Mutations.Variables;
 using Newtonsoft.Json.Linq;
 using System.Diagnostics;
 
-namespace Greed.UnitTest.Models.Mutations
+namespace Greed.UnitTest.Models.Mutations.Arrays
 {
     [TestClass]
     public class ArrayInsertionTests

@@ -6,6 +6,7 @@ using Greed.Models.Mutations.Operations.Functions.Comparison;
 using Greed.Models.Mutations.Operations.Functions.Comparison.Inequalities;
 using Greed.Models.Mutations.Operations.Functions.Sets;
 using Greed.Models.Mutations.Operations.Functions.Strings;
+using Greed.Models.Mutations.Operations.Functions.Variables;
 using Greed.Models.Mutations.Variables;
 using Newtonsoft.Json.Linq;
 using System;
@@ -39,29 +40,41 @@ namespace Greed.Models.Mutations
                 return type switch
                 {
                     MutationType.NONE => throw new ResolvableParseException("You must specify a MutationType"),
+
                     // Logical
-                    MutationType.EQ => new OpEq(jObj),
-                    MutationType.NEQ => new OpNeq(jObj),
                     MutationType.AND => new OpAnd(jObj),
                     MutationType.OR => new OpOr(jObj),
                     MutationType.XOR => new OpXor(jObj),
-                    // Inequalities
+                    MutationType.NOT => new OpNot(jObj),
+
+                    // Comparison
+                    MutationType.EQ => new OpEq(jObj),
+                    MutationType.NEQ => new OpNeq(jObj),
                     MutationType.GT => new OpGt(jObj),
                     MutationType.GTE => new OpGte(jObj),
                     MutationType.LT => new OpLt(jObj),
                     MutationType.LTE => new OpLte(jObj),
-                    // Sets
+
+                    // Parameter Sets
                     MutationType.IN => new OpIn(jObj),
                     MutationType.NIN => new OpNin(jObj),
+
                     // Strings
                     MutationType.SUBSTRING => new OpStrSub(jObj),
                     MutationType.CONCAT => new OpStrConcat(jObj),
+
+                    // Variables
+                    MutationType.SET => new OpSetVar(jObj),
+                    MutationType.CLEAR => new OpClearVar(jObj),
+
                     // Arrays
                     MutationType.APPEND => new OpArrayAppend(jObj),
                     MutationType.FILTER => new OpArrayFilter(jObj),
                     MutationType.INSERT => new OpArrayInsert(jObj),
-                    MutationType.REPLACE => throw new NotImplementedException(),
+                    MutationType.REPLACE => new OpArrayReplace(jObj),
+                    MutationType.INDEX_OF => new OpArrayIndexOf(jObj),
                     MutationType.DISTINCT => throw new NotImplementedException(),
+
                     _ => throw new ResolvableParseException("No handler configured for type: " + type.GetDescription()),
                 };
             }
@@ -104,6 +117,40 @@ namespace Greed.Models.Mutations
                 return IsTruthy(r.Exec(root, variables), root, variables);
             }
             return true;
+        }
+
+        public static double ToNumber(object? value, JObject root, Dictionary<string, Variable> variables)
+        {
+            if (value == null)
+            {
+                return 0;
+            }
+            else if (value is string str)
+            {
+                return double.Parse(str);
+            }
+            else if (value is int i)
+            {
+                return i;
+            }
+            else if (value is long l)
+            {
+                return l;
+            }
+            else if (value is float f)
+            {
+                return f;
+            }
+            else if (value is double d)
+            {
+                return d;
+            }
+            else if (value is Resolvable r)
+            {
+                return ToNumber(r.Exec(root, variables), root, variables);
+            }
+
+            throw new ResolvableParseException($"No handler for converting type {value.GetType()} to a number.");
         }
 
         public static bool AreEqual(object? a, object? b)

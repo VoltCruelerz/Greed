@@ -119,8 +119,7 @@ namespace Greed.Extensions
             lines.Add(TabLeft("{", depth));
             foreach (var item in sequence)
             {
-                var enumerable = item as IEnumerable;
-                var entry = (enumerable != null) && (item is not string)
+                var entry = (item is IEnumerable enumerable) && (item is not string)
                     ? enumerable.Stringify(depth + 1)
                     : item?.ToString() ?? "null";
                 lines.Add(TabLeft(entry, depth + 1));
@@ -145,8 +144,7 @@ namespace Greed.Extensions
             var lines = new List<string>();
             foreach (var item in sequence)
             {
-                var enumerable = item as IEnumerable;
-                var entry = (enumerable != null) && (item is not string)
+                var entry = (item is IEnumerable enumerable) && (item is not string)
                     ? enumerable.Stringify(depth + 1)
                     : item?.ToString() ?? "null";
                 var content = $"{Constants.UNI_BULLET} {entry}";
@@ -241,7 +239,7 @@ namespace Greed.Extensions
 
             foreach (char c in str)
             {
-                if (reservedCharacters.IndexOf(c) == -1)
+                if (!reservedCharacters.Contains(c))
                     sb.Append(c);
                 else
                     sb.AppendFormat("%{0:X2}", (int)c);

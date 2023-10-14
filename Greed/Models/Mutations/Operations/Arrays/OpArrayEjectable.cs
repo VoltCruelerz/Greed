@@ -11,7 +11,7 @@ namespace Greed.Models.Mutations.Operations.Arrays
     /// <summary>
     /// When the criteria is met (or not), execute the implementing class's handler.
     /// </summary>
-    public abstract class OpArrayEnumeration : OpArray
+    public abstract class OpArrayEjectable : OpArray
     {
         public int ResolutionDepth { get; set; }
 
@@ -22,7 +22,7 @@ namespace Greed.Models.Mutations.Operations.Arrays
         /// </summary>
         public bool ExecuteOnViolation = true;
 
-        public OpArrayEnumeration(JObject obj) : base(obj)
+        public OpArrayEjectable(JObject obj) : base(obj)
         {
             ResolutionDepth = obj["resolutionDepth"]?.Value<int>() ?? Path.Count - 1;
             Condition = GenerateResolvable((JObject)obj["condition"]!);

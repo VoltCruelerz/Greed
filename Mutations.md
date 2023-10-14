@@ -94,34 +94,39 @@ Variables are automatically-generated stores of data accessible to your Mutation
 
 ##### Array Operation Types
 
-Array operations execute in-place and return the resulting array's length.
-
 - `FILTER`: filters an array to only those where the condition is truthy.
 - `APPEND`: adds the `value` element to the end of the array
 - `INSERT`: inserts the `value` into the array at the position specified by the `index` field. Returns array length.
 - `REPLACE`: when the condition is truthy, replace the current element with the `value`. Returns array length.
-- **[TODO]** `DISTINCT`: `TRUE` if all parameters resolve to different values.
-- **[TODO]** `INDEX_OF`: Returns the index if `value` is included in the array, or -1 if not.
+- `INDEX_OF`: Returns the index if `value` is included in the array, or -1 if not.
 
 #### Function Mutations
 
-Functions are Mutations that are typically passed to other Mutations as parameters. They do not have side effects, meaning their primary purpose is to return a value. The notable exception to this is `SET`, which can be used to change the data structure.
+Functions are Mutations that are typically passed to other Mutations as conditions or parameters. Generally, they do not have side effects. The one notable exception to this is `SET`, which can be used to change the data structure.
 
 | Field | Type | Description | Default Value |
 |:------|:-----|:------------|:--------------|
 | `params`* | `Resolvable[]` | The list of Resolvables that will be fed into this logical operation. | |
+
+##### Arithmetic Functions
+
+- `ADD`: returns the sum of the parameters
+- `SUB`: returns params[0] - params[1] - params[2] - params[3] ... params[n-1]
+- `MUL`: returns params[0] \* params[1] \* params[2] \* params[3] ... params[n-1]
+- `DIV`: returns params[0] / params[1] / params[2] / params[3] ... params[n-1]
+- `MOD`: returns params[0] % params[1] % params[2] % params[3] ... params[n-1]
 
 ##### Logical Functions
 
 - `AND`: `TRUE` if all parameters resolve to `TRUE`
 - `OR`: `TRUE` if any parameter resolves to `TRUE`
 - `XOR`: `TRUE` if exactly one parameter resolves to `TRUE`
+- `NOT`: `TRUE` if params[0] resolves to `FALSE`
 
 ##### Comparison Functions
 
 - `EQ`: `TRUE` if the parameters all resolve to the same value
 - `NEQ`: `TRUE` if params[0] != params[1]
-- `NOT`: `TRUE` if params[0] resolves to `FALSE`
 - `GT`: `TRUE` if params[0] > params[1]
 - `GTE`: `TRUE` if params[0] >= params[1]
 - `LT`: `TRUE` if params[0] < params[1]

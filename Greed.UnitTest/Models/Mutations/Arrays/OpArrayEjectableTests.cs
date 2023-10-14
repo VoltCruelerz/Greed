@@ -1,10 +1,10 @@
 ﻿using Greed.Models.Mutations.Operations.Arrays;
 using Newtonsoft.Json.Linq;
 
-namespace Greed.UnitTest.Models.Mutations
+namespace Greed.UnitTest.Models.Mutations.Arrays
 {
     [TestClass]
-    public class OpFilterTests
+    public class OpArrayEjectableTests
     {
         #region Basic Array Filtering
         [TestMethod]

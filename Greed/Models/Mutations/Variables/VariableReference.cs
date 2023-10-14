@@ -52,9 +52,17 @@ namespace Greed.Models.Mutations.Variables
             {
                 parent[key] = i;
             }
+            else if (value is long l)
+            {
+                parent[key] = l;
+            }
             else if (value is float f)
             {
                 parent[key] = f;
+            }
+            else if (value is double d)
+            {
+                parent[key] = d;
             }
             else if (value is JToken token)
             {

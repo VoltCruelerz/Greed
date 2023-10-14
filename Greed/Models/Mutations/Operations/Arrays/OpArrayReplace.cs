@@ -10,7 +10,7 @@ namespace Greed.Models.Mutations.Operations.Arrays
     /// <summary>
     /// When the condition is met, replace the entry with Value.
     /// </summary>
-    public class OpArrayReplace : OpArrayEnumeration
+    public class OpArrayReplace : OpArrayEjectable
     {
         public JToken Value { get; set; }
 
