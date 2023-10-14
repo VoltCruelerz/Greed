@@ -153,15 +153,25 @@
                 <TextBox x:Name="txtExportDir" HorizontalAlignment="Left" Margin="131,52,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="438" TextChanged="TxtExportDir_TextChanged" ToolTip="Autosaves if directory exists."/>
                 <Label Content="Download Directory" HorizontalAlignment="Left" Margin="10,71,0,0" VerticalAlignment="Top" ToolTip="A directory Greed can use as a workspace for downloads."/>
                 <TextBox x:Name="txtDownloadDir" HorizontalAlignment="Left" Margin="131,75,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="438" TextChanged="TxtDownloadDir_TextChanged" ToolTip="Autosaves if directory exists."/>
-                <Label Content="Catalog Channel" HorizontalAlignment="Left" Margin="10,94,0,0" VerticalAlignment="Top" ToolTip="Unless you're in the LGM, leave it on Live. Unless you're a Greed developer, leave it off Alpha."/>
-                <ComboBox x:Name="CbxChannel" HorizontalAlignment="Left" Margin="131,98,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="CbxChannel_SelectionChanged" Height="22" FontSize="11" VerticalContentAlignment="Center">
+            </Grid>
+        </TabItem>
+        <TabItem x:Name="TabDeveloper" Header="Developer">
+            <Grid>
+                <Button x:Name="CmdGenerateCatalog" Padding="0,0,0,1.5" Content="Generate Catalog JSON" Margin="10,39,0,0" Click="CmdGenerateCatalog_Click" VerticalAlignment="Top" ToolTip="Generates catalog entries for upserted activated mods." Height="23" HorizontalAlignment="Left" Width="140"/>
+                <Popup x:Name="PopClipboardCatalog" PlacementTarget="{Binding ElementName=CmdGenerateCatalog}" Placement="Bottom" StaysOpen="False" IsOpen="False">
+                    <Border Background="LightGreen" BorderBrush="DarkGreen" BorderThickness="1" CornerRadius="4">
+                        <TextBlock Text="Copied to clipboard!" Margin="5" />
+                    </Border>
+                </Popup>
+                <Label Content="Catalog Channel" HorizontalAlignment="Left" Margin="10,8,0,0" VerticalAlignment="Top" ToolTip="Unless you're in the LGM, leave it on Live. Unless you're a Greed developer, leave it off Alpha."/>
+                <ComboBox x:Name="CbxChannel" HorizontalAlignment="Left" Margin="112,10,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="CbxChannel_SelectionChanged" Height="22" FontSize="11" VerticalContentAlignment="Center">
                     <ComboBox.Items>
                         <ComboBoxItem Content="Live"/>
                         <ComboBoxItem Content="Beta"/>
                         <ComboBoxItem Content="Alpha"/>
                     </ComboBox.Items>
                 </ComboBox>
-                <TextBox x:Name="txtManualCatalog" HorizontalAlignment="Left" Margin="256,100,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="313" TextChanged="TxtManualCatalog_TextChanged" ToolTip="Manual catalog location."/>
+                <TextBox x:Name="txtManualCatalog" HorizontalAlignment="Left" Margin="237,12,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="313" TextChanged="TxtManualCatalog_TextChanged" ToolTip="Manual catalog location."/>
             </Grid>
         </TabItem>
     </TabControl>

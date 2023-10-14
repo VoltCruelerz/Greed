@@ -19,6 +19,7 @@ namespace Greed.Models.Online
         [JsonProperty(PropertyName = "latest")]
         public Version Latest { get; set; } = new Version("0.0.0");
 
+        [JsonIgnore]
         public VersionEntry Live => Versions[Latest.ToString()];
 
         public override Version GetVersion()

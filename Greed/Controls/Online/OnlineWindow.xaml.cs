@@ -47,6 +47,7 @@ namespace Greed.Controls.Online
                     || m.Author.Contains(SearchQuery, StringComparison.InvariantCultureIgnoreCase)
                     || m.Description.Contains(SearchQuery, StringComparison.InvariantCultureIgnoreCase))
                 .Where(m => !SearchUninstalled || !ParentWindow.IsModInstalled(m.Id))
+                .OrderByDescending(m => m.Live.DateAdded)
                 .ToList();
 
             for (var i = 0; i < viewableMods.Count; i++)
@@ -123,7 +124,7 @@ namespace Greed.Controls.Online
             var catalogEntry = Catalog.Mods.Find(m => m.Id == SelectedMod!.Id);
             if (catalogEntry != null)
             {
-                var versions = catalogEntry.Versions.Keys.ToList();
+                var versions = catalogEntry.Versions.Keys.OrderByDescending(k => k).ToList();
                 versions.ForEach(v =>
                 {
                     var update = new MenuItem();

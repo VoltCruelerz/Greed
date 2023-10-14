@@ -10,6 +10,7 @@ using Greed.Models.ListItem;
 using Greed.Models.Online;
 using Greed.Models.Vault;
 using Microsoft.VisualBasic;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -686,6 +687,7 @@ namespace Greed
         private void CbxChannel_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var item = (ComboBoxItem)((ComboBox)sender).SelectedItem;
+            txtManualCatalog.Text = "";
             SetConfigOptions("channel", item.Content.ToString()!.ToLower());
             ReloadCatalog();
         }
@@ -1080,6 +1082,81 @@ namespace Greed
             }
             await SetProgressAsync(1);
             ReloadModListFromDiskAsync();
+        }
+        #endregion
+
+        #region Developer Tab
+        private void CmdGenerateCatalog_Click(object sender, RoutedEventArgs e)
+        {
+            var cataclone = JsonConvert.DeserializeObject<OnlineCatalog>(JsonConvert.SerializeObject(Catalog))!;
+
+            var active = Mods.Where(m => m.IsActive).ToList();
+
+            var upserted = active.Where(local =>
+            {
+                var online = cataclone.Mods.FirstOrDefault(p => p.Id == local.Id);
+                return online == null || online.Latest.IsOlderThan(local.Meta.Version);
+            }).ToList();
+
+            MessageBox.Show($"Detected the following mods to upsert:\n{string.Join("\n", upserted.Select(p => p.Meta.Name + " v" + p.Meta.Version))}");
+
+            upserted.ForEach(local =>
+            {
+                var online = cataclone.Mods.FirstOrDefault(p => p.Id == local.Id);
+                var ve = new VersionEntry
+                {
+                    GreedVersion = local.Meta.GreedVersion,
+                    SinsVersion = local.Meta.SinsVersion,
+                    Conflicts = local.Meta.Conflicts,
+                    DateAdded = DateAndTime.Now.ToString("yyyy-MM-dd HH:mm"),
+                    Dependencies = local.Meta.Dependencies,
+                    Download = ""
+                };
+
+                // Check if the mod is new
+                if (online == null)
+                {
+                    var infoUrl = Interaction.InputBox("Please provide the mod's informational URL.", $"New Mod: {local.Meta.Name} v{local.Meta.Version}");
+                    if (string.IsNullOrEmpty(infoUrl))
+                    {
+                        return;
+                    }
+                    ve.Download = Interaction.InputBox("Please provide the public static download URL.", $"New Mod: {local.Meta.Name} v{local.Meta.Version}");
+                    if (string.IsNullOrEmpty(ve.Download))
+                    {
+                        return;
+                    }
+                    cataclone.Mods.Add(new OnlineMod
+                    {
+                        Author = local.Meta.Author,
+                        Description = local.Meta.Description,
+                        Id = local.Id,
+                        IsTotalConversion = local.Meta.IsTotalConversion,
+                        Latest = local.Meta.Version,
+                        Name = local.Meta.Name,
+                        Url = infoUrl,
+                        Versions = new()
+                        {
+                            { local.Meta.Version.ToString(), ve }
+                        }
+                    });
+                }
+                // Check if the mod has been updated
+                else if (local.Meta.Version.IsNewerThan(online.Latest))
+                {
+                    ve.Download = Interaction.InputBox("Please provide the public static download URL.", $"Updated Mod: {local.Meta.Name} to {local.Meta.Version}");
+                    if (string.IsNullOrEmpty(ve.Download))
+                    {
+                        return;
+                    }
+                    online.Versions.Add(local.Meta.Version.ToString(), ve);
+                    online.Latest = local.Meta.Version;
+                }
+            });
+
+            var json = JsonConvert.SerializeObject(cataclone, Formatting.Indented);
+            Clipboard.SetText(json);
+            PopClipboardCatalog.SetPopDuration(2000);
         }
         #endregion
     }
