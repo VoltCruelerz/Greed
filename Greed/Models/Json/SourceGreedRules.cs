@@ -1,6 +1,8 @@
 ﻿using Greed.Models.Mutations;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Greed.Models.Json
 {
@@ -37,9 +39,24 @@ namespace Greed.Models.Json
         public int ExportOrder { get; set; } = 0;
 
         /// <summary>
-        /// The list of mutations
+        /// The list of mutations as raw JObjects
         /// </summary>
         [JsonProperty(PropertyName = "mutations")]
-        public List<Mutation>? Mutations { get; set; } = new List<Mutation>();
+        public List<JObject> RawMutations { get; set; } = new();
+
+        /// <summary>
+        /// The list of mutations
+        /// </summary>
+        public List<Mutation> Mutations { get; set; } = new();
+
+        /// <summary>
+        /// Deserialization isn't smart enough to handle recursive things like this, apparently. Manual load of raw JObjects.
+        /// </summary>
+        /// <returns></returns>
+        public List<Mutation> InitializeMutations()
+        {
+            Mutations = RawMutations.Select(m => (Mutation)Resolvable.GenerateResolvable(m)).ToList();
+            return Mutations;
+        }
     }
 }

@@ -43,23 +43,23 @@
                     </ListView.ContextMenu>
                     <ListView.View>
                         <GridView x:Name="grdView">
-                            <GridViewColumn Header="" Width="NaN" DisplayMemberBinding="{Binding Active}"/>
-                            <GridViewColumn Width="NaN" DisplayMemberBinding="{Binding Displayname}">
+                            <GridViewColumn Header="" Width="30" DisplayMemberBinding="{Binding Active}"/>
+                            <GridViewColumn Width="Auto" DisplayMemberBinding="{Binding Displayname}">
                                 <GridViewColumn.Header>
                                     <GridViewColumnHeader Tag="Mod Name" Click="HeaderModName_Click">Mod Name</GridViewColumnHeader>
                                 </GridViewColumn.Header>
                             </GridViewColumn>
-                            <GridViewColumn Width="NaN" DisplayMemberBinding="{Binding Version}">
+                            <GridViewColumn Width="Auto" DisplayMemberBinding="{Binding Version}">
                                 <GridViewColumn.Header>
                                     <GridViewColumnHeader Tag="Version" Click="HeaderVersion_Click">Version</GridViewColumnHeader>
                                 </GridViewColumn.Header>
                             </GridViewColumn>
-                            <GridViewColumn Width="NaN" DisplayMemberBinding="{Binding GreedVersion}">
+                            <GridViewColumn Width="Auto" DisplayMemberBinding="{Binding GreedVersion}">
                                 <GridViewColumn.Header>
                                     <GridViewColumnHeader Tag="Greed" Click="HeaderGreed_Click">Greed</GridViewColumnHeader>
                                 </GridViewColumn.Header>
                             </GridViewColumn>
-                            <GridViewColumn Width="NaN" DisplayMemberBinding="{Binding SinsVersion}">
+                            <GridViewColumn Width="Auto" DisplayMemberBinding="{Binding SinsVersion}">
                                 <GridViewColumn.Header>
                                     <GridViewColumnHeader Tag="Sins" Click="HeaderSins_Click">Sins</GridViewColumnHeader>
                                 </GridViewColumn.Header>
