@@ -59,8 +59,9 @@ namespace Greed.Models.Mutations
                     // Arrays
                     MutationType.APPEND => new OpArrayAppend(jObj),
                     MutationType.FILTER => new OpArrayFilter(jObj),
-                    MutationType.INSERT => throw new NotImplementedException(),
+                    MutationType.INSERT => new OpArrayInsert(jObj),
                     MutationType.REPLACE => throw new NotImplementedException(),
+                    MutationType.DISTINCT => throw new NotImplementedException(),
                     _ => throw new ResolvableParseException("No handler configured for type: " + type.GetDescription()),
                 };
             }

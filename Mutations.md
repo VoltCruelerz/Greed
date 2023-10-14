@@ -89,22 +89,23 @@ Variables are automatically-generated stores of data accessible to your Mutation
 | `path`* | `string` | The path to the innermost array, eg `a.b[i].c[j][apple]`. For each _Array Action Path_ you pass, variables will be created for the specified index and the corresponding element.<br><br>For example, in the above example, the following variables would be accessible: <ul><li>`$i`</li><li>`$element_i`</li><li>`$j`</li><li>`$element_j`</li><li>`$apple`</li><li>`$element_apple`</li></ul>  | |
 | `condition` | `Resolvable` | If the condition is truthy, the operation is applied. If not, it is not. Not all array operations require this field. | |
 | `resolutionDepth` | `integer` | When working with an array operation that requires resolution (such as `FILTER`), this field specifies which _Action Path Depth_ the resolution event will be handled by. For example, if you have nested arrays that you are filtering, if you find a constraint violation in the inner array, this allows you to specify whether you want to remove the element from the inner array or from the outer array. | action path length - 1 |
-| `index` | `integer` | When using `INSERT`, this specifies at what index you wish to insert the element. The range is clamped to [0, length-1]. | length - 1 |
+| `index` | `integer` | When using `INSERT`, this specifies at what index you wish to insert the element. | -1 |
 | `value` | `Resolvable` | When inserting a value into an array, this field is used. | `null` |
 
 ##### Array Operation Types
 
 Array operations execute in-place and return the resulting array's length.
 
-- `FILTER`: filters an array to only those where the condition is truthy
-- `APPEND`: adds the `value` element to the end of the array if the condition is met or if no condition is specified
-- **[TODO]** `INSERT`: inserts the `value` into the array at the position specified by the `index` field.
-- **[TODO]** `REPLACE`: when the condition is truthy, replace the current element with the `value`.
+- `FILTER`: filters an array to only those where the condition is truthy.
+- `APPEND`: adds the `value` element to the end of the array
+- `INSERT`: inserts the `value` into the array at the position specified by the `index` field. Returns array length.
+- `REPLACE`: when the condition is truthy, replace the current element with the `value`. Returns array length.
 - **[TODO]** `DISTINCT`: `TRUE` if all parameters resolve to different values.
+- **[TODO]** `INDEX_OF`: Returns the index if `value` is included in the array, or -1 if not.
 
 #### Function Mutations
 
-Functions are Mutations that are typically passed to other Mutations as parameters. They do not have side effects, meaning their only purpose is to return a value.
+Functions are Mutations that are typically passed to other Mutations as parameters. They do not have side effects, meaning their primary purpose is to return a value. The notable exception to this is `SET`, which can be used to change the data structure.
 
 | Field | Type | Description | Default Value |
 |:------|:-----|:------------|:--------------|

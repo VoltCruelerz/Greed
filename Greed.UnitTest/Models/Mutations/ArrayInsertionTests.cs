@@ -1,4 +1,5 @@
-﻿using Greed.Models.Mutations.Operations.Arrays;
+﻿using Greed.Exceptions;
+using Greed.Models.Mutations.Operations.Arrays;
 using Greed.Models.Mutations.Variables;
 using Newtonsoft.Json.Linq;
 using System.Diagnostics;
@@ -6,7 +7,7 @@ using System.Diagnostics;
 namespace Greed.UnitTest.Models.Mutations
 {
     [TestClass]
-    public class OpConcatTests
+    public class ArrayInsertionTests
     {
         #region Always
         /// <summary>
@@ -16,7 +17,7 @@ namespace Greed.UnitTest.Models.Mutations
         public void Concat_D0_SingleArr_Int()
         {
             // Arrange
-            var root = JObject.Parse("{ \"a\": [0, 1] }");
+            var root = JObject.Parse("""{ "a": [0, 1] }""");
             var config = new JObject
             {
                 { "path", "a[i]" },
@@ -28,10 +29,8 @@ namespace Greed.UnitTest.Models.Mutations
             op.Exec(root, new Dictionary<string, Variable>());
 
             // Assert
-            var arr = (JArray)root["a"]!;
-            Debug.WriteLine(root.ToString());
-            Assert.AreEqual(3, arr.Count);
-            Assert.AreEqual(2, arr[arr.Count - 1]);
+            var expected = JObject.Parse("""{ "a": [0, 1, 2] }""");
+            Assert.AreEqual(expected.ToString(), root.ToString());
         }
 
         [TestMethod]
@@ -351,11 +350,7 @@ namespace Greed.UnitTest.Models.Mutations
             var config = JObject.Parse("""
                 {
                     "path": "a[i]",
-                    "value": 2,
-                    "condition": {
-                        "type": "EQ",
-                        "params": [ "$true" ]
-                    }
+                    "value": 2
                 }
                 """);
             var op = new OpArrayAppend(config);
@@ -380,11 +375,7 @@ namespace Greed.UnitTest.Models.Mutations
             var config = JObject.Parse("""
                 {
                     "path": "a[i]",
-                    "value": 2,
-                    "condition": {
-                        "type": "EQ",
-                        "params": [ true ]
-                    }
+                    "value": 2
                 }
                 """);
             var op = new OpArrayAppend(config);
@@ -410,11 +401,7 @@ namespace Greed.UnitTest.Models.Mutations
             var config = JObject.Parse("""
                 {
                     "path": "a[i]",
-                    "value": 2,
-                    "condition": {
-                        "type": "EQ",
-                        "params": [ "$false" ]
-                    }
+                    "value": 2
                 }
                 """);
             var op = new OpArrayAppend(config);
@@ -440,11 +427,7 @@ namespace Greed.UnitTest.Models.Mutations
             var config = JObject.Parse("""
                 {
                     "path": "a[i]",
-                    "value": 2,
-                    "condition": {
-                        "type": "EQ",
-                        "params": [ false ]
-                    }
+                    "value": 2
                 }
                 """);
             var op = new OpArrayAppend(config);
@@ -456,6 +439,170 @@ namespace Greed.UnitTest.Models.Mutations
             var a = (JArray)root["a"]!;
             Debug.WriteLine(root.ToString());
             Assert.AreEqual(3, a.Count);
+        }
+        #endregion
+
+        #region Insert Tests
+
+        /// <summary>
+        /// Shallow array insertion, as seen in the manifest files.
+        /// </summary>
+        [TestMethod]
+        public void Insert_D0_SingleArr_Int_Start()
+        {
+            // Arrange
+            var root = JObject.Parse("""
+                {
+                    "a": [0,1]
+                }
+                """);
+            var config = JObject.Parse("""
+                {
+                    "path": "a[i]",
+                    "value": 2,
+                    "index": 0
+                }
+                """);
+            var expected = JObject.Parse("""
+                {
+                    "a": [2,0,1]
+                }
+                """);
+            var op = new OpArrayInsert(config);
+
+            // Act
+            op.Exec(root, new Dictionary<string, Variable>());
+
+            // Assert
+            Assert.AreEqual(expected.ToString(), root.ToString());
+        }
+
+        /// <summary>
+        /// Shallow array insertion, as seen in the manifest files.
+        /// </summary>
+        [TestMethod]
+        public void Insert_D0_SingleArr_Int_End()
+        {
+            // Arrange
+            var root = JObject.Parse("""
+                {
+                    "a": [0,1]
+                }
+                """);
+            var config = JObject.Parse("""
+                {
+                    "path": "a[i]",
+                    "value": 2,
+                    "index": 2
+                }
+                """);
+            var expected = JObject.Parse("""
+                {
+                    "a": [0,1,2]
+                }
+                """);
+            var op = new OpArrayInsert(config);
+
+            // Act
+            op.Exec(root, new Dictionary<string, Variable>());
+
+            // Assert
+            Assert.AreEqual(expected.ToString(), root.ToString());
+        }
+
+        /// <summary>
+        /// Shallow array insertion, as seen in the manifest files.
+        /// </summary>
+        [TestMethod]
+        public void Insert_D0_SingleArr_Int_Middle()
+        {
+            // Arrange
+            var root = JObject.Parse("""
+                {
+                    "a": [0,1]
+                }
+                """);
+            var config = JObject.Parse("""
+                {
+                    "path": "a[i]",
+                    "value": 2,
+                    "index": 1
+                }
+                """);
+            var expected = JObject.Parse("""
+                {
+                    "a": [0,2,1]
+                }
+                """);
+            var op = new OpArrayInsert(config);
+
+            // Act
+            op.Exec(root, new Dictionary<string, Variable>());
+
+            // Assert
+            Assert.AreEqual(expected.ToString(), root.ToString());
+        }
+
+        /// <summary>
+        /// Shallow array insertion, as seen in the manifest files.
+        /// </summary>
+        [TestMethod]
+        public void Insert_D0_SingleArr_Int_Overflow_Clamp()
+        {
+            // Arrange
+            var root = JObject.Parse("""
+                {
+                    "a": [0,1]
+                }
+                """);
+            var config = JObject.Parse("""
+                {
+                    "path": "a[i]",
+                    "value": 2,
+                    "index": 999
+                }
+                """);
+            var expected = JObject.Parse("""
+                {
+                    "a": [0,1,2]
+                }
+                """);
+            var op = new OpArrayInsert(config);
+
+            // Act
+            // Assert
+            Assert.ThrowsException<ResolvableExecException>(() => op.Exec(root, new Dictionary<string, Variable>()));
+        }
+
+        /// <summary>
+        /// Shallow array insertion, as seen in the manifest files.
+        /// </summary>
+        [TestMethod]
+        public void Insert_D0_SingleArr_Int_Underflow_Clamp()
+        {
+            // Arrange
+            var root = JObject.Parse("""
+                {
+                    "a": [0,1]
+                }
+                """);
+            var config = JObject.Parse("""
+                {
+                    "path": "a[i]",
+                    "value": 2,
+                    "index": -999
+                }
+                """);
+            var expected = JObject.Parse("""
+                {
+                    "a": [2,0,1]
+                }
+                """);
+            var op = new OpArrayInsert(config);
+
+            // Act
+            // Assert
+            Assert.ThrowsException<ResolvableExecException>(() => op.Exec(root, new Dictionary<string, Variable>()));
         }
         #endregion
     }

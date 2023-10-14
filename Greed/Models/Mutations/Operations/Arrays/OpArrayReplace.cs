@@ -2,22 +2,27 @@
 using Greed.Models.Mutations.Paths;
 using Greed.Models.Mutations.Variables;
 using Newtonsoft.Json.Linq;
+using SharpCompress.Common;
 using System.Collections.Generic;
-using System;
-using static Greed.Models.Mutations.Operations.Arrays.OpArrayFilter;
 
 namespace Greed.Models.Mutations.Operations.Arrays
 {
     /// <summary>
-    /// Filters the the array to only those where the condition returns true.
+    /// When the condition is met, replace the entry with Value.
     /// </summary>
-    public class OpArrayFilter : OpArrayEnumeration
+    public class OpArrayReplace : OpArrayEnumeration
     {
-        public OpArrayFilter(JObject obj) : base(obj) { }
+        public JToken Value { get; set; }
+
+        public OpArrayReplace(JObject obj) : base(obj)
+        {
+            Value = obj["value"]!;
+            ExecuteOnViolation = false;
+        }
 
         public override int Handler(JArray arr, int index)
         {
-            arr.RemoveAt(index);
+            arr[index] = Value;
             return arr.Count;
         }
     }
