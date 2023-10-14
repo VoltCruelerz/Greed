@@ -35,7 +35,6 @@ namespace Greed
         private static readonly string LogPrevPath = Directory.GetCurrentDirectory() + "\\log_prev.txt";
         private static readonly WarningPopup Warning = new();
 
-
         private readonly ModManager Manager = new();
         private List<Mod> Mods = new();
         private Mod? DragPastMod;

@@ -92,6 +92,7 @@ namespace Greed.Models.Mutations.Operations.Functions
 
         private static void AddParamElement(JArray arr, string elStr)
         {
+            elStr = elStr.Trim();
             if (elStr.Contains('('))
             {
                 arr.Add(ParseToJObject(elStr));

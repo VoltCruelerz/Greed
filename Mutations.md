@@ -6,10 +6,25 @@ Mutations are an advanced file manipulation tool that allows far more granular c
 
 Rather than writing out what you wish to add to a file, you instead write out the list of precise alterations you wish to make.
 
-For example, if you wanted to remove the TEC loyalist's useless Andvanced Fire Control research, you'd create something like I have in [Remove Trap Research](https://github.com/VoltCruelerz/remove-trap-research/blob/main/entities/trader_loyalist.player.gmr) (reproduced below), which is substantially shorter and less error-prone than reproducing all 165 other elements.
+For example, if you wanted to remove the TEC loyalist's useless Andvanced Fire Control research, you'd create something like I have in [Remove Trap Research](https://github.com/VoltCruelerz/remove-trap-research/blob/main/entities/trader_loyalist.player.gmr) (reproduced below), which is _substantially_ shorter and less error-prone than reproducing all 165 other elements.
 
 ```jsonc
-// trader_loyalist.player.gmr
+{
+    "greed": {
+        "mutations": [
+            {
+                "type": "FILTER",
+                "path": "research.research_subjects[i]",
+                "condition": "NEQ($element_i,trader_unlock_starbase_improve_weapon_item)"
+            }
+        ]
+    }
+}
+```
+
+This is what is known as the compacted form, and is often the most readable. Internally, however, Greed will then generate the expanded form, which is shown below.
+
+```jsonc
 {
     "greed": {
         "mutations": [
@@ -108,41 +123,79 @@ Functions are Mutations that are typically passed to other Mutations as conditio
 |:------|:-----|:------------|:--------------|
 | `params`* | `Resolvable[]` | The list of Resolvables that will be fed into this logical operation. | |
 
-##### Arithmetic Functions
+##### Function Types
 
-- `ADD`: returns the sum of the parameters
-- `SUB`: returns params[0] - params[1] - params[2] - params[3] ... params[n-1]
-- `MUL`: returns params[0] \* params[1] \* params[2] \* params[3] ... params[n-1]
-- `DIV`: returns params[0] / params[1] / params[2] / params[3] ... params[n-1]
-- `MOD`: returns params[0] % params[1] % params[2] % params[3] ... params[n-1]
+- Arithmetic
+    - `ADD`: returns the sum of the parameters
+    - `SUB`: returns params[0] - params[1] - params[2] - params[3] ... params[n-1]
+    - `MUL`: returns params[0] \* params[1] \* params[2] \* params[3] ... params[n-1]
+    - `DIV`: returns params[0] / params[1] / params[2] / params[3] ... params[n-1]
+    - `MOD`: returns params[0] % params[1] % params[2] % params[3] ... params[n-1]
+- Logical
+    - `AND`: `TRUE` if all parameters resolve to `TRUE`
+    - `OR`: `TRUE` if any parameter resolves to `TRUE`
+    - `XOR`: `TRUE` if exactly one parameter resolves to `TRUE`
+    - `NOT`: `TRUE` if params[0] resolves to `FALSE`
+- Comparison
+    - `EQ`: `TRUE` if the parameters all resolve to the same value
+    - `NEQ`: `TRUE` if params[0] != params[1]
+    - `GT`: `TRUE` if params[0] > params[1]
+    - `GTE`: `TRUE` if params[0] >= params[1]
+    - `LT`: `TRUE` if params[0] < params[1]
+    - `LTE`: `TRUE` if params[0] <= params[1]
+- Parameter Set
+    - `IN`: `TRUE` if params[0] is contained somewhere else within the list of parameters.
+    - `NIN`: `TRUE` if params[0] is NOT contained somewhere else within the list of parameters.
+- String
+    - `SUBSTRING`: Takes the string at params[0] and creates a substring starting at params[1] (inclusive) and ending at params[2] (inclusive).
+    - `CONCAT`: Concatenates the parameters.
+- Variable
+    - `SET`: Upserts a global-scope variable with the name of params[0] and the value of params[1]. Resolves to the variable's new value.
+    - `CLEAR`: Deletes a global-scope variable with the name found in params[0], if one exists. Resolves to the variable's value.
 
-##### Logical Functions
+##### Compacted and Expanded Forms
 
-- `AND`: `TRUE` if all parameters resolve to `TRUE`
-- `OR`: `TRUE` if any parameter resolves to `TRUE`
-- `XOR`: `TRUE` if exactly one parameter resolves to `TRUE`
-- `NOT`: `TRUE` if params[0] resolves to `FALSE`
+Unlike other operations, parameters have compacted and expanded forms. For example, these are equivalent:
 
-##### Comparison Functions
+> **Compacted**
+>
+> ```json
+> "NEQ($element_i,trader_unlock_starbase_improve_weapon_item)"
+> ```
+>
+> **Expanded**
+>
+> ```json
+> {
+>     "type": "NEQ",
+>     "params": [ "$element_i", "trader_unlock_starbase_improve_weapon_item" ]
+> }
+> ```
 
-- `EQ`: `TRUE` if the parameters all resolve to the same value
-- `NEQ`: `TRUE` if params[0] != params[1]
-- `GT`: `TRUE` if params[0] > params[1]
-- `GTE`: `TRUE` if params[0] >= params[1]
-- `LT`: `TRUE` if params[0] < params[1]
-- `LTE`: `TRUE` if params[0] <= params[1]
+Internally, in fact, if you use the first one (which is typically more human-readable), Greed will generate the latter and actually process your files with that.
 
-##### Parameter Set Functions
+Regardless of form, you can nest functions. For example, these are also equivalent:
 
-- `IN`: `TRUE` if params[0] is contained somewhere else within the list of parameters.
-- `NIN`: `TRUE` if params[0] is NOT contained somewhere else within the list of parameters.
-
-##### String Functions
-
-- `SUBSTRING`: Takes the string at params[0] and creates a substring starting at params[1] (inclusive) and ending at params[2] (inclusive).
-- `CONCAT`: Concatenates the parameters.
-
-##### Variable Functions
-
-- `SET`: Upserts a global-scope variable with the name of params[0] and the value of params[1]. Resolves to the variable's new value.
-- `CLEAR`: Deletes a global-scope variable with the name found in params[0], if one exists. Resolves to the variable's value.
+> **Compacted**
+>
+> ```json
+> "MUL(ADD(1,2),ADD(3,4))"
+> ```
+>
+> **Expanded**
+>
+> ```json
+> {
+>     "type": "MUL",
+>     "params": [
+>         {
+>             "type": "ADD",
+>             "params": [1, 2]
+>         },
+>         {
+>             "type": "ADD",
+>             "params": [3, 4]
+>         }
+>     ]
+> }
+> ```
