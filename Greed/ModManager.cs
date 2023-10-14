@@ -477,14 +477,25 @@ namespace Greed
         {
             string modDir = ConfigurationManager.AppSettings["modDir"]!;
             var path = modDir + "\\" + id;
-            if (Directory.Exists(path))
+            try
             {
-                Directory.Delete(path, true);
+                if (Directory.Exists(path))
+                {
+                    Directory.Delete(path, true);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Sometimes Windows reports an error even if it did delete things, probably because of some recursive race somewhere.
+                if (Directory.Exists(path))
+                {
+                    CriticalAlertPopup.Throw("Failed to delete mod at " + path, ex);
+                }
             }
         }
 
         /// <summary>
-        /// Installs a mod from github.
+        /// Installs a mod from the internet.
         /// 1. Validates presence of dependencies (unless forced).
         /// 2. Download file.
         /// 3. Unzip file.
