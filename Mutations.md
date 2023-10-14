@@ -22,26 +22,6 @@ For example, if you wanted to remove the TEC loyalist's useless Andvanced Fire C
 }
 ```
 
-This is what is known as the compacted form, and is often the most readable. Internally, however, Greed will then generate the expanded form, which is shown below.
-
-```jsonc
-{
-    "greed": {
-        "mutations": [
-            {
-                // Filter the research subjects to those that are not the research we want to remove.
-                "type": "FILTER",
-                "path": "research.research_subjects[i]",
-                "condition": {
-                    "type": "NEQ",
-                    "params": [ "$element_i", "trader_unlock_starbase_improve_weapon_item" ]
-                }
-            }
-        ]
-    }
-}
-```
-
 ## Execution Order
 
 Mutations execute after the _Greed Merge_ (if applicable), and execute in the order they are provided.
