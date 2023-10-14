@@ -3,8 +3,6 @@ using Greed.Models.Mutations.Paths;
 using Greed.Models.Mutations.Variables;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
-using System;
-using static Greed.Models.Mutations.Operations.Arrays.OpArrayFilter;
 
 namespace Greed.Models.Mutations.Operations.Arrays
 {

@@ -1,10 +1,11 @@
 ﻿using Greed.Exceptions;
 using Greed.Extensions;
 using Greed.Models.Mutations.Operations.Arrays;
+using Greed.Models.Mutations.Operations.Functions;
 using Greed.Models.Mutations.Operations.Functions.Arithmetic;
-using Greed.Models.Mutations.Operations.Functions.Logical;
 using Greed.Models.Mutations.Operations.Functions.Comparison;
 using Greed.Models.Mutations.Operations.Functions.Comparison.Inequalities;
+using Greed.Models.Mutations.Operations.Functions.Logical;
 using Greed.Models.Mutations.Operations.Functions.Sets;
 using Greed.Models.Mutations.Operations.Functions.Strings;
 using Greed.Models.Mutations.Operations.Functions.Variables;
@@ -12,7 +13,6 @@ using Greed.Models.Mutations.Variables;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using Greed.Models.Mutations.Operations.Functions;
 
 namespace Greed.Models.Mutations
 {

@@ -1,8 +1,7 @@
-﻿using Greed.Extensions;
+﻿using Greed.Exceptions;
+using Greed.Extensions;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
-using Greed.Exceptions;
-using SharpCompress.Common;
 
 namespace Greed.Models.Mutations.Variables
 {

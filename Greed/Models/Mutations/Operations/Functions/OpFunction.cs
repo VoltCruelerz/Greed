@@ -1,7 +1,6 @@
 ﻿using Greed.Exceptions;
 using Greed.Extensions;
 using Newtonsoft.Json.Linq;
-using SharpCompress.Common;
 using System.Collections.Generic;
 using System.Linq;
 

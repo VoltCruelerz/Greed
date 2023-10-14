@@ -1,6 +1,7 @@
 ﻿using Greed.Controls.Diff;
 using Greed.Exceptions;
 using Greed.Extensions;
+using Greed.Models.Mutations.Variables;
 using JsonDiffer;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -9,7 +10,6 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Text;
-using Greed.Models.Mutations.Variables;
 
 namespace Greed.Models.Json
 {

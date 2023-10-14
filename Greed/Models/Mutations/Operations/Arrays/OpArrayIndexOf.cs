@@ -2,7 +2,6 @@
 using Greed.Models.Mutations.Paths;
 using Greed.Models.Mutations.Variables;
 using Newtonsoft.Json.Linq;
-using SharpCompress.Common;
 using System.Collections.Generic;
 
 namespace Greed.Models.Mutations.Operations.Arrays

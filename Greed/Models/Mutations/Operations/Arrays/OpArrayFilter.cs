@@ -1,10 +1,4 @@
-﻿using Greed.Exceptions;
-using Greed.Models.Mutations.Paths;
-using Greed.Models.Mutations.Variables;
-using Newtonsoft.Json.Linq;
-using System.Collections.Generic;
-using System;
-using static Greed.Models.Mutations.Operations.Arrays.OpArrayFilter;
+﻿using Newtonsoft.Json.Linq;
 
 namespace Greed.Models.Mutations.Operations.Arrays
 {

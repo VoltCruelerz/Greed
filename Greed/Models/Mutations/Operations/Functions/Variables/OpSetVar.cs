@@ -1,10 +1,6 @@
 ﻿using Greed.Models.Mutations.Variables;
 using Newtonsoft.Json.Linq;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Greed.Models.Mutations.Operations.Functions.Variables
 {
@@ -25,7 +21,8 @@ namespace Greed.Models.Mutations.Operations.Functions.Variables
             var val = Parameters[1].Exec(root, variables);
 
             // If we're assigning to a field
-            if (Parameters[0] is VariableReference vr) {
+            if (Parameters[0] is VariableReference vr)
+            {
                 return vr.SetReference(variables, val);
             }
             // If we're assigning to a variable

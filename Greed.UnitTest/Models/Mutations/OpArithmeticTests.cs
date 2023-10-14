@@ -1,12 +1,6 @@
-﻿using Greed.Models.Mutations.Operations.Functions.Sets;
-using Greed.Models.Mutations.Operations.Primitive;
-using Greed.Models.Mutations;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Greed.Models.Mutations;
 using Greed.Models.Mutations.Operations.Functions.Arithmetic;
+using Greed.Models.Mutations.Operations.Primitive;
 
 namespace Greed.UnitTest.Models.Mutations
 {
