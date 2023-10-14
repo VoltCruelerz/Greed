@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Greed.Exceptions;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -117,8 +119,7 @@ namespace Greed.Extensions
             lines.Add(TabLeft("{", depth));
             foreach (var item in sequence)
             {
-                var enumerable = item as IEnumerable;
-                var entry = (enumerable != null) && (item is not string)
+                var entry = (item is IEnumerable enumerable) && (item is not string)
                     ? enumerable.Stringify(depth + 1)
                     : item?.ToString() ?? "null";
                 lines.Add(TabLeft(entry, depth + 1));
@@ -143,8 +144,7 @@ namespace Greed.Extensions
             var lines = new List<string>();
             foreach (var item in sequence)
             {
-                var enumerable = item as IEnumerable;
-                var entry = (enumerable != null) && (item is not string)
+                var entry = (item is IEnumerable enumerable) && (item is not string)
                     ? enumerable.Stringify(depth + 1)
                     : item?.ToString() ?? "null";
                 var content = $"{Constants.UNI_BULLET} {entry}";
@@ -239,12 +239,31 @@ namespace Greed.Extensions
 
             foreach (char c in str)
             {
-                if (reservedCharacters.IndexOf(c) == -1)
+                if (!reservedCharacters.Contains(c))
                     sb.Append(c);
                 else
                     sb.AppendFormat("%{0:X2}", (int)c);
             }
             return sb.ToString();
+        }
+
+        /// <summary>
+        /// Resolves a token to its primitive type.
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        /// <exception cref="ResolvableParseException"></exception>
+        public static object Resolve(this JToken token)
+        {
+            return token.Type switch
+            {
+                JTokenType.Integer => token.Value<int>()!,
+                JTokenType.Float => token.Value<float>()!,
+                JTokenType.Boolean => token.Value<bool>()!,
+                JTokenType.String => token.Value<string>()!,
+                JTokenType.Array => ((JArray)token).Count,
+                _ => throw new ResolvableParseException("Unresolvable type " + token.Type),
+            };
         }
     }
 }

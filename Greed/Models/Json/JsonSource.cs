@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Text;
+using Greed.Models.Mutations.Variables;
 
 namespace Greed.Models.Json
 {
@@ -86,6 +87,9 @@ namespace Greed.Models.Json
                     {
                         Type = GetSourceType(GreedRules.MergeMode);
                     }
+
+                    // Parse the mutations
+                    GreedRules.InitializeMutations();
                 }
             }
             catch (Exception ex)
@@ -135,6 +139,9 @@ namespace Greed.Models.Json
 
             // We shouldn't have to do this step, but Nullable doesn't play nice with Newtonsoft yet.
             PurgeNulls(a);
+
+            // Apply the mutations
+            other?.GreedRules?.Mutations.ForEach(m => m.Exec(a, Variable.GetGlobals(a)));
 
             Json = a.ToString();
             return this;

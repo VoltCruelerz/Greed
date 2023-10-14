@@ -20,7 +20,6 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 
@@ -35,7 +34,6 @@ namespace Greed
         private static readonly string LogPath = Directory.GetCurrentDirectory() + "\\log.txt";
         private static readonly string LogPrevPath = Directory.GetCurrentDirectory() + "\\log_prev.txt";
         private static readonly WarningPopup Warning = new();
-
 
         private readonly ModManager Manager = new();
         private List<Mod> Mods = new();
