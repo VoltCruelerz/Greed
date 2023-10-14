@@ -15,7 +15,10 @@ namespace Greed.Models.Mutations.Operations.Functions.Comparison
             AssertNParams(1);
         }
 
-        public OpNot(List<Resolvable> parameters) : base(parameters, MutationType.NOT) { }
+        public OpNot(List<Resolvable> parameters) : base(parameters, MutationType.NOT)
+        {
+            AssertNParams(1);
+        }
 
         public override object? Exec(JObject root, Dictionary<string, Variable> variables)
         {

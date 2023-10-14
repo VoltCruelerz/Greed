@@ -6,7 +6,7 @@ using Newtonsoft.Json.Linq;
 namespace Greed.UnitTest.Models.Mutations
 {
     [TestClass]
-    public class MutationTests
+    public class ResolvableTests
     {
         public static readonly OpPrimitive TRUE = new(true);
         public static readonly OpPrimitive FALSE = new(false);

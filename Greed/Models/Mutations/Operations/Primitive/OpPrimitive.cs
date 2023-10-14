@@ -18,5 +18,10 @@ namespace Greed.Models.Mutations.Operations.Primitive
         {
             return Value;
         }
+
+        public override string ToString()
+        {
+            return $"Primitive({Value})";
+        }
     }
 }

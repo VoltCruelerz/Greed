@@ -455,6 +455,28 @@ namespace Greed.UnitTest.Models.Mutations.Arrays
             var expected = JObject.Parse(""" { "a": ["d", "c"] } """);
             Assert.AreEqual(expected.ToString(), root.ToString());
         }
+
+        [TestMethod]
+        public void Replace_Compact_Solo_By_Str_D0()
+        {
+            // Arrange
+            var root = JObject.Parse(""" { "a": ["b", "c"] } """);
+            var config = JObject.Parse("""
+                {
+                    "path": "a[i]",
+                    "value": "d",
+                    "condition": "EQ($element_i,b)"
+                }
+                """);
+            var op = new OpArrayReplace(config);
+
+            // Act
+            op.Exec(root);
+
+            // Assert
+            var expected = JObject.Parse(""" { "a": ["d", "c"] } """);
+            Assert.AreEqual(expected.ToString(), root.ToString());
+        }
         #endregion
     }
 }

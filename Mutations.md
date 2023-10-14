@@ -6,7 +6,7 @@ Mutations are an advanced file manipulation tool that allows far more granular c
 
 Rather than writing out what you wish to add to a file, you instead write out the list of precise alterations you wish to make.
 
-For example, if you wanted to remove the TEC loyalist's useless Andvanced Fire Control research, you'd create something like the following...
+For example, if you wanted to remove the TEC loyalist's useless Andvanced Fire Control research, you'd create something like I have in [Remove Trap Research](https://github.com/VoltCruelerz/remove-trap-research/blob/main/entities/trader_loyalist.player.gmr) (reproduced below), which is substantially shorter and less error-prone than reproducing all 165 other elements.
 
 ```jsonc
 // trader_loyalist.player.gmr

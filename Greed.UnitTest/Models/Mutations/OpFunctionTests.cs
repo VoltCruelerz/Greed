@@ -2,6 +2,7 @@
 using Greed.Models.Mutations.Operations.Functions.Comparison;
 using Greed.Models.Mutations;
 using Newtonsoft.Json.Linq;
+using Greed.Models.Mutations.Operations.Functions.Arithmetic;
 using Greed.Models.Mutations.Operations.Functions.Logical;
 using Greed.Models.Mutations.Operations.Functions.Comparison.Inequalities;
 using Greed.Models.Mutations.Operations.Functions.Sets;
@@ -613,6 +614,68 @@ namespace Greed.UnitTest.Models.Mutations
             Assert.IsFalse(variables.ContainsKey("variable_name"));
             Assert.AreEqual(1, r0);
             Assert.AreEqual(null, r1);
+        }
+        #endregion
+
+        #region Compacted Parsing
+
+        [TestMethod]
+        public void Compact_Parse_Add_1_2()
+        {
+            // Arrange
+
+            // Act
+            var result = Resolvable.GenerateResolvable("ADD(1,2)");
+
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(OpAdd));
+            var op = (OpAdd)result;
+            Assert.AreEqual(3.0, op.Exec(new(), new()));
+        }
+
+        [TestMethod]
+        public void Compact_Parse_Not_1()
+        {
+            // Arrange
+
+            // Act
+            var result = Resolvable.GenerateResolvable("NOT(1)");
+
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(OpNot));
+            var op = (OpNot)result;
+            Assert.AreEqual(1, op.Parameters.Count);
+            Assert.AreEqual(1, op.Parameters[0].Exec(new(), new()));
+        }
+
+        [TestMethod]
+        public void Compact_Parse_Mul_Add()
+        {
+            // Arrange
+
+            // Act
+            var result = Resolvable.GenerateResolvable("MUL(ADD(1,2),ADD(3,4))");
+
+            // Assert
+            Assert.IsInstanceOfType(result, typeof(OpMul));
+            var op = (OpMul)result;
+            Assert.AreEqual(21.0, op.Exec(new(), new()));
+        }
+
+        [TestMethod]
+        public void Compact_Parse_Add_All_Types()
+        {
+            // Arrange
+            var variables = new Dictionary<string, Variable>
+            {
+                { "i", new Variable("i", 3, -1) }
+            };
+
+            // Act -------------------------------------------- 1    0     2 0  3 6
+            var resolvable = Resolvable.GenerateResolvable("ADD(true,false,2,0,$i,MUL(2,3))");
+
+            // Assert
+            Assert.AreEqual(12.0, resolvable.Exec(new(), variables));
         }
         #endregion
     }

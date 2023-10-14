@@ -25,7 +25,7 @@ namespace Greed.Models.Mutations.Operations.Arrays
         public OpArrayEjectable(JObject obj) : base(obj)
         {
             ResolutionDepth = obj["resolutionDepth"]?.Value<int>() ?? Path.Count - 1;
-            Condition = GenerateResolvable((JObject)obj["condition"]!);
+            Condition = GenerateResolvable(obj["condition"]!);
         }
 
         public abstract int Handler(JArray arr, int index);

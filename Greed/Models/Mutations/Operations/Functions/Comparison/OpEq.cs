@@ -11,10 +11,13 @@ namespace Greed.Models.Mutations.Operations.Functions.Comparison
     {
         public OpEq(JObject config) : base(config)
         {
-            // Do nothing
+            AssertAtLeastNParams(2);
         }
 
-        public OpEq(List<Resolvable> parameters) : base(parameters, MutationType.EQ) { }
+        public OpEq(List<Resolvable> parameters) : base(parameters, MutationType.EQ)
+        {
+            AssertAtLeastNParams(2);
+        }
 
         public override object? Exec(JObject root, Dictionary<string, Variable> variables)
         {

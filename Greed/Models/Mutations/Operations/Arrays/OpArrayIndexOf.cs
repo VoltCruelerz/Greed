@@ -13,7 +13,7 @@ namespace Greed.Models.Mutations.Operations.Arrays
 
         public OpArrayIndexOf(JObject obj) : base(obj)
         {
-            Condition = GenerateResolvable((JObject)obj["condition"]!);
+            Condition = GenerateResolvable(obj["condition"]!);
         }
 
         /// <summary>
