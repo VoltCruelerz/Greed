@@ -16,7 +16,7 @@ namespace Greed.Updater
 {
     public static class UpdateManager
     {
-        public static async Task<bool> UpdateGreed(Version version)
+        public static async Task UpdateGreed(Version version)
         {
             try
             {
@@ -29,14 +29,8 @@ namespace Greed.Updater
                 // Download the zip
                 var zipPath = Path.Combine(ConfigurationManager.AppSettings["downDir"]!, zipFile);
                 var extractPath = Path.Combine(ConfigurationManager.AppSettings["downDir"]!, extractFolder);
-                if (File.Exists(zipPath))
-                {
-                    File.Delete(zipPath);
-                }
-                if (!await DownloadZipFile(url, zipPath))
-                {
-                    return false;
-                }
+                if (File.Exists(zipPath)) File.Delete(zipPath);
+                if (!await DownloadZipFile(url, zipPath)) return;
                 _ = MainWindow.Instance!.PrintAsync($"Download of {zipFile} to {zipPath} complete.");
 
                 // Extract the zip
@@ -47,9 +41,7 @@ namespace Greed.Updater
                 var ownContents = Directory.GetFiles(curDir);
                 foreach ( var file in ownContents )
                 {
-                    if (!file.EndsWith("Greed.exe")) {
-                        File.Delete(file);
-                    }
+                    if (!file.EndsWith("Greed.exe")) File.Delete(file);
                 }
                 _ = MainWindow.Instance!.PrintAsync($"Self purge of {curDir} complete.");
 
@@ -74,7 +66,6 @@ namespace Greed.Updater
             catch (Exception ex)
             {
                 CriticalAlertPopup.Throw("Failed to update Greed", ex);
-                return false;
             }
         }
 

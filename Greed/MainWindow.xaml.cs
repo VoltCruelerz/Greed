@@ -718,7 +718,7 @@ namespace Greed
                 Catalog = await OnlineCatalog.GetOnlineListing(this);
                 if (Assembly.GetExecutingAssembly().GetName().Version!.IsOlderThan(Catalog.LatestGreed))
                 {
-                    _ = UpdateManager.UpdateGreed(Catalog.LatestGreed);
+                    await UpdateManager.UpdateGreed(Catalog.LatestGreed);
                 }
                 else
                 {
