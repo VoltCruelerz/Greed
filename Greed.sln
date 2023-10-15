@@ -5,7 +5,9 @@ VisualStudioVersion = 17.7.34003.232
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Greed", "Greed\Greed.csproj", "{8717DF93-CCAB-45C2-8822-90800888CAC9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Greed.UnitTest", "Greed.UnitTest\Greed.UnitTest.csproj", "{2774D6BC-72F2-4F6E-94C4-5A667CD6EE86}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Greed.UnitTest", "Greed.UnitTest\Greed.UnitTest.csproj", "{2774D6BC-72F2-4F6E-94C4-5A667CD6EE86}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Greed.AutoUpdater", "Greed.AutoUpdater\Greed.AutoUpdater.csproj", "{631F8656-BCCD-484A-85C9-767ABDC8C463}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{2774D6BC-72F2-4F6E-94C4-5A667CD6EE86}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2774D6BC-72F2-4F6E-94C4-5A667CD6EE86}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2774D6BC-72F2-4F6E-94C4-5A667CD6EE86}.Release|Any CPU.Build.0 = Release|Any CPU
+		{631F8656-BCCD-484A-85C9-767ABDC8C463}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{631F8656-BCCD-484A-85C9-767ABDC8C463}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{631F8656-BCCD-484A-85C9-767ABDC8C463}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{631F8656-BCCD-484A-85C9-767ABDC8C463}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1159,5 +1159,10 @@ namespace Greed
             PopClipboardCatalog.SetPopDuration(2000);
         }
         #endregion
+
+        private void CmdUpdate_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

@@ -5,7 +5,7 @@
     <TargetFramework>net7.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
-    <Version>2.4.1</Version>
+    <Version>2.4.2</Version>
     <Title>Greed Mod Manager</Title>
     <Authors>Volt Cruelerz</Authors>
     <Description>A mod loader for Sins of a Solar Empire II.</Description>
@@ -35,10 +35,10 @@
     <Resource Include="icon.png" />
   </ItemGroup>
 
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+  </Target>
+
   <ItemGroup>
-    <None Update="CHANGELOG.md">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Update="icon.ico">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
@@ -47,13 +47,9 @@
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
-    <None Update="LICENSE.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="README.md">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
+    <Content Include="..\README.md" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\Mutations.md" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\LICENSE.txt" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\Greed.AutoUpdater\bin\Release\net7.0-windows\publish\win-x64\Greed.AutoUpdater.exe" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

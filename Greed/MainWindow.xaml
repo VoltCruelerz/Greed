@@ -153,6 +153,7 @@
                 <TextBox x:Name="txtExportDir" HorizontalAlignment="Left" Margin="131,52,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="438" TextChanged="TxtExportDir_TextChanged" ToolTip="Autosaves if directory exists."/>
                 <Label Content="Download Directory" HorizontalAlignment="Left" Margin="10,71,0,0" VerticalAlignment="Top" ToolTip="A directory Greed can use as a workspace for downloads."/>
                 <TextBox x:Name="txtDownloadDir" HorizontalAlignment="Left" Margin="131,75,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="438" TextChanged="TxtDownloadDir_TextChanged" ToolTip="Autosaves if directory exists."/>
+                <Button x:Name="CmdUpdate" Padding="0,0,0,1.5" Content="Update Greed" Margin="10,98,0,0" Click="CmdUpdate_Click" VerticalAlignment="Top" ToolTip="Update Greed to the latest version." Height="23" HorizontalAlignment="Left" Width="116"/>
             </Grid>
         </TabItem>
         <TabItem x:Name="TabDeveloper" Header="Developer">
