@@ -33,8 +33,8 @@ namespace Greed
     public partial class MainWindow : Window
     {
         public static MainWindow? Instance { get; private set; }
-        private static readonly string LogPath = Directory.GetCurrentDirectory() + "\\log.txt";
-        private static readonly string LogPrevPath = Directory.GetCurrentDirectory() + "\\log_prev.txt";
+        private static readonly string LogPath = Directory.GetCurrentDirectory() + "\\log.lob";
+        private static readonly string LogPrevPath = Directory.GetCurrentDirectory() + "\\log_prev.log";
         private static readonly WarningPopup Warning = new();
 
         private readonly ModManager Manager = new();
@@ -718,7 +718,11 @@ namespace Greed
                 Catalog = await OnlineCatalog.GetOnlineListing(this);
                 if (Assembly.GetExecutingAssembly().GetName().Version!.IsOlderThan(Catalog.LatestGreed))
                 {
-                    await UpdateManager.UpdateGreed(Catalog.LatestGreed);
+                    var result = MessageBox.Show("You have an oudated version of Greed. Would you like to update?", "Update Available", MessageBoxButton.YesNo, MessageBoxImage.Information);
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        await UpdateManager.UpdateGreed(Catalog.LatestGreed);
+                    }
                 }
                 else
                 {

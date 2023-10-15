@@ -11,6 +11,7 @@ using SharpCompress.Archives;
 using SharpCompress.Archives.Rar;
 using SharpCompress.Common;
 using System.Diagnostics;
+using System.Windows;
 
 namespace Greed.Updater
 {
@@ -24,12 +25,15 @@ namespace Greed.Updater
                 var url = $"https://github.com/VoltCruelerz/Greed/releases/download/{version}/Greed.{version}.zip";
                 var zipFile = $"Greed.{version}.zip";
                 var extractFolder = $"Greed.{version}";
-                _ = MainWindow.Instance!.PrintAsync($"Installing {zipFile}...");
-
-                // Download the zip
                 var zipPath = Path.Combine(ConfigurationManager.AppSettings["downDir"]!, zipFile);
                 var extractPath = Path.Combine(ConfigurationManager.AppSettings["downDir"]!, extractFolder);
+                _ = MainWindow.Instance!.PrintAsync($"Installing {zipFile}...");
+
+                // Clean up previous execution
                 if (File.Exists(zipPath)) File.Delete(zipPath);
+                if (Directory.Exists(extractPath)) Directory.Delete(extractPath, true);
+
+                // Download the zip
                 if (!await DownloadZipFile(url, zipPath)) return;
                 _ = MainWindow.Instance!.PrintAsync($"Download of {zipFile} to {zipPath} complete.");
 
@@ -37,22 +41,11 @@ namespace Greed.Updater
                 ExtractArchive(zipPath, extractPath);
                 File.Delete(zipPath);
 
-                // Purge own directory of non-essentials
-                var ownContents = Directory.GetFiles(curDir);
-                foreach ( var file in ownContents )
-                {
-                    if (!file.EndsWith("Greed.exe")) File.Delete(file);
-                }
-                _ = MainWindow.Instance!.PrintAsync($"Self purge of {curDir} complete.");
-
-                // Copy the files
-                var updatedContents = Directory.GetFiles(extractPath);
+                // Copy the new files
+                var updatedContents = Directory.GetFiles(Path.Combine(extractPath, $"Greed {version}")).Where(f => !f.EndsWith(".config"));
                 foreach (var file in updatedContents)
                 {
-
-                    var filename = file.EndsWith("Greed.exe")
-                        ? "Greed_New.exe"
-                        : file.Split('\\')[^1];
+                    var filename = Path.GetFileName(file) + ".tmp";
                     var dest = Path.Combine(curDir, filename);
                     await MoveFileWithRetries(file, dest);
                 }
@@ -60,12 +53,16 @@ namespace Greed.Updater
 
                 _ = MainWindow.Instance!.PrintAsync($"Starting restarter...");
 
-                Process.Start(Path.Combine(curDir, "Greed.AutoUpdater.exe"), Environment.ProcessId.ToString());
-                Environment.Exit(0);
+                var response = MessageBox.Show("Greed needs to restart itself to finish the update. Would you like to restart it now?", "Greed Restart", MessageBoxButton.YesNo);
+                if ( response == MessageBoxResult.Yes)
+                {
+                    Process.Start(Path.Combine(curDir, "Greed.AutoUpdater.exe"), Environment.ProcessId.ToString());
+                    Environment.Exit(0);
+                }
             }
             catch (Exception ex)
             {
-                CriticalAlertPopup.Throw("Failed to update Greed", ex);
+                CriticalAlertPopup.ThrowAsync("Failed to update Greed", ex);
             }
         }
 
@@ -197,7 +194,7 @@ namespace Greed.Updater
                         }
                         else
                         {
-                            File.Move(src, dest);
+                            File.Move(src, dest, true);
                         }
                         return;
                     }
