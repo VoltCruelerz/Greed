@@ -32,7 +32,7 @@ _A mod loader for [Sins of a Solar Empire II](https://www.sinsofasolarempire2.co
             - [Null Removal](#null-removal)
         - [Greedy File Object Schema](#greedy-file-object-schema)
             - [GFOS Example](#gfos-example)
-        - [Greed Configuration](#greed-configuration-1)
+        - [Greed.json Configuration](#greedjson-configuration)
     - [Contributing to Greed](#contributing-to-greed)
         - [Bug Reports](#bug-reports)
     - [Contributing Mods](#contributing-mods)
@@ -46,6 +46,7 @@ _A mod loader for [Sins of a Solar Empire II](https://www.sinsofasolarempire2.co
 - **Dependency Management**: You are warned if you attempt to enable a mod without its dependencies active.
 - **Mod Packs**: Easily create bundles of your favorite mods that you can quickly enable together.
 - **C Drive Offloading**: keep your inactive mods away from your limited-space C drive
+- **Self Updating**: Greed is able to keep itself up to date with just a few clicks from you.
 
 ## User Guide
 
@@ -63,15 +64,15 @@ _A mod loader for [Sins of a Solar Empire II](https://www.sinsofasolarempire2.co
 
 Set the directories on the Settings tab. They will autosave if the paths exist.
 
-- **Sins Directory**: the location of Sins II's exe. (eg `C:\Program Files\Epic Games\SinsII`)
-- **Mods Directory**: where on your machine you wish to save your horde of mods, including the inactive ones. (eg `C:\Users\YOUR_USER\AppData\Local\sins2\mods`)
-- **Export Directory**: regardless of where you choose to store your horde of mods, Sins II expects active mods to be in a particular folder, which will nearly always be `C:\Users\YOUR_USER\AppData\Local\sins2\mods`.
-- **Downloads Directory**: the location where Greed is free to download mods to temporarily before extracting them to your mods directory. (eg `C:\Users\YOUR_USER\Downloads`)
-- **Channel Catalog**: allows you to download mods from other installation channels. For users, this should be left on `Live`.
-    - **Live**: The main channel for users.
-    - **Beta**: Reserved for cooperative _LGM_ testing.
-    - **Alpha**: Reserved for Greed development.
-    - **Custom**: Reserved for _LGM_ merge testing.
+- **Sins Directory**: the location of Sins II's exe.
+    - _typically_ `C:\Program Files\Epic Games\SinsII`
+- **Mods Directory**: where on your machine you wish to save your horde of mods, including the inactive ones.
+    - _typically_ `C:\Users\YOUR_USER\AppData\Local\sins2\mods`
+- **Export Directory**: regardless of where you choose to store your horde of mods, Sins II expects active mods to be in a particular folder
+    - _nearly always_ `C:\Users\YOUR_USER\AppData\Local\sins2\mods`.
+- **Downloads Directory**: the location where Greed is free to download mods to temporarily before extracting them to your mods directory.
+    - _nearly always_ `C:\Users\YOUR_USER\Downloads`
+- **Check for Updates**: Checks with the LGM to see if there is a new version of Greed. If so, you will be prompted to begin the update process, which will complete in a matter of seconds.
 
 ### Basic Use
 
@@ -81,7 +82,7 @@ Set the directories on the Settings tab. They will autosave if the paths exist.
 
 ![Online Catalog](assets/OnlineCatalog.png)
 
-1. Press the `[☁️]` button to view the online catalog.
+1. In the **Greedy Mods** tab, press the `[☁️]` button to view the online catalog (shown above).
 2. Right click on whatever mod you want to install.
 3. Install the version of your choice.
 
@@ -155,16 +156,19 @@ https://github.com/VoltCruelerz/Greed/assets/4068550/a0d3662e-25e5-46c2-ba97-54b
 
 ### Why Develop Greedy Mods?
 
-- **Selective Inclusion**: Your mod only needs to include what you changed about a particular source file (eg add a new property, delete a property, or add an array element), _drastically_ reducing the risk of collisions between mods.
-- **Patch Merge**: Intelligent merging of files, allowing automated merge even within the same file.
-- **Inheritance**: You can use one file as a base for another.
-- **Conditional Export**: You can configure your mod to export the same file multiple ways depending on which mods are installed.
+- **Advanced Patch Merging**: Intelligent merging of files, allowing automated merge even within the same file.
+    - **Selective Inclusion**: Your mod only needs to include what you changed about a particular source file (eg add a new property, delete a property, or add an array element), _drastically_ reducing the risk of collisions between mods.
+    - **Inheritance**: You can use one file as a base for another.
+    - **Export Order Control & Aliasing**: You can set up multiple mod files to each do discrete patches on a single game file.
+    - **Conditional Export**: You can configure your mod to export the same file multiple ways depending on which mods are installed.
+    - **Resolvable Mutations**: You can reshape nearly anything about a file, from its data to its structure.
 - **Dependency Autoinstall**: Users can automatically install your mod's dependencies.
 - **Automated Updates**: Users can update to the latest version of your mod automatically.
 - **Comments**: You can add C-style comments to your source files.
 - **Reduced Boilerplate**: Fractional files and inheritance reduces the effort required to make small mods
-- **Improved Exposure**: Greed comes with a catalog of online mods that can be automatically installed.
 - **File Diff**: Greed ships with a diff tool specifically for Sins II data files, allowing you to readily see exactly what you've done.
+- **Improved Exposure**: Greed comes with a catalog of online mods that can be automatically installed, and it includes a tool to help set up your own.
+- **MIT License**: Greed is released under the permissive MIT License, so if I get hit by a bus tomorrow, someone else can maintain it.
 
 ![screenshot](assets/DiffScreenshot.png)
 
@@ -212,7 +216,7 @@ Inside json source files, you can have a top-level object to define additional r
 | `exportOrder` | `int` | Files are exported by the following hierarchical ascending sort:<br/><ol><li>Mod Export Order</li><li>Folder</li><li>Export Name</li><li>File Export Order</li><li>Lexicographically</li></ol> | 0 |
 | `prerequisites` | `string[]` | Only export this file if the provided mods are **all** installed and active. | `[]` |
 | `mode` | `string` | Allows in-file specification of the greed merge type, eg `gmr`. | \<extension\> |
-| `mutations` | `mutation[]` | See the [dedicated document](https://github.com/VoltCruelerz/Greed/blob/master/Mutations.md). | `[]` |
+| `mutations` | `Mutation[]` | See the [dedicated document](https://github.com/VoltCruelerz/Greed/blob/master/Mutations.md). | `[]` |
 
 #### GFOS Example
 
@@ -229,7 +233,7 @@ Inside json source files, you can have a top-level object to define additional r
 }
 ```
 
-### Greed Configuration
+### Greed.json Configuration
 
 To make a mod compatible with Greed, you need only add a `greed.json` file to your mod's folder, as seen below.
 
@@ -256,7 +260,7 @@ To make a mod compatible with Greed, you need only add a `greed.json` file to yo
 }
 ```
 
-While I recommend you take advantage of Greed's more powerful features like merge file extensions, merely adding the above will make any mod interactible for Greed.
+While I recommend you take advantage of Greed's more powerful features like merge file extensions or [Resolvable Mutations](https://github.com/VoltCruelerz/Greed/blob/master/Mutations.md), merely adding the above will make any mod interactible for Greed.
 
 | Field | Type | Description |
 |:------|:-----|:------------|
