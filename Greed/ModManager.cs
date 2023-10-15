@@ -6,10 +6,8 @@ using Greed.Models;
 using Greed.Models.EnabledMods;
 using Greed.Models.Online;
 using Greed.Models.Vault;
+using Greed.Updater;
 using Newtonsoft.Json;
-using SharpCompress.Archives;
-using SharpCompress.Archives.Rar;
-using SharpCompress.Common;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -527,17 +525,13 @@ namespace Greed
 
                 // Download the file to the Downloads directory
                 var filename = (modToDownload.Id + "_" + url.Split('/')[^1]).Split("?")[0];
-                var zipPath = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-                    "Downloads",
-                    filename
-                );
+                var zipPath = Path.Combine(ConfigurationManager.AppSettings["downDir"]!, filename);
                 await window.SetProgressAsync(0.2);
                 if (File.Exists(zipPath))
                 {
                     File.Delete(zipPath);
                 }
-                if (!await DownloadZipFile(window, url, zipPath))
+                if (!await UpdateManager.DownloadZipFile(url, zipPath))
                 {
                     await window.SetProgressAsync(0);
                     return false;
@@ -589,41 +583,6 @@ namespace Greed
             return true;
         }
 
-        public static async Task<bool> DownloadZipFile(MainWindow window, string releaseUrl, string outputPath)
-        {
-            using HttpClient httpClient = new();
-            try
-            {
-                // Send an HTTP GET request to the GitHub release URL
-                await window.PrintAsync("Downloading from " + releaseUrl);
-                HttpResponseMessage response = await httpClient.GetAsync(releaseUrl);
-
-                // Check if the request was successful (HTTP status code 200)
-                if (response.IsSuccessStatusCode)
-                {
-                    // Get the response stream and create a FileStream to save the .zip file
-                    using (Stream contentStream = await response.Content.ReadAsStreamAsync())
-                    using (FileStream fileStream = File.Create(outputPath))
-                    {
-                        // Copy the content stream to the file stream
-                        await contentStream.CopyToAsync(fileStream);
-                    }
-
-                    await window.PrintAsync("Download completed successfully.");
-                }
-                else
-                {
-                    throw new InvalidOperationException($"Failed to download. HTTP status code: {response.StatusCode}");
-                }
-                return true;
-            }
-            catch (Exception ex)
-            {
-                await window.PrintAsync($"A download error occurred: {ex.Message}\n{ex.StackTrace}");
-                return false;
-            }
-        }
-
         public static async Task InstallMod(MainWindow window, string archivePath, string modId = "")
         {
             try
@@ -639,7 +598,7 @@ namespace Greed
                 await window.PrintAsync($"Extracting to {extractPath}...");
                 try
                 {
-                    ExtractArchive(archivePath, extractPath);
+                    UpdateManager.ExtractArchive(archivePath, extractPath);
                 }
                 catch (Exception ex)
                 {
@@ -678,7 +637,7 @@ namespace Greed
                 }
                 await window.SetProgressAsync(0.8);
                 await window.PrintAsync($"Starting move from {copyablePath}...");
-                await MoveWithRetries(window, copyablePath, modPath);
+                await UpdateManager.MoveDirWithRetries(copyablePath, modPath);
                 await window.PrintAsync($"Move complete.");
                 await window.PrintAsync($"Install complete.");
                 await window.SetProgressAsync(0.9);
@@ -692,78 +651,6 @@ namespace Greed
             catch (Exception ex)
             {
                 CriticalAlertPopup.Throw("Failed to Install Mod", ex);
-            }
-        }
-
-        private static void ExtractArchive(string archivePath, string extractPath)
-        {
-            var extension = Path.GetExtension(archivePath);
-            if (extension == ".zip")
-            {
-                ZipFile.ExtractToDirectory(archivePath, extractPath);
-            }
-            else if (extension == ".rar")
-            {
-                Directory.CreateDirectory(extractPath);
-                using var archive = RarArchive.Open(archivePath);
-                foreach (var entry in archive.Entries.Where(entry => !entry.IsDirectory))
-                {
-                    entry.WriteToDirectory(extractPath, new ExtractionOptions()
-                    {
-                        ExtractFullPath = true,
-                        Overwrite = true
-                    });
-                }
-            }
-            else
-            {
-                throw new InvalidDataException("Unrecognized archive type: " + extension);
-            }
-        }
-
-        /// <summary>
-        /// Repeatedly attempts to move a directory that may or may not be locked down by ZipFile.ExtractToDirectory()
-        /// </summary>
-        /// <param name="window"></param>
-        /// <param name="src"></param>
-        /// <param name="dest"></param>
-        /// <param name="maxRetries"></param>
-        /// <exception cref="InvalidOperationException"></exception>
-        private static async Task MoveWithRetries(MainWindow window, string src, string dest, int maxRetries = 5)
-        {
-            var needToSwitchDrives = src.Split(":")[0] != dest.Split(":")[0];
-            for (var retry = 0; retry <= maxRetries; retry++)
-            {
-                if (Directory.Exists(src))
-                {
-                    try
-                    {
-                        if (needToSwitchDrives)
-                        {
-                            Extensions.Extensions.CopyDirectory(src, dest, true);
-                        }
-                        else
-                        {
-                            Directory.Move(src, dest);
-                        }
-                        return;
-                    }
-                    catch (Exception ex)
-                    {
-                        await window.PrintAsync(ex, "[WARN]");
-                        //Thread.Sleep(retry * 100);
-                        await Task.Delay(Math.Min(retry * 100, 1000)).ConfigureAwait(false);
-                        await window.PrintAsync($"Retrying move due to ZipFile not being thread safe (r={retry}/{maxRetries})");
-                        if (retry == maxRetries)
-                        {
-                            throw;
-                        }
-                    }
-                }
-                else
-                {
-                    throw new InvalidOperationException($"Internal extracted directory does not exist!");
-                }
             }
         }
     }

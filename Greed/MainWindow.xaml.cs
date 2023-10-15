@@ -9,6 +9,7 @@ using Greed.Models.Json;
 using Greed.Models.ListItem;
 using Greed.Models.Online;
 using Greed.Models.Vault;
+using Greed.Updater;
 using Microsoft.VisualBasic;
 using Newtonsoft.Json;
 using System;
@@ -107,7 +108,7 @@ namespace Greed
             try
             {
                 var greedVersion = Assembly.GetExecutingAssembly().GetName().Version!;
-                var updateStr = greedVersion.CompareTo(Catalog.LatestGreed) < 0
+                var updateStr = greedVersion.IsOlderThan(Catalog.LatestGreed)
                     ? $" - {Constants.UNI_WARN} Greed v{Catalog.LatestGreed} is now available! {Constants.UNI_WARN}"
                     : "";
                 Title = $"Greed Mod Loader v{greedVersion} (Detected Sins II v{FileVersionInfo.GetVersionInfo(sinsDir + "\\sins2.exe").FileVersion}){updateStr}";
@@ -116,7 +117,6 @@ namespace Greed
             {
                 viewModList.Items.Clear();
                 Tabs.SelectedItem = TabSettings;
-                return;
             }
         }
 
@@ -711,6 +711,22 @@ namespace Greed
         }
         #endregion
 
+        private void CmdUpdateGreed_Click(object sender, RoutedEventArgs e)
+        {
+            Task.Run(async () =>
+            {
+                Catalog = await OnlineCatalog.GetOnlineListing(this);
+                if (Assembly.GetExecutingAssembly().GetName().Version!.IsOlderThan(Catalog.LatestGreed))
+                {
+                    _ = UpdateManager.UpdateGreed(Catalog.LatestGreed);
+                }
+                else
+                {
+                    MessageBox.Show("You have the latest version of Greed", "No Update", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }).ConfigureAwait(false);
+        }
+
         private void Tabs_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var control = ((TabControl)sender);
@@ -1159,10 +1175,5 @@ namespace Greed
             PopClipboardCatalog.SetPopDuration(2000);
         }
         #endregion
-
-        private void CmdUpdate_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
     }
 }
