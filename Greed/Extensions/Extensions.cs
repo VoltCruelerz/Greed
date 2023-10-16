@@ -115,8 +115,10 @@ namespace Greed.Extensions
                 return string.Empty;
             }
 
-            var lines = new List<string>();
-            lines.Add(TabLeft("{", depth));
+            var lines = new List<string>
+            {
+                TabLeft("{", depth)
+            };
             foreach (var item in sequence)
             {
                 var entry = (item is IEnumerable enumerable) && (item is not string)
@@ -147,7 +149,7 @@ namespace Greed.Extensions
                 var entry = (item is IEnumerable enumerable) && (item is not string)
                     ? enumerable.Stringify(depth + 1)
                     : item?.ToString() ?? "null";
-                var content = $"{Constants.UNI_BULLET} {entry}";
+                var content = $"{Utils.Constants.UNI_BULLET} {entry}";
                 lines.Add(TabLeft(content, depth + 1));
             }
             return string.Join(Environment.NewLine, lines);

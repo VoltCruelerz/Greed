@@ -31,7 +31,7 @@ namespace Greed.Models.ListItem
         public ModListItem(Mod mod, MainWindow window, OnlineCatalog catalog, bool isEven, bool isSelected)
         {
             Id = mod.Id;
-            Active = mod.IsActive ? Constants.UNI_CHECK : " ";
+            Active = mod.IsActive ? Utils.Constants.UNI_CHECK : " ";
             Displayname = mod.Meta.Name;
             Version = mod.Meta.Version.ToString();
             Latest = Version;
@@ -46,15 +46,15 @@ namespace Greed.Models.ListItem
             var versionViolations = mod.Meta.IsLegalVersion();
             if (versionViolations.Contains(ViolationCauseEnum.ModGreedTooOld) || versionViolations.Contains(ViolationCauseEnum.ModSinsTooOld))
             {
-                Version = Constants.UNI_WARN + " " + Version;
+                Version = Utils.Constants.UNI_WARN + " " + Version;
             }
             if (versionViolations.Contains(ViolationCauseEnum.ModGreedTooOld) || versionViolations.Contains(ViolationCauseEnum.LiveGreedTooOld))
             {
-                GreedVersion = Constants.UNI_WARN + " " + GreedVersion;
+                GreedVersion = Utils.Constants.UNI_WARN + " " + GreedVersion;
             }
             if (versionViolations.Contains(ViolationCauseEnum.ModSinsTooOld) || versionViolations.Contains(ViolationCauseEnum.LiveSinsTooOld))
             {
-                SinsVersion = Constants.UNI_WARN + " " + SinsVersion;
+                SinsVersion = Utils.Constants.UNI_WARN + " " + SinsVersion;
             }
 
             if (versionViolations.Any())
@@ -70,7 +70,7 @@ namespace Greed.Models.ListItem
                 Latest = onlineMod.Latest.ToString();
                 if (mod.Meta.Version.CompareTo(onlineMod.Latest) < 0)
                 {
-                    Version = Constants.UNI_READY_FOR_UPDATE + " " + Version;
+                    Version = Utils.Constants.UNI_READY_FOR_UPDATE + " " + Version;
                 }
             }
         }

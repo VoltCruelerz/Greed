@@ -2,6 +2,7 @@
 using Greed.Exceptions;
 using Greed.Extensions;
 using Greed.Models.Mutations.Variables;
+using Greed.Utils;
 using JsonDiffer;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -44,8 +45,8 @@ namespace Greed.Models.Json
             {
                 Mergename = Mergename[0..(Filename.Length - 4)];
             }
-            GoldPath = $"{ConfigurationManager.AppSettings["sinsDir"]!}\\{Folder}\\{Mergename}";
-            GreedPath = $"{ConfigurationManager.AppSettings["modDir"]!}\\greed\\{Folder}\\{Mergename}";
+            GoldPath = $"{Settings.GetSinsDir()}\\{Folder}\\{Mergename}";
+            GreedPath = $"{Settings.GetModDir()}\\greed\\{Folder}\\{Mergename}";
 
             Json = ReadJsonWithComments(SourcePath);
 
@@ -74,14 +75,14 @@ namespace Greed.Models.Json
                          */
                         var extension = Path.GetExtension(Mergename);
                         var parentFilename = GreedRules.Parent + extension;
-                        GoldPath = $"{ConfigurationManager.AppSettings["sinsDir"]!}\\{Folder}\\{parentFilename}";
-                        ParentGreedPath = $"{ConfigurationManager.AppSettings["modDir"]!}\\greed\\{Folder}\\{parentFilename}";
+                        GoldPath = $"{Settings.GetSinsDir()}\\{Folder}\\{parentFilename}";
+                        ParentGreedPath = $"{Settings.GetModDir()}\\greed\\{Folder}\\{parentFilename}";
                     }
                     if (GreedRules.Alias != null)
                     {
                         Mergename = GreedRules.Alias;
                         GoldPath = $"{ConfigurationManager.AppSettings["sinsDir"]!}\\{Folder}\\{Mergename}";
-                        GreedPath = $"{ConfigurationManager.AppSettings["modDir"]!}\\greed\\{Folder}\\{Mergename}";
+                        GreedPath = $"{Settings.GetModDir()}\\greed\\{Folder}\\{Mergename}";
                     }
                     if (GreedRules.MergeMode != null)
                     {
@@ -98,7 +99,7 @@ namespace Greed.Models.Json
             }
         }
 
-        private SourceType GetSourceType(string type)
+        private static SourceType GetSourceType(string type)
         {
             type = type.Replace(".", "");
             return type switch

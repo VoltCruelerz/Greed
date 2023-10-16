@@ -4,7 +4,7 @@ namespace Greed.UnitTest
 {
     public class Helper
     {
-        public static string ModsFolder = "..\\..\\..\\json\\mods";
+        public const string ModsFolder = "..\\..\\..\\json\\mods";
 
         public static Mod GetBasicMod(IVault vault, IModManager manager, IWarningPopup warning, ref int index)
         {

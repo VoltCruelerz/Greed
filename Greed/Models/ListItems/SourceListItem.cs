@@ -29,7 +29,7 @@ namespace Greed.Models.ListItem
                 {
                     var goldStr = new JsonSource(s.GoldPath).Minify();
                     var modStr = s.Minify();
-                    DeltaSymbol = modStr == goldStr ? "" : Constants.UNI_DELTA;
+                    DeltaSymbol = modStr == goldStr ? "" : Utils.Constants.UNI_DELTA;
                 }
                 catch (Exception ex)
                 {

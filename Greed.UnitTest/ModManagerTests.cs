@@ -1,4 +1,5 @@
 ﻿using Greed.Interfaces;
+using Greed.Utils;
 using Moq;
 using System.Configuration;
 
@@ -21,7 +22,10 @@ namespace Greed.UnitTest
                 Directory.Delete(mockModDir, true);
             }
             Directory.CreateDirectory(mockModDir);
-            ConfigurationManager.AppSettings["modDir"] = mockModDir;
+            Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            config.AppSettings.Settings.Add(new KeyValueConfigurationElement("modDir", Settings.DefaultModDir));
+            config.Save(ConfigurationSaveMode.Modified);
+            Settings.SetModDir(mockModDir);
         }
 
         #region Reorder Mod List

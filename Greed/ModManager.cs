@@ -6,16 +6,14 @@ using Greed.Models;
 using Greed.Models.EnabledMods;
 using Greed.Models.Online;
 using Greed.Models.Vault;
-using Greed.Updater;
+using Greed.Utils;
+using Microsoft.VisualBasic;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -49,7 +47,7 @@ namespace Greed
         /// <returns></returns>
         public List<Mod> LoadGreedyMods(GreedVault vault)
         {
-            string modDir = ConfigurationManager.AppSettings["modDir"]!;
+            string modDir = Settings.GetModDir();
             var modDirs = Directory.GetDirectories(modDir);
 
             var modIndex = 0;
@@ -82,8 +80,8 @@ namespace Greed
         public void ExportGreedyMods(List<Mod> active, ProgressBar pgbProgress, MainWindow window, Action<bool> callback)
         {
             _ = window.PrintAsync($"Exporting {active.Count} Active Mods");
-            string modDir = ConfigurationManager.AppSettings["modDir"]!;
-            string sinsDir = ConfigurationManager.AppSettings["sinsDir"]!;
+            string modDir = Settings.GetModDir();
+            string sinsDir = Settings.GetSinsDir();
             var greedPath = modDir + "\\greed";
 
             // Burn down the old Greed mod directory (if exists) and make it anew.
@@ -283,6 +281,117 @@ namespace Greed
             return movedDescendentCount + movedSuccessorCount;
         }
 
+        public static void NewModWizard(OnlineCatalog catalog)
+        {
+            // Name
+            var name = Interaction.InputBox("What would you like to name your mod?", "Greedy Wizard");
+            if (string.IsNullOrEmpty(name)) return;
+
+            var author = Interaction.InputBox("What is your username?", "Greedy Wizard");
+            if (string.IsNullOrEmpty(author)) return;
+
+            // Id
+            var existingIds = catalog.Mods.Select(m => m.Id).ToHashSet();
+            string id = "";
+            do
+            {
+                if (id != "")
+                {
+                    MessageBox.Show("That id was taken. Please select another.", "Greedy Wizard", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+                id = Interaction.InputBox("What would you like the id of your mod to be? It must be unique.", "Greedy Wizard");
+                if (string.IsNullOrEmpty(id)) return;
+            } while (existingIds.Contains(id));
+
+            // Url
+            var url = Interaction.InputBox("At what URL could players get more information or technical support for your mod?", "Greedy Wizard");
+            if (string.IsNullOrEmpty(url)) return;
+
+            // Description
+            var desc = Interaction.InputBox("Please provide a brief summary of your mod's purpose.", "Greedy Wizard");
+            if (string.IsNullOrEmpty(desc)) return;
+
+            // Mod Version
+            var version = new Version("1.0.0");
+
+            // Sins Version
+            var sinsVersion = Settings.GetSinsVersion();
+
+            // Greed Version
+            var greedVersion = Settings.GetGreedVersion();
+
+            // Dependencies
+            List<Dependency> deps = new();
+            var depResponse = MessageBox.Show("Does your mod have dependencies?", "Greedy Wizard", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (depResponse == MessageBoxResult.Yes)
+            {
+                var depStr = Interaction.InputBox("What mods is yours dependent on? Please separate them with commas. (eg 'mod-a:1.0.0,other-mod:1.5.0'", "Greedy Wizard");
+                if (string.IsNullOrEmpty(depStr)) return;
+
+                var modStrs = depStr.Split(",");
+                foreach (var item in modStrs)
+                {
+                    var terms = item.Split(":");
+                    deps.Add(new Dependency
+                    {
+                        Id = terms[0].Trim(),
+                        Version = new Version(terms[1].Trim())
+                    });
+                }
+            }
+
+            // Predecessors
+            List<string> preds = new();
+            var predResponse = MessageBox.Show("Does your mod have load order predecessors?", "Greedy Wizard", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (predResponse == MessageBoxResult.Yes)
+            {
+                var predStr = Interaction.InputBox("What mods should yours load after, if they are present? (eg 'mod-a,other-mod,mod-c'", "Greedy Wizard");
+                if (string.IsNullOrEmpty(predStr)) return;
+
+                preds = predStr.Split(",").Select(s => s.Trim()).ToList();
+            }
+
+            // Conflicts
+            List<string> conflicts = new();
+            var conflictsResponse = MessageBox.Show("Does your mod have conflicts?", "Greedy Wizard", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (conflictsResponse == MessageBoxResult.Yes)
+            {
+                var conflictsStr = Interaction.InputBox("What mods do you know yours will conflict with? (eg 'mod-a,other-mod,mod-c'", "Greedy Wizard");
+                if (string.IsNullOrEmpty(conflictsStr)) return;
+
+                conflicts = conflictsStr.Split(",").Select(s => s.Trim()).ToList();
+            }
+
+            // Total Conversion
+            var isTotalConversion = MessageBox.Show("Is your mod a total conversion?", "Greedy Wizard", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
+
+            // Generate mod
+            var modDir = Settings.GetModDir();
+            var modPath = Path.Combine(modDir, id);
+            Directory.CreateDirectory(modPath);
+            File.WriteAllText(Path.Combine(modPath, "greed.json"), JsonConvert.SerializeObject(new LocalInstall()
+            {
+                Name = name,
+                Author = author,
+                Description = desc,
+                Url = url,
+                Version = version,
+                GreedVersion = greedVersion,
+                SinsVersion = sinsVersion,
+                Dependencies = deps,
+                Predecessors = preds,
+                Conflicts = conflicts,
+                IsTotalConversion = isTotalConversion
+            }, Formatting.Indented));
+
+            // Open in Explorer
+            var openResponse = MessageBox.Show("Mod template generation complete. Would you like to open file explorer to it?", "Greedy Wizard", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (openResponse == MessageBoxResult.Yes)
+            {
+                Process.Start("explorer.exe", modPath);
+            }
+        }
+
         /// <summary>
         /// Based on the order the mods are in the list, sets their load order index.
         /// </summary>
@@ -303,12 +412,12 @@ namespace Greed
         /// </summary>
         private static void ActivateGreed()
         {
-            if (!Directory.Exists(ConfigurationManager.AppSettings["exportDir"]))
+            if (!Directory.Exists(Settings.GetExportDir()))
             {
-                Directory.CreateDirectory(ConfigurationManager.AppSettings["exportDir"]!);
+                Directory.CreateDirectory(Settings.GetExportDir());
             }
             // If enabled path doesn't exist yet, make it.
-            var enabledPath = ConfigurationManager.AppSettings["exportDir"]! + "\\enabled_mods.json";
+            var enabledPath = Settings.GetExportDir() + "\\enabled_mods.json";
             EnabledMods enabled;
             var greedKey = new ModKey()
             {
@@ -345,8 +454,8 @@ namespace Greed
         private static void DeactivateGreed()
         {
             // If enabled path doesn't exist yet, make it.
-            var greedPath = ConfigurationManager.AppSettings["exportDir"]! + "\\greed";
-            var enabledPath = ConfigurationManager.AppSettings["exportDir"]! + "\\enabled_mods.json";
+            var greedPath = Settings.GetExportDir() + "\\greed";
+            var enabledPath = Settings.GetExportDir() + "\\enabled_mods.json";
 
             if (File.Exists(enabledPath))
             {
@@ -419,7 +528,7 @@ namespace Greed
         /// <returns></returns>
         public static bool IsModInstalled(string id)
         {
-            string modDir = ConfigurationManager.AppSettings["modDir"]!;
+            string modDir = Settings.GetModDir();
             var modDirs = Directory.GetDirectories(modDir).Select(d => d.Split("\\")[^1]);
             return modDirs.Contains(id);
         }
@@ -473,7 +582,7 @@ namespace Greed
 
         private static void DeleteModFolder(string id)
         {
-            string modDir = ConfigurationManager.AppSettings["modDir"]!;
+            string modDir = Settings.GetModDir();
             var path = modDir + "\\" + id;
             try
             {
@@ -525,13 +634,13 @@ namespace Greed
 
                 // Download the file to the Downloads directory
                 var filename = (modToDownload.Id + "_" + url.Split('/')[^1]).Split("?")[0];
-                var zipPath = Path.Combine(ConfigurationManager.AppSettings["downDir"]!, filename);
+                var zipPath = Path.Combine(Settings.GetDownDir(), filename);
                 await window.SetProgressAsync(0.2);
                 if (File.Exists(zipPath))
                 {
                     File.Delete(zipPath);
                 }
-                if (!await UpdateManager.DownloadZipFile(url, zipPath))
+                if (!await IOManager.DownloadZipFile(url, zipPath))
                 {
                     await window.SetProgressAsync(0);
                     return false;
@@ -598,7 +707,7 @@ namespace Greed
                 await window.PrintAsync($"Extracting to {extractPath}...");
                 try
                 {
-                    UpdateManager.ExtractArchive(archivePath, extractPath);
+                    IOManager.ExtractArchive(archivePath, extractPath);
                 }
                 catch (Exception ex)
                 {
@@ -625,9 +734,10 @@ namespace Greed
 
 
                 // Shift to the mod directory
-                var modPath = ConfigurationManager.AppSettings["modDir"]! + "\\" + modId;
+                var modPath = Settings.GetModDir() + "\\" + modId;
                 if (Directory.Exists(modPath))
                 {
+                    IOManager.ReadyDirForDelete(modPath);
                     Directory.Delete(modPath, true);
                     await window.PrintAsync($"Deleted old install to make way for new one.");
                 }
@@ -637,7 +747,7 @@ namespace Greed
                 }
                 await window.SetProgressAsync(0.8);
                 await window.PrintAsync($"Starting move from {copyablePath}...");
-                await UpdateManager.MoveDirWithRetries(copyablePath, modPath);
+                await IOManager.MoveDirWithRetries(copyablePath, modPath);
                 await window.PrintAsync($"Move complete.");
                 await window.PrintAsync($"Install complete.");
                 await window.SetProgressAsync(0.9);

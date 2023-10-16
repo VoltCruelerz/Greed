@@ -1,10 +1,8 @@
 ﻿using Greed.Extensions;
 using Greed.Models.Online;
+using Greed.Utils;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
-using System.Diagnostics;
-using System.Reflection;
 
 namespace Greed.Models.ListItem
 {
@@ -43,15 +41,14 @@ namespace Greed.Models.ListItem
             }
 
             GreedVersion = m.Live.GreedVersion.ToString();
-            var installedGreedVersion = Assembly.GetExecutingAssembly().GetName().Version!;
+            var installedGreedVersion = Settings.GetGreedVersion();
             if (installedGreedVersion.IsOlderThan(m.Live.GreedVersion))
             {
                 GreedVersion = Constants.UNI_WARN + " " + GreedVersion;
             }
 
             SinsVersion = m.Live.SinsVersion.ToString();
-            var sinsDir = ConfigurationManager.AppSettings["sinsDir"]!;
-            var installedSinsVersion = new Version(FileVersionInfo.GetVersionInfo(sinsDir + "\\sins2.exe").FileVersion!);
+            var installedSinsVersion = Settings.GetSinsVersion();
             if (installedSinsVersion.IsOlderThan(m.Live.SinsVersion))
             {
                 SinsVersion = Constants.UNI_WARN + " " + SinsVersion;

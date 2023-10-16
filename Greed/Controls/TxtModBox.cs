@@ -41,18 +41,31 @@ namespace Greed.Controls
             }
 
             // Url
-            if (!string.IsNullOrEmpty(meta.Url))
+            try
             {
-                var hyperParagraph = new Paragraph();
-                var hyper = new Hyperlink
+                if (!string.IsNullOrEmpty(meta.Url))
                 {
-                    IsEnabled = true,
-                    NavigateUri = new Uri(meta.Url)
-                };
-                hyper.Inlines.Add(meta.Url);
-                hyper.RequestNavigate += (sender, args) => meta.Url.NavigateToUrl();
-                hyperParagraph.Inlines.Add(hyper);
-                doc.Blocks.Add(hyperParagraph);
+                    var hyperParagraph = new Paragraph();
+                    var hyper = new Hyperlink
+                    {
+                        IsEnabled = true,
+                        NavigateUri = new Uri(meta.Url)
+                    };
+                    hyper.Inlines.Add(meta.Url);
+                    hyper.RequestNavigate += (sender, args) => meta.Url.NavigateToUrl();
+                    hyperParagraph.Inlines.Add(hyper);
+                    doc.Blocks.Add(hyperParagraph);
+                }
+            }
+            catch (Exception)
+            {
+                doc.Blocks.Add(new Paragraph(new Run(meta.Url)
+                {
+                    TextDecorations =
+                    {
+                        TextDecorations.Underline
+                    }
+                }));
             }
 
             // Description
@@ -68,7 +81,7 @@ namespace Greed.Controls
                 {
                     FontWeight = FontWeights.Bold
                 });
-                meta.GetDependencies().ForEach(c => p.Inlines.Add(new Run(Environment.NewLine + Constants.UNI_BULLET + " " + c)));
+                meta.GetDependencies().ForEach(c => p.Inlines.Add(new Run(Environment.NewLine + Utils.Constants.UNI_BULLET + " " + c)));
                 doc.Blocks.Add(p);
             }
 
@@ -79,7 +92,7 @@ namespace Greed.Controls
                 {
                     FontWeight = FontWeights.Bold
                 });
-                meta.GetPredecessors().ForEach(c => p.Inlines.Add(new Run(Environment.NewLine + Constants.UNI_BULLET + " " + c)));
+                meta.GetPredecessors().ForEach(c => p.Inlines.Add(new Run(Environment.NewLine + Utils.Constants.UNI_BULLET + " " + c)));
                 doc.Blocks.Add(p);
             }
 
@@ -90,7 +103,7 @@ namespace Greed.Controls
                 {
                     FontWeight = FontWeights.Bold
                 });
-                meta.GetConflicts().ForEach(c => p.Inlines.Add(new Run(Environment.NewLine + Constants.UNI_BULLET + " " + c)));
+                meta.GetConflicts().ForEach(c => p.Inlines.Add(new Run(Environment.NewLine + Utils.Constants.UNI_BULLET + " " + c)));
                 doc.Blocks.Add(p);
             }
 

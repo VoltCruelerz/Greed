@@ -1,21 +1,20 @@
 ﻿using Greed.Controls.Popups;
-using System;
-using System.Configuration;
-using System.IO;
-using System.IO.Compression;
-using System.Net.Http;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Linq;
+using Greed.Models;
 using SharpCompress.Archives;
 using SharpCompress.Archives.Rar;
 using SharpCompress.Common;
+using System;
 using System.Diagnostics;
+using System.IO;
+using System.IO.Compression;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
 using System.Windows;
 
-namespace Greed.Updater
+namespace Greed.Utils
 {
-    public static class UpdateManager
+    public static class IOManager
     {
         public static async Task UpdateGreed(Version version)
         {
@@ -25,8 +24,8 @@ namespace Greed.Updater
                 var url = $"https://github.com/VoltCruelerz/Greed/releases/download/{version}/Greed.{version}.zip";
                 var zipFile = $"Greed.{version}.zip";
                 var extractFolder = $"Greed.{version}";
-                var zipPath = Path.Combine(ConfigurationManager.AppSettings["downDir"]!, zipFile);
-                var extractPath = Path.Combine(ConfigurationManager.AppSettings["downDir"]!, extractFolder);
+                var zipPath = Path.Combine(Settings.GetDownDir(), zipFile);
+                var extractPath = Path.Combine(Settings.GetDownDir(), extractFolder);
                 _ = MainWindow.Instance!.PrintAsync($"Installing {zipFile}...");
 
                 // Clean up previous execution
@@ -54,7 +53,7 @@ namespace Greed.Updater
                 _ = MainWindow.Instance!.PrintAsync($"Starting restarter...");
 
                 var response = MessageBox.Show("Greed needs to restart itself to finish the update. Would you like to restart it now?", "Greed Restart", MessageBoxButton.YesNo);
-                if ( response == MessageBoxResult.Yes)
+                if (response == MessageBoxResult.Yes)
                 {
                     Process.Start(Path.Combine(curDir, "Greed.AutoUpdater.exe"), Environment.ProcessId.ToString());
                     Environment.Exit(0);
@@ -213,6 +212,32 @@ namespace Greed.Updater
                 {
                     throw new FileNotFoundException($"Internal extracted file does not exist!");
                 }
+            }
+        }
+
+        public static string ZipMod(Mod m)
+        {
+            var zipName = m.Id + ".zip";
+            var zipPath = m.GetDir() + ".zip";
+            if (File.Exists(zipPath))
+            {
+                File.Delete(zipPath);
+            }
+            ZipFile.CreateFromDirectory(m.GetDir(), zipPath);
+            return zipPath;
+        }
+
+        public static void ReadyDirForDelete(string dir)
+        {
+            SetAttributesNormal(new DirectoryInfo(dir));
+        }
+
+        public static void SetAttributesNormal(DirectoryInfo dir)
+        {
+            foreach (var subDir in dir.GetDirectories()) SetAttributesNormal(subDir);
+            foreach (var file in dir.GetFiles())
+            {
+                file.Attributes = FileAttributes.Normal;
             }
         }
     }

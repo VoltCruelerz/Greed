@@ -27,15 +27,15 @@
                     <ColumnDefinition Width="409*"/>
                     <ColumnDefinition Width="432*"/>
                 </Grid.ColumnDefinitions>
-                <ListView x:Name="viewModList" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="10,64,11,10"
+                <ListView x:Name="ViewModList" d:ItemsSource="{d:SampleData ItemCount=5}" Margin="10,64,11,10"
                           AllowDrop="True"
-                          MouseDoubleClick="Toggle_Click"
+                          MouseDoubleClick="Ctx_Toggle_Click"
                           PreviewMouseLeftButtonDown="ModList_MousePreview"
                           SelectionChanged="ModList_SelectionChanged"
                           MouseUp="ModList_MouseUp"
                           MouseLeave="ModList_MouseLeave"
                           ToolTip="Later mods overwrite earlier ones. Click to view a mod's details. Double click to toggle. Drag-and-drop a .zip or .rar to install it."
-                          Drop="viewModList_Drop"
+                          Drop="ViewModList_Drop"
                         >
                     <ListView.ContextMenu>
                         <ContextMenu x:Name="CtxRight">
@@ -158,12 +158,6 @@
         </TabItem>
         <TabItem x:Name="TabDeveloper" Header="Developer">
             <Grid>
-                <Button x:Name="CmdGenerateCatalog" Padding="0,0,0,1.5" Content="Generate Catalog JSON" Margin="10,39,0,0" Click="CmdGenerateCatalog_Click" VerticalAlignment="Top" ToolTip="Generates catalog entries for upserted activated mods." Height="23" HorizontalAlignment="Left" Width="140"/>
-                <Popup x:Name="PopClipboardCatalog" PlacementTarget="{Binding ElementName=CmdGenerateCatalog}" Placement="Bottom" StaysOpen="False" IsOpen="False">
-                    <Border Background="LightGreen" BorderBrush="DarkGreen" BorderThickness="1" CornerRadius="4">
-                        <TextBlock Text="Copied to clipboard!" Margin="5" />
-                    </Border>
-                </Popup>
                 <Label Content="Catalog Channel" HorizontalAlignment="Left" Margin="10,8,0,0" VerticalAlignment="Top" ToolTip="Unless you're in the LGM, leave it on Live. Unless you're a Greed developer, leave it off Alpha."/>
                 <ComboBox x:Name="CbxChannel" HorizontalAlignment="Left" Margin="112,10,0,0" VerticalAlignment="Top" Width="120" SelectionChanged="CbxChannel_SelectionChanged" Height="22" FontSize="11" VerticalContentAlignment="Center">
                     <ComboBox.Items>
@@ -173,6 +167,19 @@
                     </ComboBox.Items>
                 </ComboBox>
                 <TextBox x:Name="txtManualCatalog" HorizontalAlignment="Left" Margin="237,12,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="313" TextChanged="TxtManualCatalog_TextChanged" ToolTip="Manual catalog location."/>
+                <Button x:Name="CmdGreedyWizard" Padding="0,0,0,1.5" Content="Greedy Mod Wizard" Margin="10,39,0,0" Click="CmdGreedyWizard_Click" VerticalAlignment="Top" ToolTip="Generates a greedy mod template." Height="23" HorizontalAlignment="Left" Width="140"/>
+                <Button x:Name="CmdZipActiveMod" Padding="0,0,0,1.5" Content="Zip Active Greedy Mod" Margin="10,67,0,0" Click="CmdZipActiveMod_Click" VerticalAlignment="Top" ToolTip="Zips the active mod and copies it to the clipboard." Height="23" HorizontalAlignment="Left" Width="140"/>
+                <Button x:Name="CmdGenerateCatalog" Padding="0,0,0,1.5" Content="Generate Catalog JSON" Margin="10,95,0,0" Click="CmdGenerateCatalog_Click" VerticalAlignment="Top" ToolTip="Generates catalog entries for upserted activated mods." Height="23" HorizontalAlignment="Left" Width="140"/>
+                <Popup x:Name="PopClipboardZipMod" PlacementTarget="{Binding ElementName=CmdZipActiveMod}" Placement="Bottom" StaysOpen="False" IsOpen="False">
+                    <Border Background="LightGreen" BorderBrush="DarkGreen" BorderThickness="1" CornerRadius="4">
+                        <TextBlock Text="Catalog JSON Copied to clipboard!" Margin="5" />
+                    </Border>
+                </Popup>
+                <Popup x:Name="PopClipboardCatalog" PlacementTarget="{Binding ElementName=CmdGenerateCatalog}" Placement="Bottom" StaysOpen="False" IsOpen="False">
+                    <Border Background="LightGreen" BorderBrush="DarkGreen" BorderThickness="1" CornerRadius="4">
+                        <TextBlock Text="Zip copied to clipboard!" Margin="5" />
+                    </Border>
+                </Popup>
             </Grid>
         </TabItem>
     </TabControl>

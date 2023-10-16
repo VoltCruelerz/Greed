@@ -9,7 +9,7 @@ using Greed.Models.Json;
 using Greed.Models.ListItem;
 using Greed.Models.Online;
 using Greed.Models.Vault;
-using Greed.Updater;
+using Greed.Utils;
 using Microsoft.VisualBasic;
 using Newtonsoft.Json;
 using System;
@@ -39,8 +39,6 @@ namespace Greed
 
         private readonly ModManager Manager = new();
         private List<Mod> Mods = new();
-        private Mod? DragPastMod;
-        private int ActualSelectedModIndex = -1;
         private readonly List<JsonSource> AllSources = new();
         private JsonSource? SelectedSource;
 
@@ -50,6 +48,8 @@ namespace Greed
         private bool ReadyToDrag = false;
         private Mod? DragMod;
         private Mod? DestMod;
+        private Mod? DragPastMod;
+        private int ActualSelectedModIndex = -1;
         private string SearchQuery = string.Empty;
         private bool SearchActive = false;
         private OnlineCatalog Catalog = new();
@@ -80,14 +80,11 @@ namespace Greed
             TxtLocalModInfo.AppendText("Select a mod to view details about it.");
 
             // Populate the config fields.
-            PopulateConfigField(txtModsDir, "modDir", Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "AppData", "Local", "sins2", "mods"));
-            PopulateConfigField(txtExportDir, "exportDir", Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "AppData", "Local", "sins2", "mods"));
-            PopulateConfigField(txtSinsDir, "sinsDir", "C:\\Program Files\\Epic Games\\SinsII");
-            PopulateConfigField(txtDownloadDir, "downDir", Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"));
-            PopulateConfigCbx(CbxChannel, "channel");
+            PopulateConfigField(txtModsDir, Settings.ModDirKey, Settings.DefaultModDir);
+            PopulateConfigField(txtExportDir, Settings.ExportDirKey, Settings.DefaultModDir);
+            PopulateConfigField(txtSinsDir, Settings.SinsDirKey, Settings.DefaultSinDir);
+            PopulateConfigField(txtDownloadDir, Settings.DownDirKey, Settings.DefaultDownDir);
+            PopulateConfigCbx(CbxChannel, Settings.ChannelKey);
             PrintSync("Directories Explored");
 
             // Only load mods if there's something to load.
@@ -101,21 +98,21 @@ namespace Greed
 
         private void SetTitle()
         {
-            string modDir = ConfigurationManager.AppSettings["modDir"]!;
-            string sinsDir = ConfigurationManager.AppSettings["sinsDir"]!;
+            string modDir = Settings.GetModDir();
+            string sinsDir = Settings.GetSinsDir();
             PrintSync($"Mod Dir: {modDir}");
             PrintSync($"Sins II Dir: {sinsDir}");
             try
             {
-                var greedVersion = Assembly.GetExecutingAssembly().GetName().Version!;
+                var greedVersion = Settings.GetGreedVersion();
                 var updateStr = greedVersion.IsOlderThan(Catalog.LatestGreed)
-                    ? $" - {Constants.UNI_WARN} Greed v{Catalog.LatestGreed} is now available! {Constants.UNI_WARN}"
+                    ? $" - {Utils.Constants.UNI_WARN} Greed v{Catalog.LatestGreed} is now available! {Utils.Constants.UNI_WARN}"
                     : "";
-                Title = $"Greed Mod Loader v{greedVersion} (Detected Sins II v{FileVersionInfo.GetVersionInfo(sinsDir + "\\sins2.exe").FileVersion}){updateStr}";
+                Title = $"Greed Mod Loader v{greedVersion} (Detected Sins II v{Settings.GetSinsVersion()}){updateStr}";
             }
             catch (Exception)
             {
-                viewModList.Items.Clear();
+                ViewModList.Items.Clear();
                 Tabs.SelectedItem = TabSettings;
             }
         }
@@ -125,6 +122,7 @@ namespace Greed
             Dispatcher.Invoke(() => SetTitle());
         }
 
+        #region Left Pane
         #region Reload Mods
         /// <summary>
         /// Reloads the list of installed mods
@@ -140,7 +138,7 @@ namespace Greed
             catch (Exception e)
             {
                 CriticalAlertPopup.Throw("Mod Load Error", new ModLoadException("Unable to load mod(s)", e));
-                viewModList.Items.Clear();
+                ViewModList.Items.Clear();
                 Tabs.SelectedItem = TabSettings;
                 return;
             }
@@ -162,7 +160,7 @@ namespace Greed
         private void RefreshModListUI()
         {
             PrintSync($"RefreshModListUI for {Mods.Count} mods.");
-            viewModList.Items.Clear();
+            ViewModList.Items.Clear();
             var printableMods = Mods
                 .Where(m => string.IsNullOrWhiteSpace(SearchQuery)
                     || m.Id.Contains(SearchQuery, StringComparison.InvariantCultureIgnoreCase)
@@ -176,7 +174,7 @@ namespace Greed
             for (var i = 0; i < printableMods.Count; i++)
             {
                 var m = printableMods[i];
-                viewModList.Items.Add(new ModListItem(m, this, Catalog, i % 2 == 0, i == ActualSelectedModIndex));
+                ViewModList.Items.Add(new ModListItem(m, this, Catalog, i % 2 == 0, i == ActualSelectedModIndex));
             }
         }
 
@@ -195,7 +193,7 @@ namespace Greed
         {
             Task.Run(async () =>
             {
-                Catalog = await OnlineCatalog.GetOnlineListing(this);
+                Catalog = await OnlineCatalog.GetOnlineListing();
                 RefreshModListUIAsync();
                 SetTitleAsync();
             }).ConfigureAwait(false);
@@ -204,7 +202,7 @@ namespace Greed
 
         private void ModList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            Debug.WriteLine("ModList_SelectionChanged() from " + DragPastMod);
+            PrintDrag("ModList_SelectionChanged() from " + DragPastMod);
             // This gets hit when refreshing the display.
             if (e.AddedItems.Count == 0)
             {
@@ -217,19 +215,19 @@ namespace Greed
             Debug.WriteLine("- New Selected Mod " + DragPastMod.ToString());
 
             // If we're ready to drag, start the drag.
-            if (ReadyToDrag)
+            if (ReadyToDrag || ActualSelectedModIndex == -1)
             {
                 // Update the flag so the binding catches which to highlight.
-                if (ActualSelectedModIndex != viewModList.SelectedIndex)
+                if (ActualSelectedModIndex != ViewModList.SelectedIndex)
                 {
                     // Out with the old
                     if (ActualSelectedModIndex != -1)
                     {
-                        ((ModListItem)viewModList.Items[ActualSelectedModIndex]).IsSelected = false;
+                        ((ModListItem)ViewModList.Items[ActualSelectedModIndex]).IsSelected = false;
                     }
                     // In with the new
-                    ActualSelectedModIndex = viewModList.SelectedIndex;
-                    ((ModListItem)viewModList.Items[ActualSelectedModIndex]).IsSelected = true;
+                    ActualSelectedModIndex = ViewModList.SelectedIndex;
+                    ((ModListItem)ViewModList.Items[ActualSelectedModIndex]).IsSelected = true;
                     RefreshModListUI();
                 }
 
@@ -267,14 +265,18 @@ namespace Greed
             CtxRight.Items.Clear();
 
             // Toggle
-            var toggle = new MenuItem();
-            toggle.Header = "Toggle";
-            toggle.Click += Toggle_Click;
+            var toggle = new MenuItem
+            {
+                Header = "Toggle"
+            };
+            toggle.Click += Ctx_Toggle_Click;
             CtxRight.Items.Add(toggle);
 
             // Uninstall
-            var uninstall = new MenuItem();
-            uninstall.Header = "Uninstall";
+            var uninstall = new MenuItem
+            {
+                Header = "Uninstall"
+            };
             uninstall.Click += MenuUninstall_Click;
             CtxRight.Items.Add(uninstall);
 
@@ -285,8 +287,10 @@ namespace Greed
                 var versions = catalogEntry.Versions.Keys.ToList();
                 versions.ForEach(v =>
                 {
-                    var update = new MenuItem();
-                    update.Header = "Install v" + v;
+                    var update = new MenuItem
+                    {
+                        Header = "Install v" + v
+                    };
                     update.Click += (sender, e) => UpdateMod(DragPastMod!, catalogEntry.Versions[v]);
                     update.IsEnabled = DragPastMod!.Meta.GetVersion().ToString() != v;
                     CtxRight.Items.Add(update);
@@ -308,11 +312,21 @@ namespace Greed
             RefreshModListUI();
         }
 
+        private void Ctx_Toggle_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleSingleMod(DragPastMod);
+        }
+        private void Toggle_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            ToggleSingleMod(DragPastMod);
+        }
+
         #region Drag Elements
+
         private void ModList_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            Debug.WriteLine("ModList_MouseUp()");
-            if (DestMod == null || DragMod == DestMod)
+            PrintDrag("ModList_MouseUp()");
+            if (DestMod == null || DragMod == null || DragMod == DestMod)
             {
                 Debug.WriteLine("- Abort drag-and-drop");
                 // We aren't or aborted drag-and-drop.
@@ -326,13 +340,9 @@ namespace Greed
             try
             {
                 Debug.WriteLine("Initiating drag-and-drop movement for " + DragMod?.ToString());
-                if (DragMod == null)
-                {
-                    throw new InvalidOperationException("DragMod was somehow null.");
-                }
 
                 // We *are* actually reordering now.
-                Manager.MoveMod(Vault, Mods, DragMod, destIndex);
+                Manager.MoveMod(Vault, Mods, DragMod!, destIndex);
             }
             catch (Exception ex)
             {
@@ -347,7 +357,7 @@ namespace Greed
 
         private void ModList_MouseLeave(object sender, System.Windows.Input.MouseEventArgs e)
         {
-            Debug.WriteLine("ModList_MouseLeave()");
+            PrintDrag("ModList_MouseLeave()");
             DragMod = null;
             DestMod = null;
             ReadyToDrag = false;
@@ -355,10 +365,18 @@ namespace Greed
 
         private void ModList_MousePreview(object sender, System.Windows.Input.MouseEventArgs e)
         {
-            Debug.WriteLine("ModList_MousePreview()");
+            PrintDrag("ModList_MousePreview()");
             DragMod = null;
             DestMod = null;
             ReadyToDrag = true;
+        }
+        private void PrintDrag(string method)
+        {
+            Debug.WriteLine(method);
+            Debug.WriteLine("- ASMI: " + ActualSelectedModIndex);
+            Debug.WriteLine("- DragMod: " + DragMod);
+            Debug.WriteLine("- DragPastMod: " + DragPastMod);
+            Debug.WriteLine("- DragDest: " + DestMod);
         }
         #endregion
 
@@ -383,12 +401,9 @@ namespace Greed
             Debug.WriteLine("HeaderSins_Click()");
         }
         #endregion
+        #endregion
 
         #region Center Pane
-        private void Toggle_Click(object sender, RoutedEventArgs e)
-        {
-            ToggleSingleMod(DragPastMod);
-        }
 
         private void ToggleSingleMod(Mod? mod)
         {
@@ -417,7 +432,7 @@ namespace Greed
             var anyAreActive = Mods.Any(m => m.IsActive);
             Mods.ForEach(m => m.SetModActivity(Mods, !anyAreActive, anyAreActive));
 
-            string modDir = ConfigurationManager.AppSettings["modDir"]!;
+            string modDir = Settings.GetModDir();
             try
             {
                 Vault.ArchiveActiveOnly(Mods);
@@ -461,8 +476,8 @@ namespace Greed
                     {
                         _ = PrintAsync("Export Complete");
 
-                        var modDir = ConfigurationManager.AppSettings["modDir"];
-                        var expDir = ConfigurationManager.AppSettings["exportDir"];
+                        var modDir = Settings.GetModDir();
+                        var expDir = Settings.GetExportDir();
                         if (modDir != expDir)
                         {
                             var modGreedFolder = modDir! + "\\greed";
@@ -520,8 +535,8 @@ namespace Greed
             if (DragPastMod != null)
             {
                 var index = Mods.IndexOf(DragPastMod!);
-                viewModList.SelectedItem = DragPastMod;
-                viewModList.SelectedIndex = index;
+                ViewModList.SelectedItem = DragPastMod;
+                ViewModList.SelectedIndex = index;
             }
         }
         #endregion
@@ -531,7 +546,8 @@ namespace Greed
         {
             SelectedSource = null;
             viewFileList.Items.Clear();
-            if (ActualSelectedModIndex > -1)
+            // Only populate this if we actually have something selected, and we didn't delete the last mod in the list.
+            if (ActualSelectedModIndex > -1 && ActualSelectedModIndex < Mods.Count)
             {
                 var selectedMod = Mods[ActualSelectedModIndex];
                 AllSources.Clear();
@@ -644,22 +660,22 @@ namespace Greed
 
         private void TxtSinsDir_TextChanged(object sender, TextChangedEventArgs e)
         {
-            SetFolderConfigOption("sinsDir", (TextBox)sender);
+            SetFolderConfigOption(Settings.SinsDirKey, (TextBox)sender);
         }
 
         private void TxtModDir_TextChanged(object sender, TextChangedEventArgs e)
         {
-            SetFolderConfigOption("modDir", (TextBox)sender);
+            SetFolderConfigOption(Settings.ModDirKey, (TextBox)sender);
         }
 
         private void TxtExportDir_TextChanged(object sender, TextChangedEventArgs e)
         {
-            SetFolderConfigOption("exportDir", (TextBox)sender);
+            SetFolderConfigOption(Settings.ExportDirKey, (TextBox)sender);
         }
 
         private void TxtDownloadDir_TextChanged(object sender, TextChangedEventArgs e)
         {
-            SetFolderConfigOption("downDir", (TextBox)sender);
+            SetFolderConfigOption(Settings.DownDirKey, (TextBox)sender);
         }
 
         private void SetFolderConfigOption(string key, TextBox txt)
@@ -680,7 +696,7 @@ namespace Greed
 
             if (exists && newVal != ConfigurationManager.AppSettings[key])
             {
-                SetConfigOptions(key, newVal);
+                Settings.SetConfigOptions(key, newVal);
             }
         }
 
@@ -688,7 +704,7 @@ namespace Greed
         {
             var item = (ComboBoxItem)((ComboBox)sender).SelectedItem;
             txtManualCatalog.Text = "";
-            SetConfigOptions("channel", item.Content.ToString()!.ToLower());
+            Settings.SetConfigOptions(Settings.ChannelKey, item.Content.ToString()!.ToLower());
             ReloadCatalog();
         }
 
@@ -697,17 +713,9 @@ namespace Greed
             var txt = (TextBox)sender;
             if (string.IsNullOrEmpty(txt.Text))
             {
-                SetConfigOptions("channel", "live");
+                Settings.SetConfigOptions("channel", "live");
             }
-            SetConfigOptions("channel", txt.Text);
-        }
-
-        private static void SetConfigOptions(string key, string value)
-        {
-            Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-            config.AppSettings.Settings[key].Value = value;
-            config.Save(ConfigurationSaveMode.Modified);
-            ConfigurationManager.RefreshSection("appSettings");
+            Settings.SetConfigOptions("channel", txt.Text);
         }
         #endregion
 
@@ -715,13 +723,13 @@ namespace Greed
         {
             Task.Run(async () =>
             {
-                Catalog = await OnlineCatalog.GetOnlineListing(this);
+                Catalog = await OnlineCatalog.GetOnlineListing();
                 if (Assembly.GetExecutingAssembly().GetName().Version!.IsOlderThan(Catalog.LatestGreed))
                 {
                     var result = MessageBox.Show("You have an oudated version of Greed. Would you like to update?", "Update Available", MessageBoxButton.YesNo, MessageBoxImage.Information);
                     if (result == MessageBoxResult.Yes)
                     {
-                        await UpdateManager.UpdateGreed(Catalog.LatestGreed);
+                        await IOManager.UpdateGreed(Catalog.LatestGreed);
                     }
                 }
                 else
@@ -764,11 +772,11 @@ namespace Greed
         /// </summary>
         private void Play()
         {
-            var execPath = ConfigurationManager.AppSettings["sinsDir"]! + "\\sins2.exe";
+            var execPath = Settings.GetSinsExePath();
             _ = PrintAsync("Executing: " + execPath);
             Process.Start(new ProcessStartInfo(execPath)
             {
-                WorkingDirectory = ConfigurationManager.AppSettings["sinsDir"]!
+                WorkingDirectory = Settings.GetSinsDir()
             });
         }
         #endregion
@@ -1073,9 +1081,9 @@ namespace Greed
             foreach (string file in files) Console.WriteLine(file);
         }
 
-        private void viewModList_Drop(object sender, DragEventArgs e)
+        private void ViewModList_Drop(object sender, DragEventArgs e)
         {
-            PrintSync("viewModList_Drop()");
+            PrintSync("ViewModList_Drop()");
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
                 string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
@@ -1117,6 +1125,12 @@ namespace Greed
                 var online = cataclone.Mods.FirstOrDefault(p => p.Id == local.Id);
                 return online == null || online.Latest.IsOlderThan(local.Meta.Version);
             }).ToList();
+
+            if (!upserted.Any())
+            {
+                MessageBox.Show("No mods were detected that need to be upserted in the catalog.");
+                return;
+            }
 
             MessageBox.Show($"Detected the following mods to upsert:\n{string.Join("\n", upserted.Select(p => p.Meta.Name + " v" + p.Meta.Version))}");
 
@@ -1178,6 +1192,38 @@ namespace Greed
             Clipboard.SetText(json);
             PopClipboardCatalog.SetPopDuration(2000);
         }
+
+        private void CmdGreedyWizard_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                ModManager.NewModWizard(Catalog);
+            }
+            catch (Exception ex)
+            {
+                CriticalAlertPopup.Throw("Failed to generate new mod (probably due to bad user input)", ex);
+            }
+        }
         #endregion
+
+        private void CmdZipActiveMod_Click(object sender, RoutedEventArgs e)
+        {
+            var active = Mods.Where(a => a.IsActive).ToList();
+            if (active.Count != 1)
+            {
+                MessageBox.Show("Only one mod can be zipped at a time. Please ensure you have exactly one mod set to active.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            try
+            {
+                var path = IOManager.ZipMod(active[0]);
+                Clipboard.SetFileDropList(new System.Collections.Specialized.StringCollection { path });
+                PopClipboardZipMod.SetPopDuration(2000);
+            }
+            catch (Exception ex)
+            {
+                CriticalAlertPopup.Throw("Failed to zip mod.", ex);
+            }
+        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Greed.Exceptions;
 using Greed.Interfaces;
 using Greed.Models.Json;
+using Greed.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -595,6 +596,11 @@ namespace Greed.Models
 
             // Default to false.
             return false;
+        }
+
+        public string GetDir()
+        {
+            return Path.Combine(Settings.GetModDir(), Id);
         }
     }
 }

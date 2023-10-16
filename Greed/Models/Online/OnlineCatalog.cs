@@ -1,8 +1,8 @@
 ﻿using Greed.Controls.Popups;
+using Greed.Utils;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -32,7 +32,7 @@ namespace Greed.Models.Online
         [JsonProperty(PropertyName = "mods")]
         public List<OnlineMod> Mods { get; set; } = new();
 
-        public async static Task<OnlineCatalog> GetOnlineListing(MainWindow window)
+        public async static Task<OnlineCatalog> GetOnlineListing()
         {
             var client = new HttpClient();
             try
@@ -51,7 +51,7 @@ namespace Greed.Models.Online
 
         private static string GetChannelPath()
         {
-            var channel = ConfigurationManager.AppSettings["channel"]!;
+            var channel = Settings.GetChannel();
             return channel switch
             {
                 ALPHA_CHANNEL => ALPHA_PATH,

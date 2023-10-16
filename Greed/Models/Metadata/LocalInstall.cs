@@ -1,10 +1,9 @@
 ﻿using Greed.Extensions;
 using Greed.Models.Metadata;
+using Greed.Utils;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -73,11 +72,7 @@ namespace Greed.Models
         /// <returns>"Greed" and/or/neither "Sins", as invalid</returns>
         public List<ViolationCauseEnum> IsLegalVersion()
         {
-            var sinsDir = ConfigurationManager.AppSettings["sinsDir"]!;
-            var sinsPath = sinsDir + "\\sins2.exe";
-            var versionStr = File.Exists(sinsPath) ? FileVersionInfo.GetVersionInfo(sinsPath).FileVersion! : "0.0.0";
-            var sinsVersion = new Version(versionStr);
-            return IsLegalVersion(sinsVersion);
+            return IsLegalVersion(Settings.GetSinsVersion());
         }
 
         public List<ViolationCauseEnum> IsLegalVersion(Version liveSinsVersion)
@@ -160,8 +155,7 @@ namespace Greed.Models
         /// <returns></returns>
         public static LocalInstall Load(string id)
         {
-            var modDir = ConfigurationManager.AppSettings["modDir"]!;
-            var greedPath = modDir + "\\" + id + "\\greed.json";
+            var greedPath = Path.Combine(Settings.GetModDir(), id, "greed.json");
             return JsonConvert.DeserializeObject<LocalInstall>(File.ReadAllText(greedPath))!;
         }
     }

@@ -1,4 +1,4 @@
-﻿using System.Configuration;
+﻿using Greed.Utils;
 
 namespace Greed.Models
 {
@@ -23,8 +23,8 @@ namespace Greed.Models
             Folder = folders[^2];
             Filename = folders[^1];
 
-            GoldPath = $"{ConfigurationManager.AppSettings["sinsDir"]!}\\{Folder}\\{Filename}";
-            GreedPath = $"{ConfigurationManager.AppSettings["modDir"]!}\\greed\\{Folder}\\{Filename}";
+            GoldPath = $"{Settings.GetSinsDir()}\\{Folder}\\{Filename}";
+            GreedPath = $"{Settings.GetModDir()}\\greed\\{Folder}\\{Filename}";
         }
 
         public override string ToString()

@@ -1,7 +1,7 @@
 ﻿using Greed.Interfaces;
+using Greed.Utils;
 using Newtonsoft.Json;
 using System.Collections.Generic;
-using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -27,7 +27,7 @@ namespace Greed.Models.Vault
 
         public static GreedVault Load()
         {
-            string modDir = ConfigurationManager.AppSettings["modDir"]!;
+            string modDir = Settings.GetModDir();
             if (!Directory.Exists(modDir))
             {
                 return new();
@@ -50,7 +50,7 @@ namespace Greed.Models.Vault
 
         private void Archive()
         {
-            string modDir = ConfigurationManager.AppSettings["modDir"]!;
+            string modDir = Settings.GetModDir();
             if (!Directory.Exists(modDir))
             {
                 return;

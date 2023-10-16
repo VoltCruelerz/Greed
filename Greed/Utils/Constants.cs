@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Greed
+namespace Greed.Utils
 {
     public static class Constants
     {

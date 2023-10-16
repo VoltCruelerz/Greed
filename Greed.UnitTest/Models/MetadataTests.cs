@@ -1,4 +1,5 @@
 ﻿using Greed.Extensions;
+using Greed.Utils;
 using Newtonsoft.Json;
 
 namespace Greed.UnitTest.Models
