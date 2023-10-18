@@ -154,6 +154,67 @@
                 <Label Content="Download Directory" HorizontalAlignment="Left" Margin="10,71,0,0" VerticalAlignment="Top" ToolTip="A directory Greed can use as a workspace for downloads."/>
                 <TextBox x:Name="txtDownloadDir" HorizontalAlignment="Left" Margin="131,75,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="438" TextChanged="TxtDownloadDir_TextChanged" ToolTip="Autosaves if directory exists."/>
                 <Button x:Name="CmdUpdateGreed" Padding="0,0,0,1.5" Content="Check for Updates" Margin="10,98,0,0" Click="CmdUpdateGreed_Click" VerticalAlignment="Top" ToolTip="Update Greed to the latest version." Height="23" HorizontalAlignment="Left" Width="116"/>
+                <Button x:Name="CmdResetSliders" Padding="0,0,0,1.5" Content="Reset Scalars" Margin="453,98,0,0" Click="CmdResetSliders_Click" VerticalAlignment="Top" ToolTip="Reset global scalars to 100%." Height="23" HorizontalAlignment="Left" Width="116"/>
+                <GroupBox Header="Max Fleet Supply" Margin="10,126,0,0" HorizontalAlignment="Left" Width="559" Height="53" VerticalAlignment="Top">
+                    <Grid>
+                        <Label x:Name="LblSupply" Content="100%" HorizontalAlignment="Left" Margin="10,0,0,2" VerticalAlignment="Bottom" Width="60" RenderTransformOrigin="0.489,0.056"/>
+                        <Slider x:Name="SldSupply" Margin="75,0,10,0" TickPlacement="Both" IsSnapToTickEnabled="True" Minimum="0" Maximum="20" TickFrequency="1" ValueChanged="SldSupply_ValueChanged"/>
+                    </Grid>
+                </GroupBox>
+                <GroupBox Header="Max Titans" Margin="10,179,0,0" HorizontalAlignment="Left" Width="559" Height="53" VerticalAlignment="Top">
+                    <Grid>
+                        <Label x:Name="LblTitans" Content="100%" HorizontalAlignment="Left" Margin="10,0,0,2" VerticalAlignment="Bottom" Width="60" RenderTransformOrigin="0.489,0.056"/>
+                        <Slider x:Name="SldTitans" Margin="75,0,10,0" TickPlacement="Both" IsSnapToTickEnabled="True" Minimum="0" Maximum="20" TickFrequency="1" ValueChanged="SldTitans_ValueChanged"/>
+                    </Grid>
+                </GroupBox>
+                <GroupBox Header="Max Tactical Slots" Margin="10,232,0,0" HorizontalAlignment="Left" Width="560" Height="53" VerticalAlignment="Top">
+                    <Grid>
+                        <Label x:Name="LblTactical" Content="100%" HorizontalAlignment="Left" Margin="10,0,0,2" VerticalAlignment="Bottom" Width="60" RenderTransformOrigin="0.489,0.056"/>
+                        <Slider x:Name="SldTactical" Margin="75,0,10,0" TickPlacement="Both" IsSnapToTickEnabled="True" Minimum="0" Maximum="20" TickFrequency="1" ValueChanged="SldTactical_ValueChanged"/>
+                    </Grid>
+                </GroupBox>
+                <GroupBox Header="Max Logistic Slots" Margin="10,285,0,0" HorizontalAlignment="Left" Width="559" Height="53" VerticalAlignment="Top">
+                    <Grid>
+                        <Label x:Name="Lbllogistic" Content="100%" HorizontalAlignment="Left" Margin="10,0,0,2" VerticalAlignment="Bottom" Width="60" RenderTransformOrigin="0.489,0.056"/>
+                        <Slider x:Name="SldLogistic" Margin="75,0,10,0" TickPlacement="Both" IsSnapToTickEnabled="True" Minimum="0" Maximum="20" TickFrequency="1" ValueChanged="SldLogistic_ValueChanged"/>
+                    </Grid>
+                </GroupBox>
+                <GroupBox Header="Weapon Damage" Margin="10,338,0,0" HorizontalAlignment="Left" Width="559" Height="53" VerticalAlignment="Top">
+                    <Grid>
+                        <Label x:Name="LblDamage" Content="100%" HorizontalAlignment="Left" Margin="10,0,0,2" VerticalAlignment="Bottom" Width="60" RenderTransformOrigin="0.489,0.056"/>
+                        <Slider x:Name="SldDamage" Margin="75,0,10,0" TickPlacement="Both" IsSnapToTickEnabled="True" Minimum="0" Maximum="20" TickFrequency="1" ValueChanged="SldDamage_ValueChanged"/>
+                    </Grid>
+                </GroupBox>
+                <GroupBox Header="Bombing Damage" Margin="10,391,0,0" HorizontalAlignment="Left" Width="559" Height="53" VerticalAlignment="Top">
+                    <Grid>
+                        <Label x:Name="LblBombing" Content="100%" HorizontalAlignment="Left" Margin="10,0,0,2" VerticalAlignment="Bottom" Width="60" RenderTransformOrigin="0.489,0.056"/>
+                        <Slider x:Name="SldBombing" Margin="75,0,10,0" TickPlacement="Both" IsSnapToTickEnabled="True" Minimum="0" Maximum="20" TickFrequency="1" ValueChanged="SldBombing_ValueChanged"/>
+                    </Grid>
+                </GroupBox>
+                <GroupBox Header="Unit Cost" Margin="10,444,0,0" HorizontalAlignment="Left" Width="559" Height="53" VerticalAlignment="Top">
+                    <Grid>
+                        <Label x:Name="LblCost" Content="100%" HorizontalAlignment="Left" Margin="10,0,0,2" VerticalAlignment="Bottom" Width="60" RenderTransformOrigin="0.489,0.056"/>
+                        <Slider x:Name="SldCost" Margin="75,0,10,0" TickPlacement="Both" IsSnapToTickEnabled="True" Minimum="0" Maximum="20" TickFrequency="1" ValueChanged="SldCost_ValueChanged"/>
+                    </Grid>
+                </GroupBox>
+                <GroupBox Header="Antimatter" Margin="10,497,0,0" HorizontalAlignment="Left" Width="559" Height="53" VerticalAlignment="Top">
+                    <Grid>
+                        <Label x:Name="LblAntimatter" Content="100%" HorizontalAlignment="Left" Margin="10,0,0,2" VerticalAlignment="Bottom" Width="60" RenderTransformOrigin="0.489,0.056"/>
+                        <Slider x:Name="SldAntimatter" Margin="75,0,10,0" TickPlacement="Both" IsSnapToTickEnabled="True" Minimum="0" Maximum="20" TickFrequency="1" ValueChanged="SldAntimatter_ValueChanged"/>
+                    </Grid>
+                </GroupBox>
+                <GroupBox Header="Gravity Well Size" Margin="10,550,0,0" HorizontalAlignment="Left" Width="559" Height="53" VerticalAlignment="Top">
+                    <Grid>
+                        <Label x:Name="LblGravityWellSize" Content="100%" HorizontalAlignment="Left" Margin="10,0,0,2" VerticalAlignment="Bottom" Width="60" RenderTransformOrigin="0.489,0.056"/>
+                        <Slider x:Name="SldGravityWellSize" Margin="75,0,10,0" TickPlacement="Both" IsSnapToTickEnabled="True" Minimum="0" Maximum="20" TickFrequency="1" ValueChanged="SldGravityWellSize_ValueChanged"/>
+                    </Grid>
+                </GroupBox>
+                <GroupBox Header="Experience Required for Level" Margin="10,603,0,0" HorizontalAlignment="Left" Width="559" Height="53" VerticalAlignment="Top">
+                    <Grid>
+                        <Label x:Name="LblExperience" Content="100%" HorizontalAlignment="Left" Margin="10,0,0,2" VerticalAlignment="Bottom" Width="60" RenderTransformOrigin="0.489,0.056"/>
+                        <Slider x:Name="SldExperience" Margin="75,0,10,0" TickPlacement="Both" IsSnapToTickEnabled="True" Minimum="0" Maximum="20" TickFrequency="1" ValueChanged="SldExperience_ValueChanged"/>
+                    </Grid>
+                </GroupBox>
             </Grid>
         </TabItem>
         <TabItem x:Name="TabDeveloper" Header="Developer">
@@ -167,6 +228,16 @@
                     </ComboBox.Items>
                 </ComboBox>
                 <TextBox x:Name="txtManualCatalog" HorizontalAlignment="Left" Margin="237,12,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="313" TextChanged="TxtManualCatalog_TextChanged" ToolTip="Manual catalog location."/>
+                <Popup x:Name="PopManualCatalogGood" PlacementTarget="{Binding ElementName=txtManualCatalog}" Placement="Bottom" StaysOpen="False" IsOpen="False">
+                    <Border Background="LightGreen" BorderBrush="DarkGreen" BorderThickness="1" CornerRadius="4">
+                        <TextBlock Text="Manual catalog is active!" Margin="5" />
+                    </Border>
+                </Popup>
+                <Popup x:Name="PopManualCatalogBad" PlacementTarget="{Binding ElementName=txtManualCatalog}" Placement="Bottom" StaysOpen="False" IsOpen="False">
+                    <Border Background="LightPink" BorderBrush="DarkRed" BorderThickness="1" CornerRadius="4">
+                        <TextBlock Text="Link is not valid!" Margin="5" />
+                    </Border>
+                </Popup>
                 <Button x:Name="CmdGreedyWizard" Padding="0,0,0,1.5" Content="Greedy Mod Wizard" Margin="10,39,0,0" Click="CmdGreedyWizard_Click" VerticalAlignment="Top" ToolTip="Generates a greedy mod template." Height="23" HorizontalAlignment="Left" Width="140"/>
                 <Button x:Name="CmdZipActiveMod" Padding="0,0,0,1.5" Content="Zip Active Greedy Mod" Margin="10,67,0,0" Click="CmdZipActiveMod_Click" VerticalAlignment="Top" ToolTip="Zips the active mod and copies it to the clipboard." Height="23" HorizontalAlignment="Left" Width="140"/>
                 <Button x:Name="CmdGenerateCatalog" Padding="0,0,0,1.5" Content="Generate Catalog JSON" Margin="10,95,0,0" Click="CmdGenerateCatalog_Click" VerticalAlignment="Top" ToolTip="Generates catalog entries for upserted activated mods." Height="23" HorizontalAlignment="Left" Width="140"/>

@@ -115,6 +115,10 @@ namespace Greed
                             pgbProgress.Value = 100 * (i + 1) / active.Count;
                         });
                     }
+
+                    // Set Global Settings
+                    GlobalScalar.GetGlobals().ForEach(g => g.Exec());
+
                     // Set Greed as active mod #0.
                     ActivateGreed();
 

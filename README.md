@@ -47,6 +47,7 @@ _A mod loader for [Sins of a Solar Empire II](https://www.sinsofasolarempire2.co
 - **Mod Packs**: Easily create bundles of your favorite mods that you can quickly enable together.
 - **C Drive Offloading**: keep your inactive mods away from your limited-space C drive
 - **Self Updating**: Greed is able to keep itself up to date with just a few clicks from you.
+- **Global Scalars**: Greed possesses several game-changing global scalars
 
 ## User Guide
 

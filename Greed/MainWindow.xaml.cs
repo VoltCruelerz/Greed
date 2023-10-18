@@ -18,7 +18,9 @@ using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -33,7 +35,7 @@ namespace Greed
     public partial class MainWindow : Window
     {
         public static MainWindow? Instance { get; private set; }
-        private static readonly string LogPath = Directory.GetCurrentDirectory() + "\\log.lob";
+        private static readonly string LogPath = Directory.GetCurrentDirectory() + "\\log.log";
         private static readonly string LogPrevPath = Directory.GetCurrentDirectory() + "\\log_prev.log";
         private static readonly WarningPopup Warning = new();
 
@@ -56,6 +58,8 @@ namespace Greed
         private TabItem? SelectedTab = null;
         private readonly HashSet<string> InvalidSettings = new();
         private readonly GreedVault Vault = GreedVault.Load();
+
+        private CancellationTokenSource? ManualLinkCancellationTokenSource = null;
 
         public MainWindow()
         {
@@ -85,7 +89,7 @@ namespace Greed
             PopulateConfigField(txtSinsDir, Settings.SinsDirKey, Settings.DefaultSinDir);
             PopulateConfigField(txtDownloadDir, Settings.DownDirKey, Settings.DefaultDownDir);
             PopulateConfigCbx(CbxChannel, Settings.ChannelKey);
-            PrintSync("Directories Explored");
+            InitializeSliders();
 
             // Only load mods if there's something to load.
             if (SelectedTab != TabSettings)
@@ -404,7 +408,6 @@ namespace Greed
         #endregion
 
         #region Center Pane
-
         private void ToggleSingleMod(Mod? mod)
         {
             PrintSync($"ToggleSingleMod({mod?.Id})");
@@ -618,7 +621,7 @@ namespace Greed
         }
         #endregion
 
-        #region App Config Settings
+        #region Settings
         /// <summary>
         /// Prepopulate a config setting field.
         /// </summary>
@@ -703,7 +706,7 @@ namespace Greed
         private void CbxChannel_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var item = (ComboBoxItem)((ComboBox)sender).SelectedItem;
-            txtManualCatalog.Text = "";
+            txtManualCatalog.Clear();
             Settings.SetConfigOptions(Settings.ChannelKey, item.Content.ToString()!.ToLower());
             ReloadCatalog();
         }
@@ -713,10 +716,115 @@ namespace Greed
             var txt = (TextBox)sender;
             if (string.IsNullOrEmpty(txt.Text))
             {
-                Settings.SetConfigOptions("channel", "live");
+                Settings.SetConfigOptions(Settings.ChannelKey, "live");
             }
-            Settings.SetConfigOptions("channel", txt.Text);
+            CancellationTokenSource? localSource = null;
+            if (ManualLinkCancellationTokenSource != null)
+            {
+                ManualLinkCancellationTokenSource.Cancel();
+            }
+            ManualLinkCancellationTokenSource = new();
+            localSource = ManualLinkCancellationTokenSource;
+            var content = txt.Text;
+            Task.Run(async () =>
+            {
+                var client = new HttpClient();
+                try
+                {
+                    var result = await client.GetAsync(content);
+                    var json = await result.Content.ReadAsStringAsync();
+                    var listing = JsonConvert.DeserializeObject<OnlineCatalog>(json);
+                    if (!localSource.IsCancellationRequested)
+                    {
+                        PopManualCatalogGood.Dispatcher.Invoke(() => PopManualCatalogGood.SetPopDuration(2000));
+                        Settings.SetConfigOptions(Settings.ChannelKey, content);
+                        ReloadCatalog();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    if (!localSource.IsCancellationRequested)
+                    {
+                        PopManualCatalogBad.Dispatcher.Invoke(() => PopManualCatalogBad.SetPopDuration(2000));
+                    }
+                    else
+                    {
+                        CriticalAlertPopup.ThrowAsync("Failed to even check if link is valid", ex);
+                    }
+                }
+            });
         }
+
+        #region Sliders
+        private void InitializeSliders()
+        {
+            SldSupply.Value = Settings.GetSliderTick(Settings.Supply);
+            SldTitans.Value = Settings.GetSliderTick(Settings.NumTitans);
+            SldTactical.Value = Settings.GetSliderTick(Settings.TacticalSlots);
+            SldLogistic.Value = Settings.GetSliderTick(Settings.LogisticalSlots);
+            SldDamage.Value = Settings.GetSliderTick(Settings.WeaponDamage);
+            SldBombing.Value = Settings.GetSliderTick(Settings.BombingDamage);
+            SldCost.Value = Settings.GetSliderTick(Settings.UnitCost);
+            SldAntimatter.Value = Settings.GetSliderTick(Settings.Antimatter);
+            SldGravityWellSize.Value = Settings.GetSliderTick(Settings.GravityWellSize);
+            SldExperience.Value = Settings.GetSliderTick(Settings.ExperienceForLevel);
+        }
+
+        private void CmdResetSliders_Click(object sender, RoutedEventArgs e)
+        {
+            SldSupply.Value = Settings.SliderOne;
+            SldTitans.Value = Settings.SliderOne;
+            SldLogistic.Value = Settings.SliderOne;
+            SldTactical.Value = Settings.SliderOne;
+            SldDamage.Value = Settings.SliderOne;
+            SldBombing.Value = Settings.SliderOne;
+            SldCost.Value = Settings.SliderOne;
+            SldAntimatter.Value = Settings.SliderOne;
+            SldGravityWellSize.Value = Settings.SliderOne;
+            SldExperience.Value = Settings.SliderOne;
+        }
+
+        private void SldSupply_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            Settings.SetSlider(Settings.Supply, LblSupply, e.NewValue);
+        }
+        private void SldTitans_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            Settings.SetSlider(Settings.NumTitans, LblTitans, e.NewValue);
+        }
+        private void SldLogistic_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            Settings.SetSlider(Settings.LogisticalSlots, Lbllogistic, e.NewValue);
+        }
+        private void SldTactical_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            Settings.SetSlider(Settings.TacticalSlots, LblTactical, e.NewValue);
+        }
+        private void SldDamage_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            Settings.SetSlider(Settings.WeaponDamage, LblDamage, e.NewValue);
+        }
+        private void SldBombing_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            Settings.SetSlider(Settings.BombingDamage, LblBombing, e.NewValue);
+        }
+        private void SldAntimatter_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            Settings.SetSlider(Settings.Antimatter, LblAntimatter, e.NewValue);
+        }
+        private void SldCost_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            Settings.SetSlider(Settings.UnitCost, LblCost, e.NewValue);
+        }
+        private void SldGravityWellSize_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            Settings.SetSlider(Settings.GravityWellSize, LblGravityWellSize, e.NewValue);
+        }
+        private void SldExperience_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            Settings.SetSlider(Settings.ExperienceForLevel, LblExperience, e.NewValue);
+        }
+        #endregion
         #endregion
 
         private void CmdUpdateGreed_Click(object sender, RoutedEventArgs e)
@@ -1061,7 +1169,6 @@ namespace Greed
             RefreshVaultPackUI();
             PopImportPack.SetPopDuration(2000);
         }
-
         #endregion
 
         #region File Drag-and-Drop

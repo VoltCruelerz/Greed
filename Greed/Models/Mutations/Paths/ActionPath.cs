@@ -8,10 +8,9 @@ using System.Text.RegularExpressions;
 
 namespace Greed.Models.Mutations.Paths
 {
-    public abstract class ActionPath
+    public abstract partial class ActionPath
     {
-        private const string ValidationStr = @"^[a-zA-Z_0-9]+?((?<field>\.[a-zA-Z_]+?)|(?<arr>\[[a-zA-Z_]*?\]))*$";
-        private static readonly Regex Validator = new(ValidationStr);
+        private static readonly Regex Validator = ValidatorRegex();
         public PathElementEnum PathElement { get; set; }
 
         public ActionPath(PathElementEnum type)
@@ -27,7 +26,7 @@ namespace Greed.Models.Mutations.Paths
 
             if (!Validator.IsMatch(path))
             {
-                throw new ResolvableParseException($"Failed to parse {path}\nExpected it to meet the following regular expression:\n{ValidationStr}");
+                throw new ResolvableParseException($"Failed to parse {path}\nExpected it to meet the following regular expression:\n{ValidatorRegex()}");
             }
 
             var terms = path.Split(".");
@@ -45,5 +44,8 @@ namespace Greed.Models.Mutations.Paths
 
             return ap;
         }
+
+        [GeneratedRegex("^[a-zA-Z_0-9]+?((?<field>\\.[a-zA-Z_]+?)|(?<arr>\\[[a-zA-Z_]*?\\]))*$")]
+        private static partial Regex ValidatorRegex();
     }
 }

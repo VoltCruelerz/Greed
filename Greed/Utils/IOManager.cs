@@ -217,7 +217,6 @@ namespace Greed.Utils
 
         public static string ZipMod(Mod m)
         {
-            var zipName = m.Id + ".zip";
             var zipPath = m.GetDir() + ".zip";
             if (File.Exists(zipPath))
             {
