@@ -35,6 +35,7 @@ _A mod loader for [Sins of a Solar Empire II](https://www.sinsofasolarempire2.co
         - [Greed.json Configuration](#greedjson-configuration)
     - [Contributing to Greed](#contributing-to-greed)
         - [Bug Reports](#bug-reports)
+        - [Greed Development Environment](#greed-development-environment)
     - [Contributing Mods](#contributing-mods)
 
 ## Why Use Greed?
@@ -290,6 +291,14 @@ In the event of an error, consult the log (viewable both in the textbox at the b
 - If the error appears to be one with Greed itself, please [create a GitHub issue](https://github.com/VoltCruelerz/Greed/issues/new).
     - Be sure to use an appropriate label and include the log when submitting so I can hunt down the error easier.
 - Otherwise, contact the appropriate mod developer.
+
+### Greed Development Environment
+
+1. Clone the repository and open it in Visual Studio 2022
+2. Build `Greed.Autoupload`
+3. Publish `Greed.Autoupload`
+4. Build `Greed`
+5. Run unit tests
 
 ## Contributing Mods
 
