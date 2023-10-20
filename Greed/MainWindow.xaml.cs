@@ -35,8 +35,6 @@ namespace Greed
     public partial class MainWindow : Window
     {
         public static MainWindow? Instance { get; private set; }
-        private static readonly string LogPath = Directory.GetCurrentDirectory() + "\\log.log";
-        private static readonly string LogPrevPath = Directory.GetCurrentDirectory() + "\\log_prev.log";
         private static readonly WarningPopup Warning = new();
 
         private readonly ModManager Manager = new();
@@ -69,17 +67,7 @@ namespace Greed
             SetTitle();
             ReloadCatalog();
             RefreshVaultPackUI();
-            PrintSync("Components Loaded");
-
-            // Shift the log history.
-            if (File.Exists(LogPath))
-            {
-                if (File.Exists(LogPrevPath))
-                {
-                    File.Delete(LogPrevPath);
-                }
-                File.Move(LogPath, LogPrevPath);
-            }
+            Log.Info("Components Loaded");
 
             TxtLocalModInfo.Document.Blocks.Clear();
             TxtLocalModInfo.AppendText("Select a mod to view details about it.");
@@ -105,8 +93,8 @@ namespace Greed
         {
             string modDir = Settings.GetModDir();
             string sinsDir = Settings.GetSinsDir();
-            PrintSync($"Mod Dir: {modDir}");
-            PrintSync($"Sins II Dir: {sinsDir}");
+            Log.Info($"Mod Dir: {modDir}");
+            Log.Info($"Sins II Dir: {sinsDir}");
             try
             {
                 var greedVersion = Settings.GetGreedVersion();
@@ -134,8 +122,8 @@ namespace Greed
         /// </summary>
         private void ReloadModListFromDisk()
         {
-            PrintSync("Loading Settings...");
-            PrintSync("Loading mods...");
+            Log.Info("Loading Settings...");
+            Log.Info("Loading mods...");
             try
             {
                 Mods = Manager.LoadGreedyMods(Vault);
@@ -147,11 +135,11 @@ namespace Greed
                 Tabs.SelectedItem = TabSettings;
                 return;
             }
-            PrintSync("Load succeeded.");
+            Log.Info("Load succeeded.");
 
             RefreshModListUI();
             ReloadSourceFileList();
-            PrintSync("Refresh Complete");
+            Log.Info("Refresh Complete");
         }
 
         public void ReloadModListFromDiskAsync()
@@ -164,7 +152,7 @@ namespace Greed
         /// </summary>
         private void RefreshModListUI()
         {
-            PrintSync($"RefreshModListUI for {Mods.Count} mods.");
+            Log.Info($"Refreshing mod list UI for {Mods.Count} mods...");
             ViewModList.Items.Clear();
             var printableMods = Mods
                 .Where(m => string.IsNullOrWhiteSpace(SearchQuery)
@@ -179,7 +167,7 @@ namespace Greed
             for (var i = 0; i < printableMods.Count; i++)
             {
                 var m = printableMods[i];
-                ViewModList.Items.Add(new ModListItem(m, this, Catalog, i % 2 == 0, i == ActualSelectedModIndex));
+                ViewModList.Items.Add(new ModListItem(m, Catalog, i % 2 == 0, i == ActualSelectedModIndex));
             }
         }
 
@@ -412,7 +400,7 @@ namespace Greed
 
         private void ToggleSingleMod(Mod? mod)
         {
-            PrintSync($"ToggleSingleMod({mod?.Id})");
+            Log.Debug($"ToggleSingleMod({mod?.Id})");
             if (mod == null) return;
 
             mod!.SetModActivity(Mods, !mod.IsActive);
@@ -433,7 +421,7 @@ namespace Greed
 
         private void ToggleAll_Click(object sender, RoutedEventArgs e)
         {
-            PrintSync("ToggleAll_Click()");
+            Log.Debug("ToggleAll_Click()");
             var anyAreActive = Mods.Any(m => m.IsActive);
             Mods.ForEach(m => m.SetModActivity(Mods, !anyAreActive, anyAreActive));
 
@@ -454,7 +442,7 @@ namespace Greed
 
         private void Refresh_Click(object sender, RoutedEventArgs e)
         {
-            PrintSync("Refresh_Click()");
+            Log.Debug("Refresh_Click()");
             ReloadModListFromDisk();
             ReloadCatalog();
             PopRefresh.SetPopDuration(2000);
@@ -471,7 +459,7 @@ namespace Greed
             ReselectSelection();
             ReloadModListFromDisk();
 
-            PrintSync("Exporting...");
+            Log.Info("Exporting...");
             try
             {
                 var active = Mods.Where(m => m.IsGreedy && m.IsActive).ToList();
@@ -479,7 +467,7 @@ namespace Greed
                 {
                     if (exportSucceeded)
                     {
-                        _ = PrintAsync("Export Complete");
+                        Log.Info("Export Complete");
 
                         var modDir = Settings.GetModDir();
                         var expDir = Settings.GetExportDir();
@@ -487,7 +475,7 @@ namespace Greed
                         {
                             var modGreedFolder = modDir! + "\\greed";
                             var expGreedFolder = expDir! + "\\greed";
-                            _ = PrintAsync("Copying export to " + expDir + "\\greed");
+                            Log.Info("Copying export to " + expDir + "\\greed");
                             if (Directory.Exists(expDir + "\\greed"))
                             {
                                 Directory.Delete(expDir + "\\greed", true);
@@ -606,13 +594,13 @@ namespace Greed
             }
             var item = (SourceListItem)e.AddedItems[0]!;
             SelectedSource = AllSources.Find(p => p.Filename == item.Filename && p.Folder == item.Folder);
-            PrintSync("Selected " + SelectedSource?.Mergename);
+            Log.Debug("Selected " + SelectedSource?.Mergename);
             cmdDiff.IsEnabled = true;
         }
 
         private void Diff_Click(object sender, RoutedEventArgs e)
         {
-            PrintSync("Diff_Click()");
+            Log.Debug("Diff_Click()");
             try
             {
                 var diffPopup = new DiffWindow(SelectedSource!);
@@ -723,16 +711,14 @@ namespace Greed
                 Settings.SetConfigOptions(Settings.ChannelKey, "live");
             }
             CancellationTokenSource? localSource = null;
-            if (ManualLinkCancellationTokenSource != null)
-            {
-                ManualLinkCancellationTokenSource.Cancel();
-            }
+            ManualLinkCancellationTokenSource?.Cancel();
             ManualLinkCancellationTokenSource = new();
             localSource = ManualLinkCancellationTokenSource;
             var content = txt.Text;
+
             Task.Run(async () =>
             {
-                var client = new HttpClient();
+                using var client = new HttpClient();
                 try
                 {
                     var result = await client.GetAsync(content);
@@ -749,6 +735,7 @@ namespace Greed
                 {
                     if (!localSource.IsCancellationRequested)
                     {
+                        Log.Warn(ex);
                         PopManualCatalogBad.Dispatcher.Invoke(() => PopManualCatalogBad.SetPopDuration(2000));
                     }
                     else
@@ -872,7 +859,7 @@ namespace Greed
 
             if (selection != SelectedTab)
             {
-                PrintSync($"Tabs_SelectionChanged()");
+                Log.Info($"Tabs_SelectionChanged()");
                 if (selection == TabMods)
                 {
                     // We have to set this BEFORE the file I/O so we don't start trying to load a second time while still in the first one.
@@ -896,10 +883,10 @@ namespace Greed
         /// <summary>
         /// Start the game.
         /// </summary>
-        private void Play()
+        private static void Play()
         {
             var execPath = Settings.GetSinsExePath();
-            _ = PrintAsync("Executing: " + execPath);
+            Log.Info("Executing: " + execPath);
             Process.Start(new ProcessStartInfo(execPath)
             {
                 WorkingDirectory = Settings.GetSinsDir()
@@ -907,7 +894,6 @@ namespace Greed
         }
         #endregion
 
-        #region Printing
         /// <summary>
         /// Sets the progress bar from any thread.
         /// </summary>
@@ -921,62 +907,12 @@ namespace Greed
             await Task.Delay(0).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Print synchronously.
-        /// </summary>
-        /// <param name="str"></param>
-        public void PrintSync(string str, string type = "[INFO]")
+        private void TxtLog_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            var timePrefix = DateTime.Now.ToString("[yyyy/MM/dd | hh:mm:ss.fff] ");
-            var prefixed = timePrefix + type + " " + str;
-            TxtLog.Text = TxtLog.Text.Any()
-                ? TxtLog.Text + '\n' + prefixed
-                : prefixed;
-            TxtLog.ScrollToEnd();
-            File.AppendAllText(LogPath, prefixed + Environment.NewLine);
-            Debug.WriteLine(prefixed);
+            Clipboard.SetText(Log.GetLogs());
+            PopupCopiedLog.SetPopDuration(2000);
+            Log.Info("Copied json to clipboard.");
         }
-
-        public void PrintSync(Exception ex)
-        {
-            PrintSync(ex.Message + "\n" + ex.StackTrace, "[ERROR]");
-        }
-
-        public void PrintSync(Exception ex, string type = "[ERROR]")
-        {
-            PrintSync(ex.Message + "\n" + ex.StackTrace, type);
-        }
-
-        /// <summary>
-        /// Invoke the print function when possible.
-        /// </summary>
-        /// <param name="str"></param>
-        public async Task PrintAsync(string str, string type = "[INFO]")
-        {
-            Dispatcher.Invoke(() => PrintSync(str, type));
-            await Task.Delay(0).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Invoke the print function when possible.
-        /// </summary>
-        /// <param name="str"></param>
-        public async Task PrintAsync(Exception ex)
-        {
-            Dispatcher.Invoke(() => PrintSync(ex));
-            await Task.Delay(0).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Invoke the print function when possible.
-        /// </summary>
-        /// <param name="str"></param>
-        public async Task PrintAsync(Exception ex, string type = "[ERROR]")
-        {
-            Dispatcher.Invoke(() => PrintSync(ex, type));
-            await Task.Delay(0).ConfigureAwait(false);
-        }
-        #endregion
 
         private void CmdOnline_Click(object sender, RoutedEventArgs e)
         {
@@ -1022,11 +958,11 @@ namespace Greed
             var localMod = Mods.Find(m => m.Id == onlineModToUpdate.Id);
             if (localMod == null)
             {
-                PrintSync("UpdateModAsync() Abort: unable to update missing local mod " + onlineModToUpdate.Id);
+                Log.Warn("UpdateModAsync() Abort: unable to update missing local mod " + onlineModToUpdate.Id);
                 return;
             }
             await UpdateModInternal(localMod!, targetVersion);
-            PrintSync("UpdateModAsync() Complete");
+            Log.Info("UpdateModAsync() Complete");
         }
 
         private void UpdateMod(Mod modToUpdate, VersionEntry targetVersion)
@@ -1036,7 +972,7 @@ namespace Greed
 
         private async Task UpdateModInternal(Mod modToUpdate, VersionEntry targetVersion)
         {
-            PrintSync("MenuUpdate_Click()");
+            Log.Debug("MenuUpdate_Click()");
 
             // Delete existing
             ModManager.Uninstall(this, Warning, Mods, modToUpdate.Id, true);
@@ -1062,7 +998,7 @@ namespace Greed
 
         private void CmdSaveBundle_Click(object sender, RoutedEventArgs e)
         {
-            PrintSync("CmdSaveBundle_Click()");
+            Log.Debug("CmdSaveBundle_Click()");
             var name = Interaction.InputBox("Please name the pack. Reusing a name will overwrite the old pack.", "Create Mod Pack");
 
             if (string.IsNullOrEmpty(name))
@@ -1077,34 +1013,34 @@ namespace Greed
             }
 
             Vault.UpsertPack(name, Mods);
-            PrintSync("Vault upsert complete.");
+            Log.Info("Vault upsert complete.");
             RefreshVaultPackUI();
         }
 
         private void CmdDeleteBundle_Click(object sender, RoutedEventArgs e)
         {
-            PrintSync("CmdDeleteBundle_Click()");
+            Log.Debug("CmdDeleteBundle_Click()");
             if (CbxBundles.SelectedItem == null)
             {
-                PrintSync("Please select a mod pack.");
+                Log.Warn("Please select a mod pack.");
                 return;
             }
 
             Vault.DeletePack((string)CbxBundles.SelectedItem);
-            PrintSync("Pack deleted.");
+            Log.Info("Pack deleted.");
             RefreshVaultPackUI();
             CbxBundles.SelectedItem = null;
         }
 
         private void CbxBundles_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            PrintSync("CbxBundles_SelectionChanged()");
+            Log.Debug("CbxBundles_SelectionChanged()");
             if (CbxBundles.SelectedItem == null) return;
 
             var activePack = Vault.Packs[(string)CbxBundles.SelectedItem];
             Mods.ForEach(m => m.SetModActivity(Mods, activePack.Contains(m.Id), true));
             Vault.ArchiveActiveOnly(Mods);
-            PrintSync("Vault archive of active complete.");
+            Log.Info("Vault archive of active complete.");
             RefreshModListUI();
         }
 
@@ -1122,32 +1058,32 @@ namespace Greed
             if (activePack.Count != actualActive.Count || activePack.Any(ap => !actualActive.Contains(ap)) || actualActive.Any(aa => !activePack.Contains(aa)))
             {
                 CbxBundles.SelectedItem = null;
-                PrintSync("Cleared CbxBundles selection.");
+                Log.Debug("Cleared CbxBundles selection.");
             }
         }
 
         private void CmdCopyBundle_Click(object sender, RoutedEventArgs e)
         {
-            PrintSync("CmdCopyBundle_Click()");
+            Log.Debug("CmdCopyBundle_Click()");
             if (CbxBundles.SelectedItem == null)
             {
-                PrintSync("Please select a mod pack.");
+                Log.Warn("Please select a mod pack.");
                 return;
             }
 
             var json = Vault.ExportPortable((string)CbxBundles.SelectedItem, Mods);
             Clipboard.SetText(json);
             PopClipboard.SetPopDuration(2000);
-            PrintSync("Copied json to clipboard.");
+            Log.Info("Copied json to clipboard.");
         }
 
         private async void CmdImportBundle_Click(object sender, RoutedEventArgs e)
         {
-            PrintSync("CmdImportBundle_Click()");
+            Log.Debug("CmdImportBundle_Click()");
             var json = Clipboard.GetText();
             if (string.IsNullOrEmpty(json))
             {
-                PrintSync("Clipboard was empty.", "[WARN]");
+                Log.Warn("Clipboard was empty.");
                 return;
             }
 
@@ -1175,7 +1111,7 @@ namespace Greed
 
             if (!allSuccess)
             {
-                await PrintAsync("Failed to install all mods in the mod pack.", "[ERROR]");
+                Log.Error("Failed to install all mods in the mod pack.");
                 return;
             }
 
@@ -1192,8 +1128,7 @@ namespace Greed
         #region File Drag-and-Drop
         private void Window_DragEnter(object sender, DragEventArgs e)
         {
-            PrintSync("Window_DragEnter()");
-            //if (e.Data.GetDataPresent(DataFormats.FileDrop)) e.Effects = DragDropEffects.Copy;
+            Log.Debug("Window_DragEnter()");
 
             // Changes the icon of the mouse
             e.Effects = DragDropEffects.All;
@@ -1201,14 +1136,14 @@ namespace Greed
 
         private void Window_Drop(object sender, DragEventArgs e)
         {
-            PrintSync("Window_Drop()");
+            Log.Debug("Window_Drop()");
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
             foreach (string file in files) Console.WriteLine(file);
         }
 
         private void ViewModList_Drop(object sender, DragEventArgs e)
         {
-            PrintSync("ViewModList_Drop()");
+            Log.Debug("ViewModList_Drop()");
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
                 string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
@@ -1229,7 +1164,7 @@ namespace Greed
             foreach (string file in files)
             {
                 await SetProgressAsync(0.1);
-                PrintSync(file);
+                Log.Info(file);
                 await ModManager.InstallMod(this, file);
                 await SetProgressAsync(0.95);
             }

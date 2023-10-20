@@ -1,4 +1,5 @@
-﻿using Greed.Controls.Popups;
+﻿using Greed.Controls;
+using Greed.Controls.Popups;
 using Greed.Models;
 using SharpCompress.Archives;
 using SharpCompress.Archives.Rar;
@@ -26,7 +27,7 @@ namespace Greed.Utils
                 var extractFolder = $"Greed.{version}";
                 var zipPath = Path.Combine(Settings.GetDownDir(), zipFile);
                 var extractPath = Path.Combine(Settings.GetDownDir(), extractFolder);
-                _ = MainWindow.Instance!.PrintAsync($"Installing {zipFile}...");
+                Log.Info($"Installing {zipFile}...");
 
                 // Clean up previous execution
                 if (File.Exists(zipPath)) File.Delete(zipPath);
@@ -34,7 +35,7 @@ namespace Greed.Utils
 
                 // Download the zip
                 if (!await DownloadZipFile(url, zipPath)) return;
-                _ = MainWindow.Instance!.PrintAsync($"Download of {zipFile} to {zipPath} complete.");
+                Log.Info($"Download of {zipFile} to {zipPath} complete.");
 
                 // Extract the zip
                 ExtractArchive(zipPath, extractPath);
@@ -48,9 +49,9 @@ namespace Greed.Utils
                     var dest = Path.Combine(curDir, filename);
                     await MoveFileWithRetries(file, dest);
                 }
-                _ = MainWindow.Instance!.PrintAsync($"Copy to {curDir} complete.");
+                Log.Info($"Copy to {curDir} complete.");
 
-                _ = MainWindow.Instance!.PrintAsync($"Starting restarter...");
+                Log.Info($"Starting restarter...");
 
                 var response = MessageBox.Show("Greed needs to restart itself to finish the update. Would you like to restart it now?", "Greed Restart", MessageBoxButton.YesNo);
                 if (response == MessageBoxResult.Yes)
@@ -71,7 +72,7 @@ namespace Greed.Utils
             try
             {
                 // Send an HTTP GET request to the GitHub release URL
-                await MainWindow.Instance!.PrintAsync("Downloading from " + releaseUrl);
+                Log.Info("Downloading from " + releaseUrl);
                 HttpResponseMessage response = await httpClient.GetAsync(releaseUrl);
 
                 // Check if the request was successful (HTTP status code 200)
@@ -85,7 +86,7 @@ namespace Greed.Utils
                         await contentStream.CopyToAsync(fileStream);
                     }
 
-                    await MainWindow.Instance!.PrintAsync("Download completed successfully.");
+                    Log.Info("Download completed successfully.");
                 }
                 else
                 {
@@ -95,7 +96,7 @@ namespace Greed.Utils
             }
             catch (Exception ex)
             {
-                await MainWindow.Instance!.PrintAsync($"A download error occurred: {ex.Message}\n{ex.StackTrace}");
+                Log.Error($"A download error occurred: {ex.Message}\n{ex.StackTrace}");
                 return false;
             }
         }
@@ -154,9 +155,9 @@ namespace Greed.Utils
                     }
                     catch (Exception ex)
                     {
-                        _ = MainWindow.Instance!.PrintAsync(ex, "[WARN]");
+                        Log.Warn(ex);
                         await Task.Delay(Math.Min(retry * 100, 1000)).ConfigureAwait(false);
-                        _ = MainWindow.Instance!.PrintAsync($"Retrying move due to ZipFile not being thread safe (r={retry}/{maxRetries})");
+                        Log.Info($"Retrying move due to ZipFile not being thread safe (r={retry}/{maxRetries})");
                         if (retry == maxRetries)
                         {
                             throw;
@@ -199,9 +200,9 @@ namespace Greed.Utils
                     }
                     catch (Exception ex)
                     {
-                        _ = MainWindow.Instance!.PrintAsync(ex, "[WARN]");
+                        Log.Warn(ex);
                         await Task.Delay(Math.Min(retry * 100, 1000)).ConfigureAwait(false);
-                        _ = MainWindow.Instance!.PrintAsync($"Retrying move due to ZipFile not being thread safe (r={retry}/{maxRetries})");
+                        Log.Info($"Retrying move due to ZipFile not being thread safe (r={retry}/{maxRetries})");
                         if (retry == maxRetries)
                         {
                             throw;

@@ -34,7 +34,7 @@ namespace Greed.Utils
         public const string GravityWellSize = "gravityWellSize";
         public const string ExperienceForLevel = "experienceForLevel";
         private const string GlobalPrefix = "global.";
-        private static readonly List<double> SliderValue = new(){ 0.1, 0.2, 0.35, 0.5, 0.65, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.50, 1.75, 2.0, 2.5, 3, 4, 5, 6, 8, 10 };
+        private static readonly List<double> SliderValue = new() { 0.1, 0.2, 0.35, 0.5, 0.65, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.50, 1.75, 2.0, 2.5, 3, 4, 5, 6, 8, 10 };
         public static readonly int SliderOne = SliderValue.FindIndex(p => p == 1.0);
 
         #region Get
@@ -120,7 +120,7 @@ namespace Greed.Utils
             SetConfigOptions(ChannelKey, value);
         }
 
-        public static void SetSlider(string field, Label label,  double value)
+        public static void SetSlider(string field, Label label, double value)
         {
             var mult = SliderValue[(int)value];
             label.Content = (int)(mult * 100) + "%";

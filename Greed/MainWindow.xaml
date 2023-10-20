@@ -112,8 +112,6 @@
                 <Label Content="JSON Files" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="26" Width="265" Grid.Column="2"/>
                 <Button x:Name="cmdPlay" Grid.Column="1" Content="▶" Margin="168,0,0,10" RenderTransformOrigin="-0.059,-0.389" Height="20" VerticalAlignment="Bottom" Background="#FF759E66" Click="Play_Click" ToolTip="Launch Sins II" HorizontalAlignment="Left" Width="50"/>
                 <Button x:Name="cmdToggleAll" Content="!∀" Margin="10,37,0,0" VerticalAlignment="Top" Click="ToggleAll_Click" Height="22" ToolTip="Toggle all mods on or off." HorizontalAlignment="Left" Width="28"/>
-                <ProgressBar x:Name="pgbProgress" Margin="10,5,10,0" Grid.ColumnSpan="3" Foreground="#FF06B025" Background="#FFAAAAAA" BorderBrush="#FF747474" Value="0" Grid.Row="1" Height="20" VerticalAlignment="Top" />
-                <TextBox x:Name="TxtLog" Margin="10,30,10,10" Grid.Row="1" TextWrapping="Wrap" Text="" Grid.ColumnSpan="3" Background="#FFBDBDBD" IsReadOnly="True" FontFamily="Consolas" VerticalScrollBarVisibility="Auto"/>
                 <Label Content="Details" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="26" Width="265" Grid.Column="1"/>
                 <Button x:Name="CmdRefresh" Content="↻" Padding="0,-4,1,1" Margin="0,37,44,0" VerticalAlignment="Top" Click="Refresh_Click" Height="22" ToolTip="Refresh the mod list." FontSize="16" HorizontalAlignment="Right" Width="28"/>
                 <TextBox x:Name="TxtSearchMods" Margin="43,37,110,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" AutomationProperties.HelpText="Search 🔍" HorizontalContentAlignment="Right" TextChanged="TxtSearchMods_TextChanged" Height="22"/>
@@ -139,6 +137,15 @@
                 <Popup x:Name="PopImportPack" PlacementTarget="{Binding ElementName=CmdImportBundle}" Placement="Bottom" StaysOpen="False" IsOpen="False">
                     <Border Background="LightGreen" BorderBrush="DarkGreen" BorderThickness="1" CornerRadius="4">
                         <TextBlock Text="Imported mod pack!" Margin="5" />
+                    </Border>
+                </Popup>
+
+                <ProgressBar x:Name="pgbProgress" Margin="10,5,10,0" Grid.ColumnSpan="3" Foreground="#FF06B025" Background="#FFAAAAAA" BorderBrush="#FF747474" Value="0" Grid.Row="1" Height="20" VerticalAlignment="Top" />
+
+                <localControls:Log x:Name="TxtLog" MouseDoubleClick="TxtLog_MouseDoubleClick" Margin="10,30,10,10" Grid.Row="1" Grid.ColumnSpan="3" Background="#FFBDBDBD" IsReadOnly="True" FontFamily="Consolas" VerticalScrollBarVisibility="Auto"/>
+                <Popup x:Name="PopupCopiedLog" PlacementTarget="{Binding ElementName=TxtLog}" Placement="Bottom" StaysOpen="False" IsOpen="False">
+                    <Border Background="LightGreen" BorderBrush="DarkGreen" BorderThickness="1" CornerRadius="4">
+                        <TextBlock Text="Copied log to clipboard!" Margin="5" />
                     </Border>
                 </Popup>
             </Grid>

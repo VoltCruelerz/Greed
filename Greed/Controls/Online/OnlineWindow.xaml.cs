@@ -2,7 +2,6 @@
 using Greed.Models.Online;
 using Greed.Utils;
 using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -29,7 +28,7 @@ namespace Greed.Controls.Online
         {
             InitializeComponent();
             Title = $"Online Catalog of Greedy Mods (Channel: {Settings.GetChannel()})";
-            Debug.WriteLine("OnlineWindow()");
+            Log.Info("OnlineWindow()");
             Catalog = listing;
             ParentWindow = parent;
 
@@ -39,7 +38,7 @@ namespace Greed.Controls.Online
 
         private void RefreshOnlineModListUI()
         {
-            _ = ParentWindow.PrintAsync($"RefreshOnlineModListUI for {Catalog.Mods.Count} mods.");
+            Log.Info($"RefreshOnlineModListUI for {Catalog.Mods.Count} mods.");
             var modVersions = ParentWindow.GetModVersions();
             ViewOnlineModList.Items.Clear();
             var viewableMods = Catalog.Mods
@@ -85,7 +84,7 @@ namespace Greed.Controls.Online
             }
             catch (Exception ex)
             {
-                _ = ParentWindow.PrintAsync(ex);
+                Log.Error(ex);
             }
         }
         private void UpdateRightClickMenuOptions()
@@ -102,8 +101,10 @@ namespace Greed.Controls.Online
             var installed = installedVersions.ContainsKey(SelectedMod!.Id) ? installedVersions[SelectedMod!.Id].ToString() : "";
 
             // Uninstall
-            var uninstall = new MenuItem();
-            uninstall.Header = "Uninstall";
+            var uninstall = new MenuItem
+            {
+                Header = "Uninstall"
+            };
             uninstall.Click += (sender, e) =>
             {
                 ParentWindow.Uninstall(SelectedMod!.Id);
@@ -114,8 +115,10 @@ namespace Greed.Controls.Online
             CtxRight.Items.Add(uninstall);
 
             // Install Live
-            var installLive = new MenuItem();
-            installLive.Header = "Install Latest";
+            var installLive = new MenuItem
+            {
+                Header = "Install Latest"
+            };
             installLive.Click += async (sender, e) => await DownloadSelection(SelectedMod!.Live);
             installLive.IsEnabled = (!isInstalled || installed != latest) && !string.IsNullOrEmpty(SelectedMod.Live.Download);
             CtxRight.Items.Add(installLive);
@@ -129,13 +132,15 @@ namespace Greed.Controls.Online
                 var versions = catalogEntry.Versions.Keys.OrderByDescending(k => k).ToList();
                 versions.ForEach(v =>
                 {
-                    var update = new MenuItem();
-                    update.Header = "Install v" + v;
+                    var update = new MenuItem
+                    {
+                        Header = "Install v" + v
+                    };
                     if (isInstalled)
                     {
                         update.Click += async (sender, e) =>
                         {
-                            ParentWindow.PrintSync("Ctx Click " + (string)update.Header);
+                            Log.Info("Ctx Click " + (string)update.Header);
                             await ParentWindow.UpdateModAsync(SelectedMod!, catalogEntry.Versions[v]);
                             RefreshOnlineModListUI();
                         };
@@ -145,7 +150,7 @@ namespace Greed.Controls.Online
                     {
                         update.Click += async (sender, e) =>
                         {
-                            ParentWindow.PrintSync("Ctx Click " + (string)update.Header);
+                            Log.Info("Ctx Click " + (string)update.Header);
                             await DownloadSelection(SelectedMod.GetVersionEntry(v));
                         };
                         update.IsEnabled = true;

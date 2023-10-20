@@ -15,7 +15,7 @@ namespace Greed.Controls.Popups
         {
             Debug.WriteLine($"CriticalAlertPopup: {title}");
             InitializeComponent();
-            _ = MainWindow.Instance!.PrintAsync(title + "\r\n" + body, "[CRITICAL]");
+            Log.Error(title + Environment.NewLine + body);
             Title = title;
             TxtCriticalError.Text = body;
             SystemSounds.Beep.Play();
@@ -31,15 +31,14 @@ namespace Greed.Controls.Popups
 
         private void CmdIgnoreError_Click(object sender, RoutedEventArgs e)
         {
-            Debug.WriteLine($"CmdIgnoreError_Click()");
+            Log.Info($"CmdIgnoreError_Click()");
             Close();
         }
 
         private void CmdReportError_Click(object sender, RoutedEventArgs e)
         {
-            Debug.WriteLine($"CmdReportError_Click()");
+            Log.Info($"CmdReportError_Click()");
             var navigable = $"https://github.com/VoltCruelerz/Greed/issues/new?title={Title}&body={TxtCriticalError.Text.UrlEncode()}&labels[]=bug";
-            Debug.WriteLine(navigable);
             navigable.NavigateToUrl();
         }
 
@@ -61,16 +60,20 @@ namespace Greed.Controls.Popups
 
         public static void Throw(string title, Exception ex)
         {
-            var str = ParseException(ex);
-            new CriticalAlertPopup(title, str, str.Contains("Newtonsoft.Json")).Show();
+            try
+            {
+                var str = ParseException(ex);
+                new CriticalAlertPopup(title, str, str.Contains("Newtonsoft.Json")).Show();
+            }
+            catch (Exception oops)
+            {
+                Log.Critical("Incorrectly called CriticalAlertPopup.Throw()", oops);
+            }
         }
 
         public static void ThrowAsync(string title, Exception ex)
         {
-            MainWindow.Instance!.Dispatcher.Invoke(() =>
-            {
-                Throw(title, ex);
-            });
+            MainWindow.Instance!.Dispatcher.Invoke(() => Throw(title, ex));
         }
     }
 }

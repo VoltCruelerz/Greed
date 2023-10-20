@@ -1,4 +1,5 @@
 ﻿using Greed.Controls.Popups;
+using Greed.Exceptions;
 using Greed.Utils;
 using Newtonsoft.Json;
 using System;
@@ -38,13 +39,17 @@ namespace Greed.Models.Online
             try
             {
                 var result = await client.GetAsync(GetChannelPath());
+                if (result.StatusCode != System.Net.HttpStatusCode.OK)
+                {
+                    throw new CatalogLoadException($"HTTP Status Code was {result.StatusCode}{Environment.NewLine}{result.ReasonPhrase}", new HttpRequestException());
+                }
                 var json = await result.Content.ReadAsStringAsync();
                 var listing = JsonConvert.DeserializeObject<OnlineCatalog>(json);
                 return listing!;
             }
             catch (Exception ex)
             {
-                CriticalAlertPopup.Throw("Failed to Load Online Mod Listing", ex);
+                CriticalAlertPopup.ThrowAsync("Failed to Load Online Mod Listing", ex);
             }
             return new OnlineCatalog();
         }

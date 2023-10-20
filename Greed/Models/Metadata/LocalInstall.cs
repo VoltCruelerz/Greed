@@ -92,12 +92,12 @@ namespace Greed.Models
 
             if (liveSinsVersion.IsOlderThan(SinsVersion))
             {
-                causes.Add(ViolationCauseEnum.ModSinsTooOld);
+                causes.Add(ViolationCauseEnum.LiveSinsTooOld);
             }
 
             if (SinsVersion.IsOlderThan(Constants.MinimumSinsVersion))
             {
-                causes.Add(ViolationCauseEnum.LiveSinsTooOld);
+                causes.Add(ViolationCauseEnum.ModSinsTooOld);
             }
 
             return causes;

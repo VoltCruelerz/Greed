@@ -1,4 +1,5 @@
-﻿using Greed.Extensions;
+﻿using Greed.Controls;
+using Greed.Extensions;
 using Greed.Models.Metadata;
 using Greed.Models.Online;
 using System;
@@ -28,7 +29,7 @@ namespace Greed.Models.ListItem
 
         public bool IsSelected { get; set; }
 
-        public ModListItem(Mod mod, MainWindow window, OnlineCatalog catalog, bool isEven, bool isSelected)
+        public ModListItem(Mod mod, OnlineCatalog catalog, bool isEven, bool isSelected)
         {
             Id = mod.Id;
             Active = mod.IsActive ? Utils.Constants.UNI_CHECK : " ";
@@ -59,7 +60,7 @@ namespace Greed.Models.ListItem
 
             if (versionViolations.Any())
             {
-                _ = window.PrintAsync("WARNING - Incompatible Version: " + mod.Meta.Name + Environment.NewLine + versionViolations.Select(v => v.GetDescription()).ToBulletedList());
+                Log.Warn("Incompatible Version: " + mod.Meta.Name + Environment.NewLine + versionViolations.Select(v => v.GetDescription()).ToBulletedList());
                 IsLegal = false;
             }
 

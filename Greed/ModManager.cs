@@ -80,7 +80,7 @@ namespace Greed
         /// <param name="callback"></param>
         public void ExportGreedyMods(List<Mod> active, ProgressBar pgbProgress, MainWindow window, Action<bool> callback)
         {
-            _ = window.PrintAsync($"Exporting {active.Count} Active Mods");
+            Log.Info($"Exporting {active.Count} Active Mods");
             var slidersChanged = window.ScalarSliders.Any(s => s.HasChanged());
             string modDir = Settings.GetModDir();
             string sinsDir = Settings.GetSinsDir();
@@ -100,7 +100,7 @@ namespace Greed
                 {
                     if (!active.Any() && !slidersChanged)
                     {
-                        _ = window.PrintAsync("No active mods or scalars.");
+                        Log.Info("No active mods or scalars. Cleaning up...");
                         DeactivateGreed();
                         return;
                     }
@@ -109,7 +109,7 @@ namespace Greed
                     for (i = 0; i < active.Count; i++)
                     {
                         var mod = active[i];
-                        _ = window.PrintAsync($"[{i + 1}/{active.Count}]: Merging {mod.Meta.Name}...");
+                        Log.Info($"[{i + 1}/{active.Count}]: Merging {mod.Meta.Name}...");
                         mod.Export(active);
                         pgbProgress.Dispatcher.Invoke(() =>
                         {
@@ -540,7 +540,7 @@ namespace Greed
 
         public static void Uninstall(MainWindow window, WarningPopup warning, List<Mod> installedMods, string id, bool force = false)
         {
-            _ = window.PrintAsync($"Uninstalling {id}...");
+            Log.Info($"Uninstalling {id}...");
             var modToUninstall = installedMods.Find(m => m.Id == id)!;
 
             if (force)
@@ -626,12 +626,12 @@ namespace Greed
             try
             {
                 await window.SetProgressAsync(0);
-                await window.PrintAsync($"Installing {modToDownload.Name}...");
+                Log.Info($"Installing {modToDownload.Name}...");
                 var url = versionToDownload.Download;
 
                 if (!force && !await DependenciesReady(window, warning, channel, modToDownload, versionToDownload))
                 {
-                    await window.PrintAsync($"Download of {modToDownload.Name} aborted.");
+                    Log.Warn($"Download of {modToDownload.Name} aborted.");
                     await window.SetProgressAsync(0);
                     return false;
                 }
@@ -650,7 +650,7 @@ namespace Greed
                     await window.SetProgressAsync(0);
                     return false;
                 }
-                await window.PrintAsync($"Download of {modToDownload.Name} to {zipPath} complete.");
+                Log.Info($"Download of {modToDownload.Name} to {zipPath} complete.");
                 await window.SetProgressAsync(0.5);
 
                 await InstallMod(window, zipPath, modToDownload!.Id);
@@ -709,19 +709,19 @@ namespace Greed
                 {
                     Directory.Delete(extractPath, true);
                 }
-                await window.PrintAsync($"Extracting to {extractPath}...");
+                Log.Info($"Extracting to {extractPath}...");
                 try
                 {
                     IOManager.ExtractArchive(archivePath, extractPath);
                 }
                 catch (Exception ex)
                 {
-                    await window.PrintAsync(ex);
+                    Log.Error(ex);
                     await window.SetProgressAsync(0.0);
                     return;
                 }
                 await window.SetProgressAsync(0.8);
-                await window.PrintAsync($"Extract complete.");
+                Log.Info($"Extract complete.");
 
                 // Check if the mod is shallow or nested, and get the folder we'll want to copy.
                 var isShallow = File.Exists(extractPath + "\\greed.json");
@@ -733,7 +733,7 @@ namespace Greed
                 if (string.IsNullOrEmpty(modId))
                 {
                     var hypotheticalId = copyablePath.Split("\\")[^1];
-                    await window.PrintAsync("Mod ID of auto-imported mod inferred as " + hypotheticalId, "[WARN]");
+                    Log.Warn("Mod ID of auto-imported mod inferred as " + hypotheticalId);
                     modId = hypotheticalId;
                 }
 
@@ -744,17 +744,17 @@ namespace Greed
                 {
                     IOManager.ReadyDirForDelete(modPath);
                     Directory.Delete(modPath, true);
-                    await window.PrintAsync($"Deleted old install to make way for new one.");
+                    Log.Info($"Deleted old install to make way for new one.");
                 }
                 if (!Directory.Exists(copyablePath))
                 {
-                    await window.PrintAsync($"Folder doesn't exist yet!");
+                    Log.Info($"Folder \"{copyablePath}\" doesn't exist yet!");
                 }
                 await window.SetProgressAsync(0.8);
-                await window.PrintAsync($"Starting move from {copyablePath}...");
+                Log.Info($"Starting move from {copyablePath}...");
                 await IOManager.MoveDirWithRetries(copyablePath, modPath);
-                await window.PrintAsync($"Move complete.");
-                await window.PrintAsync($"Install complete.");
+                Log.Info($"Move complete.");
+                Log.Info($"Install complete.");
                 await window.SetProgressAsync(0.9);
 
                 // Cleanup
