@@ -1,4 +1,6 @@
 ﻿using Greed.Exceptions;
+using Greed.Models;
+using Greed.Utils;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections;
@@ -11,6 +13,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Threading;
 using static System.Text.Json.JsonSerializer;
@@ -266,6 +269,12 @@ namespace Greed.Extensions
                 JTokenType.Array => ((JArray)token).Count,
                 _ => throw new ResolvableParseException("Unresolvable type " + token.Type),
             };
+        }
+
+        public static bool HasChanged(this Slider slider)
+        {
+            if (slider == null) return false;
+            return slider.Value != Settings.SliderOne;
         }
     }
 }

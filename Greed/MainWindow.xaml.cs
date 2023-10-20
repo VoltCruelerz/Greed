@@ -60,6 +60,7 @@ namespace Greed
         private readonly GreedVault Vault = GreedVault.Load();
 
         private CancellationTokenSource? ManualLinkCancellationTokenSource = null;
+        public List<Slider> ScalarSliders = new();
 
         public MainWindow()
         {
@@ -204,6 +205,33 @@ namespace Greed
         }
         #endregion
 
+        #region Mod List Interaction
+        private void TxtSearchMods_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var txt = (TextBox)sender;
+            SearchQuery = txt.Text;
+            RefreshModListUI();
+        }
+
+        private void CheckActive_Toggle(object sender, RoutedEventArgs e)
+        {
+            var cbx = (CheckBox)sender;
+            SearchActive = cbx.IsChecked ?? false;
+            RefreshModListUI();
+        }
+
+        private void Ctx_Toggle_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleSingleMod(DragPastMod);
+        }
+
+        private void Toggle_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            ToggleSingleMod(DragPastMod);
+        }
+        #endregion
+
+        #region Select and Drag Elements
         private void ModList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             PrintDrag("ModList_SelectionChanged() from " + DragPastMod);
@@ -302,31 +330,6 @@ namespace Greed
             }
         }
 
-        private void TxtSearchMods_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            var txt = (TextBox)sender;
-            SearchQuery = txt.Text;
-            RefreshModListUI();
-        }
-
-        private void CheckActive_Toggle(object sender, RoutedEventArgs e)
-        {
-            var cbx = (CheckBox)sender;
-            SearchActive = cbx.IsChecked ?? false;
-            RefreshModListUI();
-        }
-
-        private void Ctx_Toggle_Click(object sender, RoutedEventArgs e)
-        {
-            ToggleSingleMod(DragPastMod);
-        }
-        private void Toggle_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            ToggleSingleMod(DragPastMod);
-        }
-
-        #region Drag Elements
-
         private void ModList_MouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             PrintDrag("ModList_MouseUp()");
@@ -374,6 +377,7 @@ namespace Greed
             DestMod = null;
             ReadyToDrag = true;
         }
+
         private void PrintDrag(string method)
         {
             Debug.WriteLine(method);
@@ -405,9 +409,7 @@ namespace Greed
             Debug.WriteLine("HeaderSins_Click()");
         }
         #endregion
-        #endregion
 
-        #region Center Pane
         private void ToggleSingleMod(Mod? mod)
         {
             PrintSync($"ToggleSingleMod({mod?.Id})");
@@ -515,6 +517,19 @@ namespace Greed
             }
         }
 
+        private void ReselectSelection()
+        {
+            DragPastMod = Mods.Find(m => m.Id == DragPastMod?.Id);
+            if (DragPastMod != null)
+            {
+                var index = Mods.IndexOf(DragPastMod!);
+                ViewModList.SelectedItem = DragPastMod;
+                ViewModList.SelectedIndex = index;
+            }
+        }
+        #endregion
+
+        #region Center Pane
         private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
         {
             if (e.Key == System.Windows.Input.Key.F5)
@@ -529,17 +544,6 @@ namespace Greed
             else if (e.Key == System.Windows.Input.Key.Space)
             {
                 ToggleSingleMod(DragPastMod);
-            }
-        }
-
-        private void ReselectSelection()
-        {
-            DragPastMod = Mods.Find(m => m.Id == DragPastMod?.Id);
-            if (DragPastMod != null)
-            {
-                var index = Mods.IndexOf(DragPastMod!);
-                ViewModList.SelectedItem = DragPastMod;
-                ViewModList.SelectedIndex = index;
             }
         }
         #endregion
@@ -768,6 +772,20 @@ namespace Greed
             SldAntimatter.Value = Settings.GetSliderTick(Settings.Antimatter);
             SldGravityWellSize.Value = Settings.GetSliderTick(Settings.GravityWellSize);
             SldExperience.Value = Settings.GetSliderTick(Settings.ExperienceForLevel);
+
+            ScalarSliders = new()
+            {
+                SldSupply,
+                SldTitans,
+                SldTactical,
+                SldLogistic,
+                SldDamage,
+                SldBombing,
+                SldCost,
+                SldAntimatter,
+                SldGravityWellSize,
+                SldExperience
+            };
         }
 
         private void CmdResetSliders_Click(object sender, RoutedEventArgs e)
@@ -1311,7 +1329,6 @@ namespace Greed
                 CriticalAlertPopup.Throw("Failed to generate new mod (probably due to bad user input)", ex);
             }
         }
-        #endregion
 
         private void CmdZipActiveMod_Click(object sender, RoutedEventArgs e)
         {
@@ -1332,5 +1349,6 @@ namespace Greed
                 CriticalAlertPopup.Throw("Failed to zip mod.", ex);
             }
         }
+        #endregion
     }
 }

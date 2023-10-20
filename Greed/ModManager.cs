@@ -1,6 +1,7 @@
 ﻿using Greed.Controls;
 using Greed.Controls.Popups;
 using Greed.Exceptions;
+using Greed.Extensions;
 using Greed.Interfaces;
 using Greed.Models;
 using Greed.Models.EnabledMods;
@@ -80,6 +81,7 @@ namespace Greed
         public void ExportGreedyMods(List<Mod> active, ProgressBar pgbProgress, MainWindow window, Action<bool> callback)
         {
             _ = window.PrintAsync($"Exporting {active.Count} Active Mods");
+            var slidersChanged = window.ScalarSliders.Any(s => s.HasChanged());
             string modDir = Settings.GetModDir();
             string sinsDir = Settings.GetSinsDir();
             var greedPath = modDir + "\\greed";
@@ -91,20 +93,19 @@ namespace Greed
             }
             Directory.CreateDirectory(greedPath);
             File.WriteAllText(greedPath + "\\mod_manifest.json", "{ \"is_cosmetic_only\": false }");
-
             Task.Run(() =>
             {
-                if (!active.Any())
-                {
-                    _ = window.PrintAsync("No active mods.");
-                    DeactivateGreed();
-                    return;
-                }
                 int i = 0;
                 try
                 {
+                    if (!active.Any() && !slidersChanged)
+                    {
+                        _ = window.PrintAsync("No active mods or scalars.");
+                        DeactivateGreed();
+                        return;
+                    }
+
                     // For each greedy mod, overwrite as needed.
-                    var interval = 100 / active.Count;
                     for (i = 0; i < active.Count; i++)
                     {
                         var mod = active[i];
