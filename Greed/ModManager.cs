@@ -4,6 +4,7 @@ using Greed.Exceptions;
 using Greed.Extensions;
 using Greed.Interfaces;
 using Greed.Models;
+using Greed.Models.Config;
 using Greed.Models.EnabledMods;
 using Greed.Models.Online;
 using Greed.Models.Vault;
@@ -118,7 +119,7 @@ namespace Greed
                     }
 
                     // Set Global Settings
-                    GlobalScalar.GetGlobals().ForEach(g => g.Exec());
+                    Settings.ExecGlobalScalars();
 
                     // Set Greed as active mod #0.
                     ActivateGreed();

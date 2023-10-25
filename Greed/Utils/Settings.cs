@@ -1,81 +1,73 @@
-﻿using System;
+﻿using Greed.Controls;
+using Greed.Models.Config;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
+using System.Drawing.Printing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Metadata;
+using System.Text.Json;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Media;
 
 namespace Greed.Utils
 {
     public static class Settings
     {
-        public const string ModDirKey = "modDir";
-        public const string SinsDirKey = "sinsDir";
-        public const string ExportDirKey = "exportDir";
-        public const string DownDirKey = "downDir";
-        public const string ChannelKey = "channel";
+        private static bool HasInitialized = false;
 
         public static readonly string DefaultModDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "AppData", "Local", "sins2", "mods");
         public static readonly string DefaultSinDir = "C:\\Program Files\\Epic Games\\SinsII";
         public static readonly string DefaultDownDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
 
         // Sliders
-        public const string Supply = "fleetSupply";
-        public const string NumTitans = "numTitans";
-        public const string TacticalSlots = "tactical";
-        public const string LogisticalSlots = "logistics";
-        public const string CultureRate = "cultureRate";
-        public const string BombingDamage = "bombingDamage";
-        public const string WeaponDamage = "weaponDamage";
-        public const string Antimatter = "antimatter";
-        public const string UnitCost = "unitCost";
-        public const string GravityWellSize = "gravityWellSize";
-        public const string ExperienceForLevel = "experienceForLevel";
-        private const string GlobalPrefix = "global.";
         private static readonly List<double> SliderValue = new() { 0.1, 0.2, 0.35, 0.5, 0.65, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.50, 1.75, 2.0, 2.5, 3, 4, 5, 6, 8, 10 };
         public static readonly int SliderOne = SliderValue.FindIndex(p => p == 1.0);
+
+        private static readonly Config Config = JsonConvert.DeserializeObject<Config>(File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "Config.json")))!;
+        private static readonly List<Expander> ScalarExpanders = new();
 
         #region Get
         public static string GetModDir()
         {
-            return ConfigurationManager.AppSettings[ModDirKey]!;
+            return Config.Dirs.Mods;
         }
 
         public static string GetSinsDir()
         {
-            return ConfigurationManager.AppSettings[SinsDirKey]!;
+            return Config.Dirs.Sins;
         }
 
         public static string GetExportDir()
         {
-            return ConfigurationManager.AppSettings[ExportDirKey]!;
+            return Config.Dirs.Export;
         }
 
         public static string GetDownDir()
         {
-            return ConfigurationManager.AppSettings[DownDirKey]!;
+            return Config.Dirs.Download;
         }
 
         public static string GetChannel()
         {
-            return ConfigurationManager.AppSettings[ChannelKey]!;
+            return Config.Channel;
         }
 
-        public static double GetSliderTick(string field)
+        public static double GetSliderTick(string groupName, string scalarName)
         {
-            var key = GlobalPrefix + field;
-            var success = double.TryParse(ConfigurationManager.AppSettings[key]!, out double result);
-            if (success) return SliderValue.FindIndex(p => p == result);
-            return SliderOne;
+            var result = Config.Groups.Find(g => g.Name == groupName)!.Scalars.Find(s => s.Name == scalarName)!.Value;
+            return SliderValue.FindIndex(p => p == result);
         }
 
-        public static double GetSliderMult(string field)
+        public static double GetSliderMult(string groupName, string scalarName)
         {
-            var key = GlobalPrefix + field;
-            var success = double.TryParse(ConfigurationManager.AppSettings[key]!, out double result);
-            return success ? result : 1;
+            return Config.Groups.Find(g => g.Name == groupName)!.Scalars.Find(s => s.Name == scalarName)!.Value;
         }
 
         public static Version GetGreedVersion()
@@ -97,51 +89,127 @@ namespace Greed.Utils
         #region Set
         public static void SetModDir(string value)
         {
-            SetConfigOptions(ModDirKey, value);
+            Config.Dirs.Mods = value;
         }
 
         public static void SetSinsDir(string value)
         {
-            SetConfigOptions(SinsDirKey, value);
+            Config.Dirs.Sins = value;
         }
 
         public static void SetExportDir(string value)
         {
-            SetConfigOptions(ExportDirKey, value);
+            Config.Dirs.Export = value;
         }
 
         public static void SetDownDir(string value)
         {
-            SetConfigOptions(DownDirKey, value);
+            Config.Dirs.Download = value;
         }
 
         public static void SetChannel(string value)
         {
-            SetConfigOptions(ChannelKey, value);
+            Config.Channel = value;
         }
 
-        public static void SetSlider(string field, Label label, double value)
+        public static void SetSlider(string groupName, string scalarName, Label label, double value)
         {
             var mult = SliderValue[(int)value];
             label.Content = (int)(mult * 100) + "%";
-            SetConfigOptions(GlobalPrefix + field, mult + "");
+            Config.Groups.Find(g => g.Name == groupName)!.Scalars.Find(s => s.Name == scalarName)!.Value = value;
         }
 
-        public static void SetConfigOptions(string key, string value)
+        public static void SetSlider(int groupIndex, int scalarIndex, Label label, double value)
         {
-            Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-            if (config.AppSettings.Settings.AllKeys.Contains(key))
-            {
-                config.AppSettings.Settings[key].Value = value;
-            }
-            else
-            {
-                config.AppSettings.Settings.Add(key, value);
-            }
-            config.Save(ConfigurationSaveMode.Modified);
-            ConfigurationManager.RefreshSection("appSettings");
+            var mult = SliderValue[(int)value];
+            label.Content = (int)(mult * 100) + "%";
+            Config.Groups[groupIndex].Scalars[scalarIndex].Value = value;
         }
         #endregion
 
+        #region Initialize Scalar Sliders
+        public static int PopulateScalarExpander(Grid grid)
+        {
+            ScalarExpanders.Clear();
+            var offset = 0;
+            var white = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+            for (var i = 0; i < Config.Groups.Count; i++)
+            {
+                var group = Config.Groups[i];
+                var prevSet = offset;
+                Grid subGrid = new()
+                {
+                    Background = white
+                };
+                for (var j = 0; j < group.Scalars.Count; j++)
+                {
+                    var scalar = group.Scalars[j];
+                    subGrid.Children.Add(new SliderBox(scalar.Name, i, j));
+                    offset++;
+                }
+                var subExp = new Expander()
+                {
+                    VerticalAlignment = System.Windows.VerticalAlignment.Top,
+                    HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
+                    Header = group.Name,
+                    Height = 50 * group.Scalars.Count + 30,
+                    Width = 537,
+                    Content = subGrid,
+                    Margin = new System.Windows.Thickness(0, i * 30, 0, 0)
+                };
+
+                subExp.Expanded += SubExp_Expanded;
+                subExp.Collapsed += SubExp_Collapsed;
+
+                ScalarExpanders.Add(subExp);
+                grid.Children.Add(subExp);
+                offset++;
+            }
+            return offset;
+        }
+
+        private static Thickness ShiftElementDown(Thickness original, double offset)
+        {
+            return new Thickness(original.Left, original.Top + offset, original.Right, original.Bottom);
+        }
+
+        private static Thickness ShiftElementUp(Thickness original, double offset)
+        {
+            return new Thickness(original.Left, original.Top - offset, original.Right, original.Bottom);
+        }
+
+        private static void SubExp_Expanded(object sender, RoutedEventArgs e)
+        {
+            var exp = (Expander)sender;
+            var start = ScalarExpanders.IndexOf(exp) + 1;
+            for (var i = start; i < ScalarExpanders.Count; i++)
+            {
+                var movable = ScalarExpanders[i];
+                movable.Margin = ShiftElementDown(movable.Margin, exp.Height - 20);
+            }
+        }
+
+        private static void SubExp_Collapsed(object sender, RoutedEventArgs e)
+        {
+            var exp = (Expander)sender;
+            var start = ScalarExpanders.IndexOf(exp) + 1;
+            for (var i = start; i < ScalarExpanders.Count; i++)
+            {
+                var movable = ScalarExpanders[i];
+                movable.Margin = ShiftElementUp(movable.Margin, exp.Height - 20);
+            }
+        }
+        #endregion
+
+        public static void ExecGlobalScalars()
+        {
+            if (!HasInitialized)
+            {
+                Config.Init();
+                HasInitialized = true;
+            }
+
+            Config.Groups.ForEach(g => g.Scalars.ForEach(s => s.Exec()));
+        }
     }
 }

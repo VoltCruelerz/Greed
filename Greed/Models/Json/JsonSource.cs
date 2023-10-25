@@ -175,7 +175,7 @@ namespace Greed.Models.Json
 
         public DiffResult DiffFromGold()
         {
-            if (File.Exists(GreedPath))
+            if (File.Exists(GoldPath))
             {
                 var gold = new JsonSource(GoldPath);
                 var greed = gold.Clone().Merge(this);

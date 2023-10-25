@@ -123,8 +123,6 @@ namespace Greed.Models.Mutations
             {
                 throw new ResolvableParseException($"Failed to parse configuration to Resolvable:\n{obj?.ToString()}", ex);
             }
-
-
         }
 
         public static bool IsTruthy(object? obj, JObject root, Dictionary<string, Variable> variables)

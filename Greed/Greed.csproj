@@ -9,17 +9,14 @@
     <Title>Greed Mod Manager</Title>
     <Authors>Volt Cruelerz</Authors>
     <Description>A mod loader for Sins of a Solar Empire II.</Description>
-    <Copyright>MIT License</Copyright>
+    <Copyright>Copyright (c) 2023-$(CurrentYear)</Copyright>
+    <License>MIT</License>
     <PackageIcon>icon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/VoltCruelerz/Greed/tree/master</RepositoryUrl>
     <UseWindowsForms>True</UseWindowsForms>
     <ApplicationIcon>favicon.ico</ApplicationIcon>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Remove="github-mark-white.svg" />
-  </ItemGroup>
 
   <ItemGroup>
     <Content Include="favicon.ico" />
@@ -47,6 +44,7 @@
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
+    <Content Include="Config.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\README.md" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\Mutations.md" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\LICENSE.txt" CopyToOutputDirectory="PreserveNewest" />

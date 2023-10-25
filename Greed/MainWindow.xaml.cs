@@ -66,19 +66,13 @@ namespace Greed
             InitializeComponent();
             SetTitle();
             ReloadCatalog();
+            LoadSettings();
+
             RefreshVaultPackUI();
             Log.Info("Components Loaded");
 
             TxtLocalModInfo.Document.Blocks.Clear();
             TxtLocalModInfo.AppendText("Select a mod to view details about it.");
-
-            // Populate the config fields.
-            PopulateConfigField(txtModsDir, Settings.ModDirKey, Settings.DefaultModDir);
-            PopulateConfigField(txtExportDir, Settings.ExportDirKey, Settings.DefaultModDir);
-            PopulateConfigField(txtSinsDir, Settings.SinsDirKey, Settings.DefaultSinDir);
-            PopulateConfigField(txtDownloadDir, Settings.DownDirKey, Settings.DefaultDownDir);
-            PopulateConfigCbx(CbxChannel, Settings.ChannelKey);
-            InitializeSliders();
 
             // Only load mods if there's something to load.
             if (SelectedTab != TabSettings)
@@ -614,14 +608,23 @@ namespace Greed
         #endregion
 
         #region Settings
+        private void LoadSettings()
+        {
+            PopulateConfigField(TxtModsDir, Settings.GetModDir(), Settings.DefaultModDir);
+            PopulateConfigField(TxtExportDir, Settings.GetExportDir(), Settings.DefaultModDir);
+            PopulateConfigField(TxtSinsDir, Settings.GetSinsDir(), Settings.DefaultSinDir);
+            PopulateConfigField(TxtDownloadDir, Settings.GetDownDir(), Settings.DefaultDownDir);
+
+            ExpGlobalScalars.Height = 10 + 50 * Settings.PopulateScalarExpander((Grid)ExpGlobalScalars.Content);
+        }
+
         /// <summary>
         /// Prepopulate a config setting field.
         /// </summary>
         /// <param name="txt"></param>
         /// <param name="key"></param>
-        private void PopulateConfigField(TextBox txt, string key, string defaultStr)
+        private void PopulateConfigField(TextBox txt, string dir, string defaultStr)
         {
-            string? dir = ConfigurationManager.AppSettings[key];
             if (string.IsNullOrEmpty(dir))
             {
                 dir = defaultStr;
@@ -655,25 +658,33 @@ namespace Greed
 
         private void TxtSinsDir_TextChanged(object sender, TextChangedEventArgs e)
         {
-            SetFolderConfigOption(Settings.SinsDirKey, (TextBox)sender);
+            var txt = (TextBox)sender;
+            if (SetFolderConfigOption("Sins II Directory", txt))
+                Settings.SetSinsDir(txt.Text);
         }
 
         private void TxtModDir_TextChanged(object sender, TextChangedEventArgs e)
         {
-            SetFolderConfigOption(Settings.ModDirKey, (TextBox)sender);
+            var txt = (TextBox)sender;
+            if (SetFolderConfigOption("Mod Vault Directory", txt))
+                Settings.SetModDir(txt.Text);
         }
 
         private void TxtExportDir_TextChanged(object sender, TextChangedEventArgs e)
         {
-            SetFolderConfigOption(Settings.ExportDirKey, (TextBox)sender);
+            var txt = (TextBox)sender;
+            if (SetFolderConfigOption("Mod Export Directory", txt))
+                Settings.SetExportDir(txt.Text);
         }
 
         private void TxtDownloadDir_TextChanged(object sender, TextChangedEventArgs e)
         {
-            SetFolderConfigOption(Settings.DownDirKey, (TextBox)sender);
+            var txt = (TextBox)sender;
+            if (SetFolderConfigOption("Working Download Directory", txt))
+                Settings.SetDownDir(txt.Text);
         }
 
-        private void SetFolderConfigOption(string key, TextBox txt)
+        private bool SetFolderConfigOption(string key, TextBox txt)
         {
             string newVal = txt.Text.Replace("/", "\\");
             var exists = Directory.Exists(newVal);
@@ -688,18 +699,14 @@ namespace Greed
                 InvalidSettings.Remove(key);
             }
             TabMods.IsEnabled = !InvalidSettings.Any();
-
-            if (exists && newVal != ConfigurationManager.AppSettings[key])
-            {
-                Settings.SetConfigOptions(key, newVal);
-            }
+            return exists;
         }
 
         private void CbxChannel_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var item = (ComboBoxItem)((ComboBox)sender).SelectedItem;
             txtManualCatalog.Clear();
-            Settings.SetConfigOptions(Settings.ChannelKey, item.Content.ToString()!.ToLower());
+            Settings.SetChannel(item.Content.ToString()!.ToLower());
             ReloadCatalog();
         }
 
@@ -708,7 +715,7 @@ namespace Greed
             var txt = (TextBox)sender;
             if (string.IsNullOrEmpty(txt.Text))
             {
-                Settings.SetConfigOptions(Settings.ChannelKey, "live");
+                Settings.SetChannel("live");
             }
             CancellationTokenSource? localSource = null;
             ManualLinkCancellationTokenSource?.Cancel();
@@ -727,7 +734,7 @@ namespace Greed
                     if (!localSource.IsCancellationRequested)
                     {
                         PopManualCatalogGood.Dispatcher.Invoke(() => PopManualCatalogGood.SetPopDuration(2000));
-                        Settings.SetConfigOptions(Settings.ChannelKey, content);
+                        Settings.SetChannel(content);
                         ReloadCatalog();
                     }
                 }
@@ -745,91 +752,10 @@ namespace Greed
                 }
             });
         }
-
-        #region Sliders
-        private void InitializeSliders()
-        {
-            SldSupply.Value = Settings.GetSliderTick(Settings.Supply);
-            SldTitans.Value = Settings.GetSliderTick(Settings.NumTitans);
-            SldTactical.Value = Settings.GetSliderTick(Settings.TacticalSlots);
-            SldLogistic.Value = Settings.GetSliderTick(Settings.LogisticalSlots);
-            SldDamage.Value = Settings.GetSliderTick(Settings.WeaponDamage);
-            SldBombing.Value = Settings.GetSliderTick(Settings.BombingDamage);
-            SldCost.Value = Settings.GetSliderTick(Settings.UnitCost);
-            SldAntimatter.Value = Settings.GetSliderTick(Settings.Antimatter);
-            SldGravityWellSize.Value = Settings.GetSliderTick(Settings.GravityWellSize);
-            SldExperience.Value = Settings.GetSliderTick(Settings.ExperienceForLevel);
-
-            ScalarSliders = new()
-            {
-                SldSupply,
-                SldTitans,
-                SldTactical,
-                SldLogistic,
-                SldDamage,
-                SldBombing,
-                SldCost,
-                SldAntimatter,
-                SldGravityWellSize,
-                SldExperience
-            };
-        }
-
         private void CmdResetSliders_Click(object sender, RoutedEventArgs e)
         {
-            SldSupply.Value = Settings.SliderOne;
-            SldTitans.Value = Settings.SliderOne;
-            SldLogistic.Value = Settings.SliderOne;
-            SldTactical.Value = Settings.SliderOne;
-            SldDamage.Value = Settings.SliderOne;
-            SldBombing.Value = Settings.SliderOne;
-            SldCost.Value = Settings.SliderOne;
-            SldAntimatter.Value = Settings.SliderOne;
-            SldGravityWellSize.Value = Settings.SliderOne;
-            SldExperience.Value = Settings.SliderOne;
-        }
 
-        private void SldSupply_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            Settings.SetSlider(Settings.Supply, LblSupply, e.NewValue);
         }
-        private void SldTitans_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            Settings.SetSlider(Settings.NumTitans, LblTitans, e.NewValue);
-        }
-        private void SldLogistic_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            Settings.SetSlider(Settings.LogisticalSlots, Lbllogistic, e.NewValue);
-        }
-        private void SldTactical_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            Settings.SetSlider(Settings.TacticalSlots, LblTactical, e.NewValue);
-        }
-        private void SldDamage_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            Settings.SetSlider(Settings.WeaponDamage, LblDamage, e.NewValue);
-        }
-        private void SldBombing_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            Settings.SetSlider(Settings.BombingDamage, LblBombing, e.NewValue);
-        }
-        private void SldAntimatter_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            Settings.SetSlider(Settings.Antimatter, LblAntimatter, e.NewValue);
-        }
-        private void SldCost_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            Settings.SetSlider(Settings.UnitCost, LblCost, e.NewValue);
-        }
-        private void SldGravityWellSize_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            Settings.SetSlider(Settings.GravityWellSize, LblGravityWellSize, e.NewValue);
-        }
-        private void SldExperience_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            Settings.SetSlider(Settings.ExperienceForLevel, LblExperience, e.NewValue);
-        }
-        #endregion
         #endregion
 
         private void CmdUpdateGreed_Click(object sender, RoutedEventArgs e)

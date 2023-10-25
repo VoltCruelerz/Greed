@@ -1,0 +1,167 @@
+﻿{
+  "dirs": {
+    "mods": "",
+    "export": "",
+    "sins": "",
+    "download": ""
+  },
+  "channel": "live",
+  "groups": [
+    {
+      "name": "Empire",
+      "scalars": [
+        {
+          "name": "Max Fleet Supply",
+          "folder": "entities",
+          "type": "INT",
+          "extension": ".player",
+          "locations": [
+            {
+              "path": "max_supply.levels[i].max_supply"
+            }
+          ],
+          "value": 1.0
+        },
+        {
+          "name": "Max Titans",
+          "folder": "entities",
+          "type": "INT",
+          "extension": ".player",
+          "locations": [
+            {
+              "path": "unit_limits.global[i].unit_limit",
+              "condition": "EQ($element_i.tag,titan)"
+            }
+          ],
+          "value": 1.0
+        },
+        {
+          "name": "Tactical Slots",
+          "folder": "entities",
+          "type": "INT",
+          "extension": ".player",
+          "locations": [
+            {
+              "path": "planet_types[i].tracks.defense[j].max_military_structure_slots"
+            }
+          ],
+          "value": 1.0
+        },
+        {
+          "name": "Logistics Slots",
+          "folder": "entities",
+          "type": "INT",
+          "extension": ".player",
+          "locations": [
+            {
+              "path": "planet_types[i].tracks.logistics[j].max_civilian_structure_slots"
+            }
+          ],
+          "value": 1.0
+        }
+      ]
+    },
+    {
+      "name": "Combat",
+      "scalars": [
+        {
+          "name": "Weapon Damage",
+          "folder": "entities",
+          "type": "DOUBLE",
+          "extension": ".weapon",
+          "locations": [
+            {
+              "path": "damage"
+            }
+          ],
+          "value": 1.0
+        },
+        {
+          "name": "Bombing Damage",
+          "folder": "entities",
+          "type": "DOUBLE",
+          "extension": ".weapon",
+          "locations": [
+            {
+              "path": "bombing_damage"
+            }
+          ],
+          "value": 1.0
+        },
+        {
+          "name": "Antimatter",
+          "folder": "entities",
+          "type": "DOUBLE",
+          "extension": ".unit",
+          "locations": [
+            {
+              "path": "antimatter.max_antimatter"
+            },
+            {
+              "path": "antimatter.antimatter_restore_rate"
+            },
+            {
+              "path": "levels.levels[i].unit_modifiers.additive_values.max_antimatter"
+            },
+            {
+              "path": "levels.levels[i].unit_modifiers.additive_values.antimatter_restore_rate"
+            }
+          ],
+          "value": 1.0
+        },
+        {
+          "name": "Capital Experienc to Next Level",
+          "folder": "entities",
+          "type": "DOUBLE",
+          "extension": ".unit",
+          "locations": [
+            {
+              "path": "levels.levels[i].experience_to_next_level"
+            }
+          ],
+          "value": 1.0
+        }
+      ]
+    },
+    {
+      "name": "Economics",
+      "scalars": [
+        {
+          "name": "Unit Cost",
+          "folder": "entities",
+          "type": "DOUBLE",
+          "extension": ".unit",
+          "locations": [
+            {
+              "path": "build.price.credits"
+            },
+            {
+              "path": "build.price.metal"
+            },
+            {
+              "path": "build.price.crystal"
+            }
+          ],
+          "value": 1.0
+        }
+      ]
+    },
+    {
+      "name": "Maps",
+      "scalars": [
+        {
+          "name": "Gravity Well Size",
+          "folder": "entities",
+          "type": "DOUBLE",
+          "extension": ".unit",
+          "locations": [
+            {
+              "path": "gravity_well_fixture.inner_move_distance"
+            }
+          ],
+          "value": 1.0
+        }
+      ]
+    }
+  ]
+}
