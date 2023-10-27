@@ -163,7 +163,7 @@
                 <Button x:Name="CmdUpdateGreed" Padding="0,0,0,1.5" Content="Check for Updates" Margin="10,98,0,0" Click="CmdUpdateGreed_Click" VerticalAlignment="Top" ToolTip="Update Greed to the latest version." Height="23" HorizontalAlignment="Left" Width="116"/>
                 <Button x:Name="CmdResetSliders" Padding="0,0,0,1.5" Content="Reset Scalars" Margin="453,98,0,0" Click="CmdResetSliders_Click" VerticalAlignment="Top" ToolTip="Reset global scalars to 100%." Height="23" HorizontalAlignment="Left" Width="116"/>
                 <Expander x:Name="ExpGlobalScalars" HorizontalAlignment="Left" Height="197" Header="Global Scalars" Margin="10,126,0,0" VerticalAlignment="Top" Width="559">
-                    <Grid Background="#FFC8D213">
+                    <Grid x:Name="GridScalarParent" Background="#CFC8C213">
                     </Grid>
                 </Expander>
             </Grid>

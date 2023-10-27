@@ -27,10 +27,11 @@ namespace Greed.Utils
         public static readonly string DefaultDownDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
 
         // Sliders
-        private static readonly List<double> SliderValue = new() { 0.1, 0.2, 0.35, 0.5, 0.65, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.50, 1.75, 2.0, 2.5, 3, 4, 5, 6, 8, 10 };
+        public static readonly List<double> SliderValue = new() { 0.1, 0.2, 0.35, 0.5, 0.65, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.50, 1.75, 2.0, 2.5, 3, 4, 5, 6, 8, 10 };
         public static readonly int SliderOne = SliderValue.FindIndex(p => p == 1.0);
 
-        private static readonly Config Config = JsonConvert.DeserializeObject<Config>(File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "Config.json")))!;
+        private static readonly string ConfigPath = Path.Combine(Directory.GetCurrentDirectory(), "Config.json");
+        private static readonly Config Config = JsonConvert.DeserializeObject<Config>(File.ReadAllText(ConfigPath))!;
         private static readonly List<Expander> ScalarExpanders = new();
 
         #region Get
@@ -90,47 +91,67 @@ namespace Greed.Utils
         public static void SetModDir(string value)
         {
             Config.Dirs.Mods = value;
+            Save();
         }
 
         public static void SetSinsDir(string value)
         {
             Config.Dirs.Sins = value;
+            Save();
         }
 
         public static void SetExportDir(string value)
         {
             Config.Dirs.Export = value;
+            Save();
         }
 
         public static void SetDownDir(string value)
         {
             Config.Dirs.Download = value;
+            Save();
         }
 
         public static void SetChannel(string value)
         {
             Config.Channel = value;
+            Save();
         }
 
-        public static void SetSlider(string groupName, string scalarName, Label label, double value)
+        public static void SetSlider(string groupName, string scalarName, Label label, double tickIndex)
         {
-            var mult = SliderValue[(int)value];
-            label.Content = (int)(mult * 100) + "%";
-            Config.Groups.Find(g => g.Name == groupName)!.Scalars.Find(s => s.Name == scalarName)!.Value = value;
+            var mult = SliderValue[(int)tickIndex];
+            label.Content = mult.ToString("P0");
+            Config.Groups.Find(g => g.Name == groupName)!.Scalars.Find(s => s.Name == scalarName)!.Value = mult;
+            Save();
         }
 
-        public static void SetSlider(int groupIndex, int scalarIndex, Label label, double value)
+        public static void SetSlider(int groupIndex, int scalarIndex, Label label, double tickIndex)
         {
-            var mult = SliderValue[(int)value];
-            label.Content = (int)(mult * 100) + "%";
-            Config.Groups[groupIndex].Scalars[scalarIndex].Value = value;
+            var mult = SliderValue[(int)tickIndex];
+            label.Content = mult.ToString("P0");
+            Config.Groups[groupIndex].Scalars[scalarIndex].Value = mult;
+            Save();
+        }
+
+        public static void ResetSliders(Grid parent)
+        {
+            parent.Children.Clear();
+            ScalarExpanders.Clear();
+            Config.Groups.ForEach(g => g.Scalars.ForEach(s => s.Value = 1));
+            Save();
+            PopulateScalarExpander(parent);
+        }
+
+        private static void Save()
+        {
+            File.WriteAllText(ConfigPath, JsonConvert.SerializeObject(Config, Formatting.Indented));
         }
         #endregion
 
         #region Initialize Scalar Sliders
         public static int PopulateScalarExpander(Grid grid)
         {
-            ScalarExpanders.Clear();
             var offset = 0;
             var white = new SolidColorBrush(Color.FromRgb(255, 255, 255));
             for (var i = 0; i < Config.Groups.Count; i++)
@@ -144,7 +165,7 @@ namespace Greed.Utils
                 for (var j = 0; j < group.Scalars.Count; j++)
                 {
                     var scalar = group.Scalars[j];
-                    subGrid.Children.Add(new SliderBox(scalar.Name, i, j));
+                    subGrid.Children.Add(new SliderBox(scalar.Name, i, j, SliderValue.IndexOf(scalar.Value)));
                     offset++;
                 }
                 var subExp = new Expander()

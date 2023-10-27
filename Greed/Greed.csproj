@@ -16,6 +16,7 @@
     <RepositoryUrl>https://github.com/VoltCruelerz/Greed/tree/master</RepositoryUrl>
     <UseWindowsForms>True</UseWindowsForms>
     <ApplicationIcon>favicon.ico</ApplicationIcon>
+    <PackageProjectUrl>https://github.com/VoltCruelerz/Greed</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>
@@ -48,6 +49,6 @@
     <Content Include="..\README.md" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\Mutations.md" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\LICENSE.txt" CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="..\Greed.AutoUpdater\bin\Release\net7.0-windows\publish\win-x64\Greed.AutoUpdater.exe" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\Greed.AutoUpdater\bin\$(Configuration)\net7.0-windows\Greed.AutoUpdater.exe" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

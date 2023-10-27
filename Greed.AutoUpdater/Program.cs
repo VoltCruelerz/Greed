@@ -25,10 +25,10 @@ try
     sb.AppendLine("- Found Files...");
     allFiles.ForEach(f => sb.AppendLine(Path.GetFileName(f)));
     var old = allFiles
-        .Where(f => !f.EndsWith(".tmp") && !f.EndsWith(".dll.config") && Path.GetFileName(f) != "Greed.AutoUpdater.exe")
+        .Where(f => !f.EndsWith(".tmp") && !f.EndsWith(".dll.config") && !f.EndsWith(".json") && Path.GetFileName(f) != "Greed.AutoUpdater.exe")
         .ToList();
     var tmp = allFiles
-        .Where(f => f.EndsWith(".tmp") && !f.EndsWith(".dll.config") && Path.GetFileName(f) != "Greed.AutoUpdater.exe.tmp")
+        .Where(f => f.EndsWith(".tmp") && !f.EndsWith(".dll.config") && !f.EndsWith(".json") && Path.GetFileName(f) != "Greed.AutoUpdater.exe.tmp")
         .ToList();
 
     // Purge everthing that doesn't end in .tmp

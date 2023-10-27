@@ -103,6 +103,7 @@ namespace Greed
                     {
                         Log.Info("No active mods or scalars. Cleaning up...");
                         DeactivateGreed();
+                        Log.Info("Cleanup complete.");
                         return;
                     }
 
@@ -467,7 +468,7 @@ namespace Greed
             {
                 var enabled = JsonConvert.DeserializeObject<EnabledMods>(File.ReadAllText(enabledPath))!;
                 enabled.ModKeys = enabled.ModKeys.Where(m => m.Name != "greed").ToList();
-                Directory.Delete(greedPath, true);
+                if (Directory.Exists(greedPath)) Directory.Delete(greedPath, true);
                 File.WriteAllText(enabledPath, JsonConvert.SerializeObject(enabled));
             }
         }

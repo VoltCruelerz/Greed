@@ -21,24 +21,32 @@ namespace Greed.Models.Config
         [JsonProperty(PropertyName = "condition")]
         public string RawCondition { get; set; } = string.Empty;
 
+        [JsonIgnore]
         public List<ActionPath>? NodePath { get; set; }
 
+        [JsonIgnore]
         public Resolvable? Condition { get; set; }
 
         public void Init()
         {
             NodePath = ActionPath.Build(RawPath);
-            Condition = Resolvable.GenerateResolvable(RawCondition);
+            Condition = string.IsNullOrEmpty(RawCondition) ? null : Resolvable.GenerateResolvable(RawCondition);
         }
 
-        public bool Exec(JObject obj, GlobalScalar parent)
+        public bool Exec(JObject root, GlobalScalar parent)
         {
             if (NodePath == null) throw new InvalidOperationException("Never called Init()");
 
             bool madeAChange = false;
-            NodePath[0].DoWork(obj, NodePath, 0, new(), (token, variables, depth) =>
+            NodePath[0].DoWork(root, NodePath, 0, new(), (token, variables, depth) =>
             {
                 if (token == null) return;
+                if (Condition != null)
+                {
+                    var pass = Resolvable.IsTruthy(Condition.Exec(root, variables), root, variables);
+                    if (!pass) return;
+                }
+
                 if (token is JObject obj)
                 {
                     var fp = (FieldPath)NodePath[^1];

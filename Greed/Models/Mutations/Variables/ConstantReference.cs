@@ -16,5 +16,10 @@ namespace Greed.Models.Mutations.Variables
         {
             return Value;
         }
+
+        public override string ToString()
+        {
+            return Value?.ToString() ?? "null";
+        }
     }
 }

@@ -95,7 +95,7 @@ namespace Greed.Models.Mutations.Variables
 
         public override string ToString()
         {
-            return "VR: $" + string.Join(".", Path);
+            return "(VR$" + string.Join(".", Path) + ")";
         }
     }
 }

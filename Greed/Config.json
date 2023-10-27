@@ -36,6 +36,23 @@
           "value": 1.0
         },
         {
+          "name": "Max Starbases",
+          "folder": "entities",
+          "type": "INT",
+          "extension": ".player",
+          "locations": [
+            {
+              "path": "unit_limits.star[i].unit_limit",
+              "condition": "EQ($element_i.tag,starbase)"
+            },
+            {
+              "path": "unit_limits.planet[i].unit_limit",
+              "condition": "EQ($element_i.tag,starbase)"
+            }
+          ],
+          "value": 1.0
+        },
+        {
           "name": "Tactical Slots",
           "folder": "entities",
           "type": "INT",
@@ -55,6 +72,21 @@
           "locations": [
             {
               "path": "planet_types[i].tracks.logistics[j].max_civilian_structure_slots"
+            }
+          ],
+          "value": 1.0
+        },
+        {
+          "name": "Labs per Research Tier",
+          "folder": "entities",
+          "type": "INT",
+          "extension": ".player",
+          "locations": [
+            {
+              "path": "research.research_domains.civilian.research_tiers[i].required_research_points"
+            },
+            {
+              "path": "research.research_domains.military.research_tiers[i].required_research_points"
             }
           ],
           "value": 1.0

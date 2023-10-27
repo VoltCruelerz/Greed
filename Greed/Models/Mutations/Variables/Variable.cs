@@ -19,7 +19,7 @@ namespace Greed.Models.Mutations.Variables
 
         public override string ToString()
         {
-            return $"[{ScopeDepth}] {Name} := {Value?.ToString()}";
+            return $"([{ScopeDepth}]{Name}={Value?.ToString()})";
         }
 
         public static Dictionary<string, Variable> GetGlobals(JObject root)

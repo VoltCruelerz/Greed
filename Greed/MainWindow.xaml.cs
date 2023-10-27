@@ -754,7 +754,7 @@ namespace Greed
         }
         private void CmdResetSliders_Click(object sender, RoutedEventArgs e)
         {
-
+            Settings.ResetSliders(GridScalarParent);
         }
         #endregion
 
