@@ -34,7 +34,15 @@ namespace Greed.Utils
                 if (Directory.Exists(extractPath)) Directory.Delete(extractPath, true);
 
                 // Download the zip
-                if (!await DownloadZipFile(url, zipPath)) return;
+                try
+                {
+                    if (!await DownloadZipFile(url, zipPath)) return;
+                }
+                catch (Exception e)
+                {
+                    CriticalAlertPopup.ThrowAsync("Download Failed", e);
+                    return;
+                }
                 Log.Info($"Download of {zipFile} to {zipPath} complete.");
 
                 // Extract the zip

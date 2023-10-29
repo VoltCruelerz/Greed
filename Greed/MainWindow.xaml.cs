@@ -64,10 +64,10 @@ namespace Greed
         {
             Instance = this;
             InitializeComponent();
+            LoadSettings();
             SetTitle();
             ReloadCatalog();
 
-            LoadSettings();
 
             RefreshVaultPackUI();
             Log.Info("Components Loaded");
