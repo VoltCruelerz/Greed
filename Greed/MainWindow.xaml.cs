@@ -66,6 +66,7 @@ namespace Greed
             InitializeComponent();
             SetTitle();
             ReloadCatalog();
+
             LoadSettings();
 
             RefreshVaultPackUI();
@@ -610,10 +611,17 @@ namespace Greed
         #region Settings
         private void LoadSettings()
         {
+            Settings.AutomigrateConfig();
+            LoadSettingsUiElements();
+        }
+
+        private void LoadSettingsUiElements()
+        {
             PopulateConfigField(TxtModsDir, Settings.GetModDir(), Settings.DefaultModDir);
             PopulateConfigField(TxtExportDir, Settings.GetExportDir(), Settings.DefaultModDir);
             PopulateConfigField(TxtSinsDir, Settings.GetSinsDir(), Settings.DefaultSinDir);
             PopulateConfigField(TxtDownloadDir, Settings.GetDownDir(), Settings.DefaultDownDir);
+            PopulateConfigCbx(CbxChannel, Settings.GetChannel());
 
             ExpGlobalScalars.Height = 10 + 50 * Settings.PopulateScalarExpander((Grid)ExpGlobalScalars.Content);
         }

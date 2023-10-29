@@ -9,8 +9,7 @@ try
     if (args.Length != 1) throw new ArgumentException("Missing parameter 'process_id'");
     sb.AppendLine("Argument: " + args[0]);
 
-    int processId = 0;
-    if (!int.TryParse(args[0], out processId)) throw new ArgumentException("Invalid process ID.");
+    if (!int.TryParse(args[0], out int processId)) throw new ArgumentException("Invalid process ID.");
 
     // Get the Greed process
     Process process = Process.GetProcessById(processId) ?? throw new Exception("Process not found!");

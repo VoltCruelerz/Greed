@@ -62,6 +62,7 @@ namespace Greed.Models.Online
                 ALPHA_CHANNEL => ALPHA_PATH,
                 BETA_CHANNEL => BETA_PATH,
                 LIVE_CHANNEL => LIVE_PATH,
+                "" => LIVE_PATH,
                 _ => channel,
             };
         }

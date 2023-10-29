@@ -49,7 +49,7 @@ namespace Greed.Models.Config
 
         public void Exec()
         {
-            if ((double)Value == 1.0) return;
+            if (!HasChanged()) return;
 
             try
             {
@@ -79,16 +79,19 @@ namespace Greed.Models.Config
                 foreach (var f in files)
                 {
                     var obj = JObject.Parse(File.ReadAllText(f));
-
-                    var madeAChange = Locations.Any(loc => loc.Exec(obj, this));
-
-                    if (madeAChange) File.WriteAllText(Path.Combine(greedSettingFolder, Path.GetFileName(f)), obj.ToString());
+                    var changes = Locations.Sum(loc => loc.Exec(obj, this));
+                    if (changes > 0) File.WriteAllText(Path.Combine(greedSettingFolder, Path.GetFileName(f)), obj.ToString());
                 }
             }
             catch (Exception ex)
             {
                 throw new Exception($"Failed to export global {Name}", ex);
             }
+        }
+
+        public bool HasChanged()
+        {
+            return Value != 1.0;
         }
     }
 }

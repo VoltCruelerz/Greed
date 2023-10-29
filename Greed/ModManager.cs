@@ -82,7 +82,7 @@ namespace Greed
         public void ExportGreedyMods(List<Mod> active, ProgressBar pgbProgress, MainWindow window, Action<bool> callback)
         {
             Log.Info($"Exporting {active.Count} Active Mods");
-            var slidersChanged = window.ScalarSliders.Any(s => s.HasChanged());
+            var slidersChanged = Settings.GetScalars().Any(s => s.HasChanged());
             string modDir = Settings.GetModDir();
             string sinsDir = Settings.GetSinsDir();
             var greedPath = modDir + "\\greed";

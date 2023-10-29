@@ -1,4 +1,5 @@
 ﻿{
+  "version": "0.0.0",
   "dirs": {
     "mods": "",
     "export": "",
@@ -83,10 +84,7 @@
           "extension": ".player",
           "locations": [
             {
-              "path": "research.research_domains.civilian.research_tiers[i].required_research_points"
-            },
-            {
-              "path": "research.research_domains.military.research_tiers[i].required_research_points"
+              "path": "research.research_domains.military.research_tiers[j].required_research_points"
             }
           ],
           "value": 1.0

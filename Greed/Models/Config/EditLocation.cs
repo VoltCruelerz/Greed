@@ -33,11 +33,11 @@ namespace Greed.Models.Config
             Condition = string.IsNullOrEmpty(RawCondition) ? null : Resolvable.GenerateResolvable(RawCondition);
         }
 
-        public bool Exec(JObject root, GlobalScalar parent)
+        public int Exec(JObject root, GlobalScalar parent)
         {
             if (NodePath == null) throw new InvalidOperationException("Never called Init()");
 
-            bool madeAChange = false;
+            int changes = 0;
             NodePath[0].DoWork(root, NodePath, 0, new(), (token, variables, depth) =>
             {
                 if (token == null) return;
@@ -50,16 +50,17 @@ namespace Greed.Models.Config
                 if (token is JObject obj)
                 {
                     var fp = (FieldPath)NodePath[^1];
-                    if (obj[fp.Name] == null) return;
+                    var child = obj[fp.Name];
+                    if (child == null) return;
                     if (parent.Type == GlobalType.DOUBLE)
                     {
-                        obj[fp.Name] = obj[fp.Name]!.Value<double>() * parent.Value;
-                        madeAChange = true;
+                        obj[fp.Name] = child!.Value<double>() * parent.Value;
+                        changes++;
                     }
                     else if (parent.Type == GlobalType.INT)
                     {
-                        obj[fp.Name] = (int)(obj[fp.Name]!.Value<int>() * parent.Value);
-                        madeAChange = true;
+                        obj[fp.Name] = (int)(child!.Value<int>() * parent.Value);
+                        changes++;
                     }
                 }
                 else if (token is JArray arr)
@@ -68,20 +69,20 @@ namespace Greed.Models.Config
                     if (parent.Type == GlobalType.DOUBLE)
                     {
                         arr[i] = token.Value<double>() * parent.Value;
-                        madeAChange = true;
+                        changes++;
                     }
                     else if (parent.Type == GlobalType.INT)
                     {
                         arr[i] = (int)(token.Value<int>() * parent.Value);
-                        madeAChange = true;
+                        changes++;
                     }
                 }
-                if (!madeAChange)
+                if (changes == 0)
                 {
                     throw new Exception($"Failed to find work for global {parent.Name}::{RawPath}");
                 }
             });
-            return madeAChange;
+            return changes;
         }
     }
 }

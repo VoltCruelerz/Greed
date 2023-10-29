@@ -5,11 +5,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Text.Json;
+using Greed.Utils;
 
 namespace Greed.Models.Config
 {
     public class Config
     {
+        [JsonRequired]
+        [JsonProperty(PropertyName = "version")]
+        public Version Version { get; set; } = new Version(0,0,0);
+
         [JsonRequired]
         [JsonProperty(PropertyName = "channel")]
         public string Channel = "live";

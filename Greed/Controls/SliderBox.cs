@@ -14,9 +14,8 @@ namespace Greed.Controls
         public int GroupIndex;
         public int ScalarIndex;
 
-        Label LblPercentage;
-
-        Slider SldSetter;
+        private readonly Label LblPercentage;
+        private readonly Slider SldSetter;
 
         public SliderBox(string name, int groupIndex, int scalarIndex, int tickIndex)
         {

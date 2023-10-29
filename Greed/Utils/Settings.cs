@@ -1,4 +1,6 @@
 ﻿using Greed.Controls;
+using Greed.Controls.Popups;
+using Greed.Extensions;
 using Greed.Models.Config;
 using Newtonsoft.Json;
 using System;
@@ -34,7 +36,40 @@ namespace Greed.Utils
         private static readonly Config Config = JsonConvert.DeserializeObject<Config>(File.ReadAllText(ConfigPath))!;
         private static readonly List<Expander> ScalarExpanders = new();
 
+        public static void AutomigrateConfig()
+        {
+            // Pre 2.7 (dll.config)
+            if (Config.Version.IsOlderThan(new Version("2.7.0")))
+            {
+                try
+                {
+                    const string ModDirKey = "modDir";
+                    const string SinsDirKey = "sinsDir";
+                    const string ExportDirKey = "exportDir";
+                    const string DownDirKey = "downDir";
+                    const string ChannelKey = "channel";
+                    Config.Dirs.Mods = string.IsNullOrEmpty(Config.Dirs.Mods) ? ConfigurationManager.AppSettings[ModDirKey]! : DefaultModDir;
+                    Config.Dirs.Export = string.IsNullOrEmpty(Config.Dirs.Mods) ? ConfigurationManager.AppSettings[ExportDirKey]! : DefaultModDir;
+                    Config.Dirs.Sins = string.IsNullOrEmpty(Config.Dirs.Mods) ? ConfigurationManager.AppSettings[SinsDirKey]! : DefaultModDir;
+                    Config.Dirs.Download = string.IsNullOrEmpty(Config.Dirs.Mods) ? ConfigurationManager.AppSettings[DownDirKey]! : DefaultModDir;
+                    Config.Channel = string.IsNullOrEmpty(Config.Channel) ? ConfigurationManager.AppSettings[ChannelKey]! : "live";
+                }
+                catch (Exception ex)
+                {
+                    CriticalAlertPopup.ThrowAsync("Unable to import existing config. Defaulting.", ex);
+                }
+            }
+
+            // Mark that the migration is complete
+            if (Config.Version.IsOlderThan(GetGreedVersion()))
+            {
+                Config.Version = GetGreedVersion();
+                Save();
+            }
+        }
+
         #region Get
+
         public static string GetModDir()
         {
             return Config.Dirs.Mods;
@@ -84,6 +119,13 @@ namespace Greed.Utils
         public static Version GetSinsVersion()
         {
             return new Version(FileVersionInfo.GetVersionInfo(GetSinsExePath()).FileVersion!);
+        }
+
+        public static List<GlobalScalar> GetScalars()
+        {
+            List<GlobalScalar> scalars = new();
+            Config.Groups.ForEach(g => g.Scalars.ForEach(s => scalars.Add(s)));
+            return scalars;
         }
         #endregion
 
