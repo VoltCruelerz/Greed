@@ -50,8 +50,8 @@ namespace Greed.Utils
                     const string ChannelKey = "channel";
                     Config.Dirs.Mods = string.IsNullOrEmpty(Config.Dirs.Mods) ? ConfigurationManager.AppSettings[ModDirKey]! : DefaultModDir;
                     Config.Dirs.Export = string.IsNullOrEmpty(Config.Dirs.Mods) ? ConfigurationManager.AppSettings[ExportDirKey]! : DefaultModDir;
-                    Config.Dirs.Sins = string.IsNullOrEmpty(Config.Dirs.Mods) ? ConfigurationManager.AppSettings[SinsDirKey]! : DefaultModDir;
-                    Config.Dirs.Download = string.IsNullOrEmpty(Config.Dirs.Mods) ? ConfigurationManager.AppSettings[DownDirKey]! : DefaultModDir;
+                    Config.Dirs.Sins = string.IsNullOrEmpty(Config.Dirs.Mods) ? ConfigurationManager.AppSettings[SinsDirKey]! : DefaultSinDir;
+                    Config.Dirs.Download = string.IsNullOrEmpty(Config.Dirs.Mods) ? ConfigurationManager.AppSettings[DownDirKey]! : DefaultDownDir;
                     Config.Channel = string.IsNullOrEmpty(Config.Channel) ? ConfigurationManager.AppSettings[ChannelKey]! : "live";
                 }
                 catch (Exception ex)
@@ -118,6 +118,11 @@ namespace Greed.Utils
 
         public static Version GetSinsVersion()
         {
+            if (!File.Exists(GetSinsExePath()))
+            {
+                CriticalAlertPopup.ThrowAsync("Unable to locate " + GetSinsExePath(), new FileNotFoundException());
+                return new Version(0, 0, 0);
+            }
             return new Version(FileVersionInfo.GetVersionInfo(GetSinsExePath()).FileVersion!);
         }
 
