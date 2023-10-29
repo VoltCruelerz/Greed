@@ -17,6 +17,7 @@
     <UseWindowsForms>True</UseWindowsForms>
     <ApplicationIcon>favicon.ico</ApplicationIcon>
     <PackageProjectUrl>https://github.com/VoltCruelerz/Greed</PackageProjectUrl>
+    <PublisherName>League of Greedy Modders</PublisherName>
   </PropertyGroup>
 
   <ItemGroup>
