@@ -25,6 +25,9 @@ _A mod loader for [Sins of a Solar Empire II](https://www.sinsofasolarempire2.co
         - [Left Pane - Mods](#left-pane---mods)
         - [Center Pane - Details \& Execution](#center-pane---details--execution)
         - [Right Pane - Difference](#right-pane---difference)
+        - [Global Scalars](#global-scalars)
+            - [Scalar Schema](#scalar-schema)
+            - [Edit Location Schema](#edit-location-schema)
     - [Greedy Mod Development](#greedy-mod-development)
         - [Why Develop Greedy Mods?](#why-develop-greedy-mods)
         - [Merge Types](#merge-types)
@@ -153,6 +156,34 @@ https://github.com/VoltCruelerz/Greed/assets/4068550/a0d3662e-25e5-46c2-ba97-54b
 2. The folder of the modified file (eg `entities` or `uniforms`).
 3. The name of the file.
 4. View a comparison between what this file's contents and the original Sins version. You can also double click on a file to see its diff.
+
+### Global Scalars
+
+![Scalars](assets/Collapse%20Scalars.png)
+
+In addition to loading other mods, Greed can also function as an ad-hoc mod by itself. On the _Settings_ tab, you can see a list of game-modifying scalars. The changes made with these scalars apply after all other mods have been merged during Greed's export process.
+
+Greed ships with a handful of scalars, but you can edit Greed's `Config.json` file's `groups[i]` field if you want to change which are available to you.
+
+#### Scalar Schema
+
+| Field | Type | Description | Default Value |
+|:------|:-----|:------------|:--------------|
+| `name`* | `string` | The name of the scalar. | |
+| `folder`* | `string` | Where you can find the files that you want to scale. This will usually be `entities` or `uniforms`. | |
+| `type`* | `string enum` | This will either be `INT` or `DOUBLE`, depending on whether the target field is a floating point or integer. | |
+| `extension`* | `string` | The file extension to filter on, eg `.player`. | |
+| `locations`* | `EditLocation[]` | The list of edit locations to edit the files. Typically, there will only be one, but you may want to move several in lockstep. | |
+| `value`* | `double` | The current value of the scalar. | |
+
+#### Edit Location Schema
+
+See [Resolvable Mutations](Mutations.md) for more details.
+
+| Field | Type | Description | Default Value |
+|:------|:-----|:------------|:--------------|
+| `path`* | `string` | The Action Path to the field you wish to edit. | |
+| `condition` | `Resolvable` | If provided, this condition must be met to make an edit. | `""` |
 
 ## Greedy Mod Development
 

@@ -96,7 +96,10 @@ namespace Greed
                 var updateStr = greedVersion.IsOlderThan(Catalog.LatestGreed)
                     ? $" - {Utils.Constants.UNI_WARN} Greed v{Catalog.LatestGreed} is now available! {Utils.Constants.UNI_WARN}"
                     : "";
-                Title = $"Greed Mod Loader v{greedVersion} (Detected Sins II v{Settings.GetSinsVersion()}){updateStr}";
+                var sinsStr = Settings.GetSinsVersion().IsNewerThan(new Version(0, 0, 0))
+                    ? $"(Detected Sins II v{Settings.GetSinsVersion()})"
+                    : "";
+                Title = $"Greed Mod Loader v{greedVersion} {sinsStr}{updateStr}";
             }
             catch (Exception)
             {
@@ -668,7 +671,10 @@ namespace Greed
         {
             var txt = (TextBox)sender;
             if (SetFolderConfigOption("Sins II Directory", txt))
+            {
                 Settings.SetSinsDir(txt.Text);
+                SetTitle();
+            }
         }
 
         private void TxtModDir_TextChanged(object sender, TextChangedEventArgs e)

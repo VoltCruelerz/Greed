@@ -52,31 +52,31 @@ namespace Greed.Utils
                     const string ChannelKey = "channel";
                     Log.Info($"{wall}- Migrating Mods Dir...{Environment.NewLine}- - JSON: {Config.Dirs.Mods}{Environment.NewLine}- - XML: {ConfigurationManager.AppSettings[ModDirKey]!}{Environment.NewLine}- - Default: {DefaultModDir}");
                     Config.Dirs.Mods = string.IsNullOrEmpty(Config.Dirs.Mods)
-                        ? ConfigurationManager.AppSettings[ModDirKey]!
+                        ? ConfigurationManager.AppSettings[ModDirKey] ?? DefaultModDir
                         : DefaultModDir;
                     Log.Info("- Migrated to " + Config.Dirs.Mods);
 
                     Log.Info($"{wall}- Migrating Export Dir...{Environment.NewLine}- - JSON: {Config.Dirs.Export}{Environment.NewLine}- - XML: {ConfigurationManager.AppSettings[ExportDirKey]!}{Environment.NewLine}- - Default: {DefaultModDir}");
                     Config.Dirs.Export = string.IsNullOrEmpty(Config.Dirs.Export)
-                        ? ConfigurationManager.AppSettings[ExportDirKey]!
+                        ? ConfigurationManager.AppSettings[ExportDirKey] ?? DefaultModDir
                         : DefaultModDir;
                     Log.Info("- Migrated to " + Config.Dirs.Export);
 
                     Log.Info($"{wall}- Migrating Sins Dir...{Environment.NewLine}- - JSON: {Config.Dirs.Sins}{Environment.NewLine}- - XML: {ConfigurationManager.AppSettings[SinsDirKey]!}{Environment.NewLine}- - Default: {DefaultSinDir}");
                     Config.Dirs.Sins = string.IsNullOrEmpty(Config.Dirs.Sins)
-                        ? ConfigurationManager.AppSettings[SinsDirKey]!
+                        ? ConfigurationManager.AppSettings[SinsDirKey] ?? DefaultSinDir
                         : DefaultSinDir;
                     Log.Info("- Migrated to " + Config.Dirs.Sins);
 
                     Log.Info($"{wall}- Migrating Down Dir...{Environment.NewLine}- - JSON: {Config.Dirs.Download}{Environment.NewLine}- - XML: {ConfigurationManager.AppSettings[DownDirKey]!}{Environment.NewLine}- - Default: {DefaultDownDir}");
                     Config.Dirs.Download = string.IsNullOrEmpty(Config.Dirs.Download)
-                        ? ConfigurationManager.AppSettings[DownDirKey]!
+                        ? ConfigurationManager.AppSettings[DownDirKey] ?? DefaultDownDir
                         : DefaultDownDir;
                     Log.Info("- Migrated to " + Config.Dirs.Download);
 
                     Log.Info($"{wall}- Migrating Channel...{Environment.NewLine}- - JSON: {Config.Channel}{Environment.NewLine}- - XML: {ConfigurationManager.AppSettings[ChannelKey]!}{Environment.NewLine}- - Default: live");
                     Config.Channel = string.IsNullOrEmpty(Config.Channel)
-                        ? ConfigurationManager.AppSettings[ChannelKey]!
+                        ? ConfigurationManager.AppSettings[ChannelKey] ?? "live"
                         : "live";
                     Log.Info("- Migrated to " + Config.Channel);
                 }
@@ -146,7 +146,6 @@ namespace Greed.Utils
         {
             if (!File.Exists(GetSinsExePath()))
             {
-                CriticalAlertPopup.ThrowAsync("Unable to locate " + GetSinsExePath(), new FileNotFoundException());
                 return new Version(0, 0, 0);
             }
             return new Version(FileVersionInfo.GetVersionInfo(GetSinsExePath()).FileVersion!);

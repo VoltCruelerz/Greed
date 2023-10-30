@@ -140,7 +140,7 @@
           "value": 1.0
         },
         {
-          "name": "Capital Experienc to Next Level",
+          "name": "Level-Up Experience Threshold",
           "folder": "entities",
           "type": "DOUBLE",
           "extension": ".unit",
