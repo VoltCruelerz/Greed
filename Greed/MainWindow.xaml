@@ -153,75 +153,19 @@
         <TabItem x:Name="TabSettings" Header="Settings">
             <Grid>
                 <Label Content="Sins Directory" HorizontalAlignment="Left" Margin="10,2,0,0" VerticalAlignment="Top" ToolTip="The directory containing sins2.exe"/>
-                <TextBox x:Name="txtSinsDir" HorizontalAlignment="Left" Margin="131,6,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="438" TextChanged="TxtSinsDir_TextChanged" ToolTip="Autosaves if directory exists."/>
+                <TextBox x:Name="TxtSinsDir" HorizontalAlignment="Left" Margin="131,6,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="438" TextChanged="TxtSinsDir_TextChanged" ToolTip="Autosaves if directory exists."/>
                 <Label Content="Mods Directory" HorizontalAlignment="Left" Margin="10,25,0,0" VerticalAlignment="Top" ToolTip="Where mods should be stored on your system. Often the same as Export Directory."/>
-                <TextBox x:Name="txtModsDir" HorizontalAlignment="Left" Margin="131,29,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="438" TextChanged="TxtModDir_TextChanged" ToolTip="Autosaves if directory exists."/>
+                <TextBox x:Name="TxtModsDir" HorizontalAlignment="Left" Margin="131,29,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="438" TextChanged="TxtModDir_TextChanged" ToolTip="Autosaves if directory exists."/>
                 <Label Content="Export Directory" HorizontalAlignment="Left" Margin="10,48,0,0" VerticalAlignment="Top" ToolTip="Where Sins II loads mods from. Often the same as Mods Directory."/>
-                <TextBox x:Name="txtExportDir" HorizontalAlignment="Left" Margin="131,52,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="438" TextChanged="TxtExportDir_TextChanged" ToolTip="Autosaves if directory exists."/>
+                <TextBox x:Name="TxtExportDir" HorizontalAlignment="Left" Margin="131,52,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="438" TextChanged="TxtExportDir_TextChanged" ToolTip="Autosaves if directory exists."/>
                 <Label Content="Download Directory" HorizontalAlignment="Left" Margin="10,71,0,0" VerticalAlignment="Top" ToolTip="A directory Greed can use as a workspace for downloads."/>
-                <TextBox x:Name="txtDownloadDir" HorizontalAlignment="Left" Margin="131,75,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="438" TextChanged="TxtDownloadDir_TextChanged" ToolTip="Autosaves if directory exists."/>
+                <TextBox x:Name="TxtDownloadDir" HorizontalAlignment="Left" Margin="131,75,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="438" TextChanged="TxtDownloadDir_TextChanged" ToolTip="Autosaves if directory exists."/>
                 <Button x:Name="CmdUpdateGreed" Padding="0,0,0,1.5" Content="Check for Updates" Margin="10,98,0,0" Click="CmdUpdateGreed_Click" VerticalAlignment="Top" ToolTip="Update Greed to the latest version." Height="23" HorizontalAlignment="Left" Width="116"/>
                 <Button x:Name="CmdResetSliders" Padding="0,0,0,1.5" Content="Reset Scalars" Margin="453,98,0,0" Click="CmdResetSliders_Click" VerticalAlignment="Top" ToolTip="Reset global scalars to 100%." Height="23" HorizontalAlignment="Left" Width="116"/>
-                <GroupBox Header="Max Fleet Supply" Margin="10,126,0,0" HorizontalAlignment="Left" Width="559" Height="53" VerticalAlignment="Top" BorderBrush="#FFC8D213">
-                    <Grid>
-                        <Label x:Name="LblSupply" Content="100%" HorizontalAlignment="Left" Margin="10,0,0,2" VerticalAlignment="Bottom" Width="60" RenderTransformOrigin="0.489,0.056"/>
-                        <Slider x:Name="SldSupply" Margin="75,0,10,0" TickPlacement="Both" IsSnapToTickEnabled="True" Minimum="0" Maximum="20" TickFrequency="1" ValueChanged="SldSupply_ValueChanged" Foreground="#FF9DA000"/>
+                <Expander x:Name="ExpGlobalScalars" HorizontalAlignment="Left" Height="197" Header="Global Scalars" Margin="10,126,0,0" VerticalAlignment="Top" Width="559">
+                    <Grid x:Name="GridScalarParent" Background="#CFC8C213">
                     </Grid>
-                </GroupBox>
-                <GroupBox Header="Max Titans" Margin="10,179,0,0" HorizontalAlignment="Left" Width="559" Height="53" VerticalAlignment="Top" BorderBrush="#FFC8D213">
-                    <Grid>
-                        <Label x:Name="LblTitans" Content="100%" HorizontalAlignment="Left" Margin="10,0,0,2" VerticalAlignment="Bottom" Width="60" RenderTransformOrigin="0.489,0.056"/>
-                        <Slider x:Name="SldTitans" Margin="75,0,10,0" TickPlacement="Both" IsSnapToTickEnabled="True" Minimum="0" Maximum="20" TickFrequency="1" ValueChanged="SldTitans_ValueChanged" Foreground="#FF9DA000"/>
-                    </Grid>
-                </GroupBox>
-                <GroupBox Header="Max Tactical Slots" Margin="10,232,0,0" HorizontalAlignment="Left" Width="560" Height="53" VerticalAlignment="Top" BorderBrush="#FFC8D213">
-                    <Grid>
-                        <Label x:Name="LblTactical" Content="100%" HorizontalAlignment="Left" Margin="10,0,0,2" VerticalAlignment="Bottom" Width="60" RenderTransformOrigin="0.489,0.056"/>
-                        <Slider x:Name="SldTactical" Margin="75,0,10,0" TickPlacement="Both" IsSnapToTickEnabled="True" Minimum="0" Maximum="20" TickFrequency="1" ValueChanged="SldTactical_ValueChanged" Foreground="#FF9DA000"/>
-                    </Grid>
-                </GroupBox>
-                <GroupBox Header="Max Logistic Slots" Margin="10,285,0,0" HorizontalAlignment="Left" Width="559" Height="53" VerticalAlignment="Top" BorderBrush="#FFC8D213">
-                    <Grid>
-                        <Label x:Name="Lbllogistic" Content="100%" HorizontalAlignment="Left" Margin="10,0,0,2" VerticalAlignment="Bottom" Width="60" RenderTransformOrigin="0.489,0.056"/>
-                        <Slider x:Name="SldLogistic" Margin="75,0,10,0" TickPlacement="Both" IsSnapToTickEnabled="True" Minimum="0" Maximum="20" TickFrequency="1" ValueChanged="SldLogistic_ValueChanged" Foreground="#FF9DA000"/>
-                    </Grid>
-                </GroupBox>
-                <GroupBox Header="Weapon Damage" Margin="10,338,0,0" HorizontalAlignment="Left" Width="559" Height="53" VerticalAlignment="Top" BorderBrush="#FFC8D213">
-                    <Grid>
-                        <Label x:Name="LblDamage" Content="100%" HorizontalAlignment="Left" Margin="10,0,0,2" VerticalAlignment="Bottom" Width="60" RenderTransformOrigin="0.489,0.056"/>
-                        <Slider x:Name="SldDamage" Margin="75,0,10,0" TickPlacement="Both" IsSnapToTickEnabled="True" Minimum="0" Maximum="20" TickFrequency="1" ValueChanged="SldDamage_ValueChanged" Foreground="#FF9DA000"/>
-                    </Grid>
-                </GroupBox>
-                <GroupBox Header="Bombing Damage" Margin="10,391,0,0" HorizontalAlignment="Left" Width="559" Height="53" VerticalAlignment="Top" BorderBrush="#FFC8D213">
-                    <Grid>
-                        <Label x:Name="LblBombing" Content="100%" HorizontalAlignment="Left" Margin="10,0,0,2" VerticalAlignment="Bottom" Width="60" RenderTransformOrigin="0.489,0.056"/>
-                        <Slider x:Name="SldBombing" Margin="75,0,10,0" TickPlacement="Both" IsSnapToTickEnabled="True" Minimum="0" Maximum="20" TickFrequency="1" ValueChanged="SldBombing_ValueChanged" Foreground="#FF9DA000"/>
-                    </Grid>
-                </GroupBox>
-                <GroupBox Header="Unit Cost" Margin="10,444,0,0" HorizontalAlignment="Left" Width="559" Height="53" VerticalAlignment="Top" BorderBrush="#FFC8D213">
-                    <Grid>
-                        <Label x:Name="LblCost" Content="100%" HorizontalAlignment="Left" Margin="10,0,0,2" VerticalAlignment="Bottom" Width="60" RenderTransformOrigin="0.489,0.056"/>
-                        <Slider x:Name="SldCost" Margin="75,0,10,0" TickPlacement="Both" IsSnapToTickEnabled="True" Minimum="0" Maximum="20" TickFrequency="1" ValueChanged="SldCost_ValueChanged" Foreground="#FF9DA000"/>
-                    </Grid>
-                </GroupBox>
-                <GroupBox Header="Antimatter" Margin="10,497,0,0" HorizontalAlignment="Left" Width="559" Height="53" VerticalAlignment="Top" BorderBrush="#FFC8D213">
-                    <Grid>
-                        <Label x:Name="LblAntimatter" Content="100%" HorizontalAlignment="Left" Margin="10,0,0,2" VerticalAlignment="Bottom" Width="60" RenderTransformOrigin="0.489,0.056"/>
-                        <Slider x:Name="SldAntimatter" Margin="75,0,10,0" TickPlacement="Both" IsSnapToTickEnabled="True" Minimum="0" Maximum="20" TickFrequency="1" ValueChanged="SldAntimatter_ValueChanged" Foreground="#FF9DA000"/>
-                    </Grid>
-                </GroupBox>
-                <GroupBox Header="Gravity Well Size" Margin="10,550,0,0" HorizontalAlignment="Left" Width="559" Height="53" VerticalAlignment="Top" BorderBrush="#FFC8D213">
-                    <Grid>
-                        <Label x:Name="LblGravityWellSize" Content="100%" HorizontalAlignment="Left" Margin="10,0,0,2" VerticalAlignment="Bottom" Width="60" RenderTransformOrigin="0.489,0.056"/>
-                        <Slider x:Name="SldGravityWellSize" Margin="75,0,10,0" TickPlacement="Both" IsSnapToTickEnabled="True" Minimum="0" Maximum="20" TickFrequency="1" ValueChanged="SldGravityWellSize_ValueChanged" Foreground="#FF9DA000"/>
-                    </Grid>
-                </GroupBox>
-                <GroupBox Header="Experience Required for Level" Margin="10,603,0,0" HorizontalAlignment="Left" Width="559" Height="53" VerticalAlignment="Top" BorderBrush="#FFC8D213">
-                    <Grid>
-                        <Label x:Name="LblExperience" Content="100%" HorizontalAlignment="Left" Margin="10,0,0,2" VerticalAlignment="Bottom" Width="60" RenderTransformOrigin="0.489,0.056"/>
-                        <Slider x:Name="SldExperience" Margin="75,0,10,0" TickPlacement="Both" IsSnapToTickEnabled="True" Minimum="0" Maximum="20" TickFrequency="1" ValueChanged="SldExperience_ValueChanged" Foreground="#FF9DA000"/>
-                    </Grid>
-                </GroupBox>
+                </Expander>
             </Grid>
         </TabItem>
         <TabItem x:Name="TabDeveloper" Header="Developer">

@@ -5,21 +5,20 @@
     <TargetFramework>net7.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
-    <Version>2.6.2</Version>
+    <Version>2.7.0</Version>
     <Title>Greed Mod Manager</Title>
     <Authors>Volt Cruelerz</Authors>
     <Description>A mod loader for Sins of a Solar Empire II.</Description>
-    <Copyright>MIT License</Copyright>
+    <Copyright>Copyright (c) 2023-$(CurrentYear)</Copyright>
+    <License>MIT</License>
     <PackageIcon>icon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/VoltCruelerz/Greed/tree/master</RepositoryUrl>
     <UseWindowsForms>True</UseWindowsForms>
     <ApplicationIcon>favicon.ico</ApplicationIcon>
+    <PackageProjectUrl>https://github.com/VoltCruelerz/Greed</PackageProjectUrl>
+    <PublisherName>League of Greedy Modders</PublisherName>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Remove="github-mark-white.svg" />
-  </ItemGroup>
 
   <ItemGroup>
     <Content Include="favicon.ico" />
@@ -47,9 +46,10 @@
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
+    <Content Include="Config.json" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\README.md" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\Mutations.md" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="..\LICENSE.txt" CopyToOutputDirectory="PreserveNewest" />
-    <Content Include="..\Greed.AutoUpdater\bin\Release\net7.0-windows\publish\win-x64\Greed.AutoUpdater.exe" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\Greed.AutoUpdater\bin\$(Configuration)\net7.0-windows\Greed.AutoUpdater.exe" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

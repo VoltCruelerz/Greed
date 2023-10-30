@@ -4,6 +4,7 @@ using Greed.Exceptions;
 using Greed.Extensions;
 using Greed.Interfaces;
 using Greed.Models;
+using Greed.Models.Config;
 using Greed.Models.EnabledMods;
 using Greed.Models.Online;
 using Greed.Models.Vault;
@@ -81,7 +82,7 @@ namespace Greed
         public void ExportGreedyMods(List<Mod> active, ProgressBar pgbProgress, MainWindow window, Action<bool> callback)
         {
             Log.Info($"Exporting {active.Count} Active Mods");
-            var slidersChanged = window.ScalarSliders.Any(s => s.HasChanged());
+            var slidersChanged = Settings.GetScalars().Any(s => s.HasChanged());
             string modDir = Settings.GetModDir();
             string sinsDir = Settings.GetSinsDir();
             var greedPath = modDir + "\\greed";
@@ -102,6 +103,7 @@ namespace Greed
                     {
                         Log.Info("No active mods or scalars. Cleaning up...");
                         DeactivateGreed();
+                        Log.Info("Cleanup complete.");
                         return;
                     }
 
@@ -118,7 +120,7 @@ namespace Greed
                     }
 
                     // Set Global Settings
-                    GlobalScalar.GetGlobals().ForEach(g => g.Exec());
+                    Settings.ExecGlobalScalars();
 
                     // Set Greed as active mod #0.
                     ActivateGreed();
@@ -466,7 +468,7 @@ namespace Greed
             {
                 var enabled = JsonConvert.DeserializeObject<EnabledMods>(File.ReadAllText(enabledPath))!;
                 enabled.ModKeys = enabled.ModKeys.Where(m => m.Name != "greed").ToList();
-                Directory.Delete(greedPath, true);
+                if (Directory.Exists(greedPath)) Directory.Delete(greedPath, true);
                 File.WriteAllText(enabledPath, JsonConvert.SerializeObject(enabled));
             }
         }

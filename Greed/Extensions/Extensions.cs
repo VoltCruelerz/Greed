@@ -42,6 +42,11 @@ namespace Greed.Extensions
             return version.CompareTo(other) < 0;
         }
 
+        public static bool IsAtLeastAsOldAs(this Version version, Version other)
+        {
+            return version.CompareTo(other) <= 0;
+        }
+
         public static bool IsNewerThan(this Version version, Version other)
         {
             return version.CompareTo(other) > 0;
@@ -268,12 +273,6 @@ namespace Greed.Extensions
                 JTokenType.Array => ((JArray)token).Count,
                 _ => throw new ResolvableParseException("Unresolvable type " + token.Type),
             };
-        }
-
-        public static bool HasChanged(this Slider slider)
-        {
-            if (slider == null) return false;
-            return slider.Value != Settings.SliderOne;
         }
     }
 }
