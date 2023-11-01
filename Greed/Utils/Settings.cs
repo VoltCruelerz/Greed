@@ -1,5 +1,6 @@
 ﻿using Greed.Controls;
 using Greed.Controls.Popups;
+using Greed.Controls.Settings;
 using Greed.Extensions;
 using Greed.Models.Config;
 using Newtonsoft.Json;
@@ -7,15 +8,10 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
-using System.Drawing.Printing;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Reflection.Metadata;
-using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 
 namespace Greed.Utils
@@ -33,8 +29,21 @@ namespace Greed.Utils
         public static readonly int SliderOne = SliderValue.FindIndex(p => p == 1.0);
 
         private static readonly string ConfigPath = Path.Combine(Directory.GetCurrentDirectory(), "Config.json");
-        private static readonly Config Config = JsonConvert.DeserializeObject<Config>(File.ReadAllText(ConfigPath))!;
         private static readonly List<Expander> ScalarExpanders = new();
+
+        private static Config LoadConfig()
+        {
+            try
+            {
+                return JsonConvert.DeserializeObject<Config>(File.ReadAllText(ConfigPath))!;
+            }
+            catch (Exception ex)
+            {
+                CriticalAlertPopup.ThrowAsync("Failed to load config!", ex);
+                return new();
+            }
+        }
+        private static readonly Config Config = LoadConfig();
 
         public static void AutomigrateConfig()
         {
@@ -157,6 +166,13 @@ namespace Greed.Utils
             Config.Groups.ForEach(g => g.Scalars.ForEach(s => scalars.Add(s)));
             return scalars;
         }
+
+        public static List<GlobalBool> GetBools()
+        {
+            List<GlobalBool> bools = new();
+            Config.Groups.ForEach(g => g.Bools.ForEach(s => bools.Add(s)));
+            return bools;
+        }
         #endregion
 
         #region Set
@@ -206,6 +222,12 @@ namespace Greed.Utils
             Save();
         }
 
+        public static void SetBool(int groupIndex, int boolIndex, bool value)
+        {
+            Config.Groups[groupIndex].Bools[boolIndex].Value = value;
+            Save();
+        }
+
         public static void ResetSliders(Grid parent)
         {
             parent.Children.Clear();
@@ -224,6 +246,7 @@ namespace Greed.Utils
         #region Initialize Scalar Sliders
         public static int PopulateScalarExpander(Grid grid)
         {
+            const int titleSpacing = 30;
             var offset = 0;
             var white = new SolidColorBrush(Color.FromRgb(255, 255, 255));
             for (var i = 0; i < Config.Groups.Count; i++)
@@ -237,18 +260,23 @@ namespace Greed.Utils
                 for (var j = 0; j < group.Scalars.Count; j++)
                 {
                     var scalar = group.Scalars[j];
-                    subGrid.Children.Add(new SliderBox(scalar.Name, i, j, SliderValue.IndexOf(scalar.Value)));
-                    offset++;
+                    subGrid.Children.Add(new SliderBox(scalar.Name, i, j, offset++, SliderValue.IndexOf(scalar.Value)));
                 }
+                for (var j = 0; j < group.Bools.Count; j++)
+                {
+                    var boolBox = group.Bools[j];
+                    subGrid.Children.Add(new CheckBoxBox(boolBox.Name, i, j, offset++, boolBox.Value));
+                }
+                var boxCount = group.Scalars.Count + group.Bools.Count;
                 var subExp = new Expander()
                 {
                     VerticalAlignment = System.Windows.VerticalAlignment.Top,
                     HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
                     Header = group.Name,
-                    Height = 50 * group.Scalars.Count + 30,
+                    Height = SettingsBox.BoxSpacing * boxCount + titleSpacing,
                     Width = 537,
                     Content = subGrid,
-                    Margin = new System.Windows.Thickness(0, i * 30, 0, 0)
+                    Margin = new System.Windows.Thickness(0, i * titleSpacing, 0, 0)
                 };
 
                 subExp.Expanded += SubExp_Expanded;
@@ -302,7 +330,11 @@ namespace Greed.Utils
                 HasInitialized = true;
             }
 
-            Config.Groups.ForEach(g => g.Scalars.ForEach(s => s.Exec()));
+            Config.Groups.ForEach(g =>
+            {
+                g.Scalars.ForEach(s => s.Exec());
+                g.Bools.ForEach(s => s.Exec());
+            });
         }
     }
 }

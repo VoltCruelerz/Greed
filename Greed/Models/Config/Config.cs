@@ -1,11 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Text.Json;
-using Greed.Utils;
 
 namespace Greed.Models.Config
 {
@@ -13,7 +9,7 @@ namespace Greed.Models.Config
     {
         [JsonRequired]
         [JsonProperty(PropertyName = "version")]
-        public Version Version { get; set; } = new Version(0,0,0);
+        public Version Version { get; set; } = new Version(0, 0, 0);
 
         [JsonRequired]
         [JsonProperty(PropertyName = "channel")]

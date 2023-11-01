@@ -1,36 +1,18 @@
-﻿using Greed.Utils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
+﻿using System.Windows.Controls;
 using System.Windows.Media;
 
-namespace Greed.Controls
+namespace Greed.Controls.Settings
 {
-    public class SliderBox : GroupBox
+    public class SliderBox : SettingsBox
     {
-        public int GroupIndex;
-        public int ScalarIndex;
-
         private readonly Label LblPercentage;
         private readonly Slider SldSetter;
 
-        public SliderBox(string name, int groupIndex, int scalarIndex, int tickIndex)
+        public SliderBox(string name, int groupIndex, int subIndex, int posIndex, int tickIndex) : base(name, groupIndex, subIndex, posIndex)
         {
-            GroupIndex = groupIndex;
-            ScalarIndex = scalarIndex;
-
-            Header = name;
-            Height = 53;
-            VerticalAlignment = System.Windows.VerticalAlignment.Top;
-            BorderBrush = new SolidColorBrush(Color.FromRgb(255, 200, 210));
-            Margin = new System.Windows.Thickness(0, 50 * scalarIndex, 0, 0);
-
             LblPercentage = new Label()
             {
-                Content = Settings.SliderValue[tickIndex].ToString("P0"),
+                Content = Greed.Utils.Settings.SliderValue[tickIndex].ToString("P0"),
                 HorizontalAlignment = System.Windows.HorizontalAlignment.Left,
                 VerticalAlignment = System.Windows.VerticalAlignment.Bottom,
                 Width = 60,
@@ -50,15 +32,13 @@ namespace Greed.Controls
             };
             SldSetter.ValueChanged += Slider_ValueChanged;
 
-            var grid = new Grid();
-            grid.Children.Add(LblPercentage);
-            grid.Children.Add(SldSetter);
-            AddChild(grid);
+            GrdContent.Children.Add(LblPercentage);
+            GrdContent.Children.Add(SldSetter);
         }
 
         private void Slider_ValueChanged(object sender, System.Windows.RoutedPropertyChangedEventArgs<double> e)
         {
-            Settings.SetSlider(GroupIndex, ScalarIndex, LblPercentage, e.NewValue);
+            Greed.Utils.Settings.SetSlider(GroupIndex, ArrayIndex, LblPercentage, e.NewValue);
         }
     }
 }

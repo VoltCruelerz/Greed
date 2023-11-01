@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using System.Media;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace Greed.Controls.Popups
@@ -73,7 +74,19 @@ namespace Greed.Controls.Popups
 
         public static void ThrowAsync(string title, Exception ex)
         {
-            MainWindow.Instance!.Dispatcher.Invoke(() => Throw(title, ex));
+            // If the main window hasn't loaded yet, delay until then.
+            if (MainWindow.Instance == null)
+            {
+                Task.Run(() =>
+                {
+                    Task.Delay(5000);
+                    ThrowAsync(title, ex);
+                });
+            }
+            else
+            {
+                MainWindow.Instance!.Dispatcher.Invoke(() => Throw(title, ex));
+            }
         }
     }
 }

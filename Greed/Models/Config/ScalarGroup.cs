@@ -1,9 +1,5 @@
 ﻿using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Greed.Models.Config
 {
@@ -16,6 +12,9 @@ namespace Greed.Models.Config
         [JsonRequired]
         [JsonProperty(PropertyName = "scalars")]
         public List<GlobalScalar> Scalars { get; set; } = new();
+
+        [JsonProperty(PropertyName = "bools")]
+        public List<GlobalBool> Bools { get; set; } = new();
 
         public void Init()
         {

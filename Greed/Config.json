@@ -10,6 +10,18 @@
   "groups": [
     {
       "name": "Empire",
+      "bools": [
+        {
+          "name": "All Research Complete",
+          "type": "ALL_RESEARCH",
+          "value": false
+        },
+        {
+          "name": "Infinite(ish) Money",
+          "type": "INFINITE_MONEY",
+          "value": false
+        }
+      ],
       "scalars": [
         {
           "name": "Max Fleet Supply",

@@ -1,19 +1,16 @@
-﻿using Greed.Models.Mutations.Paths;
-using Greed.Models.Mutations.Variables;
-using Greed.Utils;
+﻿using Greed.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.Json.Serialization;
 
 namespace Greed.Models.Config
 {
-    public class GlobalScalar
+    public class GlobalScalar : GlobalSetting
     {
-        public enum GlobalType
+        public enum ScalarType
         {
             INT,
             DOUBLE
@@ -24,12 +21,8 @@ namespace Greed.Models.Config
         public string Folder { get; set; } = string.Empty;
 
         [Newtonsoft.Json.JsonRequired]
-        [JsonProperty(PropertyName = "name")]
-        public string Name { get; set; } = string.Empty;
-
-        [Newtonsoft.Json.JsonRequired]
         [JsonProperty(PropertyName = "type")]
-        public GlobalType Type { get; set; }
+        public ScalarType Type { get; set; }
 
         [JsonProperty(PropertyName = "value")]
         public double Value { get; set; } = 1.0;
@@ -42,40 +35,21 @@ namespace Greed.Models.Config
         [JsonProperty(PropertyName = "locations")]
         public List<EditLocation> Locations { get; set; } = new();
 
-        public void Init()
+        public override void Init()
         {
             Locations.ForEach(loc => loc.Init());
         }
 
-        public void Exec()
+        public override void Exec()
         {
             if (!HasChanged()) return;
 
+            var files = GetGlobalFiles(Folder, Extension);
+
             try
             {
-                // Load existing files
-                var greedSettingFolder = Path.Combine(Settings.GetModDir(), "greed", Folder);
-                if (!Directory.Exists(greedSettingFolder)) Directory.CreateDirectory(greedSettingFolder);
-                var greedFile = Directory.GetFiles(greedSettingFolder)
-                    .Where(f => Path.GetExtension(f) == Extension)
-                    .ToList();
-                var goldFiles = Directory.GetFiles(Path.Combine(Settings.GetSinsDir(), Folder))
-                    .Where(f => Path.GetExtension(f) == Extension)
-                    .ToList();
-
-                // Use greed if available, default to gold.
-                var fileDict = greedFile.ToDictionary(f => Path.GetFileName(f));
-                goldFiles.ForEach(f =>
-                {
-                    var greedName = Path.GetFileName(f);
-                    if (!fileDict.ContainsKey(greedName))
-                    {
-                        fileDict.Add(greedName, f);
-                    }
-                });
-                var files = fileDict.Values.ToList();
-
                 // Apply the changes
+                var greedSettingFolder = Path.Combine(Settings.GetModDir(), "greed", Folder);
                 foreach (var f in files)
                 {
                     var obj = JObject.Parse(File.ReadAllText(f));
@@ -89,7 +63,7 @@ namespace Greed.Models.Config
             }
         }
 
-        public bool HasChanged()
+        public override bool HasChanged()
         {
             return Value != 1.0;
         }

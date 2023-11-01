@@ -1,6 +1,5 @@
 ﻿using Greed.Models.ListItem;
 using Greed.Models.Online;
-using Greed.Utils;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -27,7 +26,7 @@ namespace Greed.Controls.Online
         public OnlineWindow(OnlineCatalog listing, MainWindow parent)
         {
             InitializeComponent();
-            Title = $"Online Catalog of Greedy Mods (Channel: {Settings.GetChannel()})";
+            Title = $"Online Catalog of Greedy Mods (Channel: {Greed.Utils.Settings.GetChannel()})";
             Log.Info("OnlineWindow()");
             Catalog = listing;
             ParentWindow = parent;

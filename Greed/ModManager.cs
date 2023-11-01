@@ -1,10 +1,8 @@
 ﻿using Greed.Controls;
 using Greed.Controls.Popups;
 using Greed.Exceptions;
-using Greed.Extensions;
 using Greed.Interfaces;
 using Greed.Models;
-using Greed.Models.Config;
 using Greed.Models.EnabledMods;
 using Greed.Models.Online;
 using Greed.Models.Vault;
@@ -83,6 +81,7 @@ namespace Greed
         {
             Log.Info($"Exporting {active.Count} Active Mods");
             var slidersChanged = Settings.GetScalars().Any(s => s.HasChanged());
+            var boolsChanged = Settings.GetBools().Any(s => s.HasChanged());
             string modDir = Settings.GetModDir();
             string sinsDir = Settings.GetSinsDir();
             var greedPath = modDir + "\\greed";
@@ -99,7 +98,7 @@ namespace Greed
                 int i = 0;
                 try
                 {
-                    if (!active.Any() && !slidersChanged)
+                    if (!active.Any() && !slidersChanged && !boolsChanged)
                     {
                         Log.Info("No active mods or scalars. Cleaning up...");
                         DeactivateGreed();
